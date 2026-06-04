@@ -1,0 +1,14 @@
+{
+  "name": "bushka-superrepo",
+  "private": true,
+  "version": "0.1.0",
+  "description": "БУ.шка: mobile-first PWA for used tech sellers",
+  "workspaces": [
+    "apps/pwa"
+  ],
+  "scripts": {
+    "dev": "npm --workspace apps/pwa run dev",
+    "build": "npm --workspace apps/pwa run build",
+    "check": "npm --workspace apps/pwa run check"
+  }
+}

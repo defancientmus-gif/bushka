@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f5f6f3">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="БУ.шка">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <title>БУ.шка</title>
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" href="./icons/icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./styles.css?v=mobile-mvp-7">
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-mark">бу</span>
+        <span>БУ.шка</span>
+      </div>
+      <div class="top-actions">
+        <button class="profile-button" type="button" id="scrollToProfile">ЛК</button>
+        <button class="icon-button" type="button" id="scrollToComposer" aria-label="Добавить">
+          <span class="icon icon-plus" aria-hidden="true"></span>
+        </button>
+      </div>
+    </header>
+
+    <main>
+      <section class="composer" id="composer" aria-labelledby="composerTitle">
+        <div class="section-head">
+          <h1 id="composerTitle">Новый пост</h1>
+          <span class="state" id="importState">черновик</span>
+        </div>
+
+        <div class="import-box">
+          <label for="importInput">Импорт</label>
+          <textarea id="importInput" rows="2" placeholder="Ссылка Avito, t.me или текст"></textarea>
+          <button class="secondary" type="button" id="importButton">Разобрать</button>
+        </div>
+
+        <form class="form">
+          <div class="dropzone" id="dropzone">
+            <input id="photoInput" type="file" accept="image/*" multiple>
+            <div class="upload-board">
+              <div class="slots" aria-hidden="true">
+                <span class="slot" style="--i: 0"></span>
+                <span class="slot" style="--i: 1"></span>
+                <span class="slot" style="--i: 2"></span>
+                <span class="slot" style="--i: 3"></span>
+              </div>
+              <div class="preview-strip" id="previewStrip" aria-label="Превью фото"></div>
+            </div>
+            <div class="upload-footer">
+              <span id="photoState">0 / 8</span>
+              <label class="upload-button" for="photoInput">
+                <span class="camera-icon" aria-hidden="true"></span>
+                Фото
+              </label>
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="title">Название</label>
+            <input id="title" type="text" autocomplete="off" placeholder="iPhone 13 mini 128">
+          </div>
+
+          <div class="inline-fields">
+            <div class="field">
+              <label for="price">Цена</label>
+              <input id="price" type="text" inputmode="numeric" placeholder="35 000 ₽">
+            </div>
+            <div class="field">
+              <label for="condition">Состояние</label>
+              <select id="condition">
+                <option>Хорошее</option>
+                <option>Идеальное</option>
+                <option>Есть следы</option>
+                <option>На запчасти</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="field description-field">
+            <label for="about">Описание</label>
+            <textarea id="about" rows="6" placeholder="Комплект, дефекты, батарея, причина продажи"></textarea>
+          </div>
+
+          <div class="inline-fields">
+            <div class="field">
+              <label for="contact">Контакт</label>
+              <input id="contact" type="text" autocomplete="off" placeholder="@username">
+            </div>
+            <div class="field">
+              <label for="category">Категория</label>
+              <select id="category">
+                <option>Ноутбук</option>
+                <option>Смартфон</option>
+                <option>Консоль</option>
+                <option>Фото</option>
+                <option>Аудио</option>
+                <option>Другое</option>
+              </select>
+            </div>
+          </div>
+
+          <article class="item preview-card" id="livePreview" aria-label="Превью карточки"></article>
+
+          <button class="primary" type="button" id="publishButton">Опубликовать</button>
+        </form>
+      </section>
+
+      <section class="profile-section" id="profile" aria-labelledby="profileTitle">
+        <div class="section-head">
+          <h2 id="profileTitle">ЛК</h2>
+          <span class="state" id="profileState">сохранено</span>
+        </div>
+        <div class="profile-card">
+          <div class="profile-grid">
+            <div class="field">
+              <label for="profileName">Имя</label>
+              <input id="profileName" type="text" autocomplete="name" placeholder="Вы">
+            </div>
+            <div class="field">
+              <label for="profileCity">Город</label>
+              <input id="profileCity" type="text" autocomplete="address-level2" placeholder="Москва">
+            </div>
+          </div>
+          <div class="field">
+            <label for="profileContact">Контакт</label>
+            <input id="profileContact" type="text" autocomplete="off" placeholder="@username">
+          </div>
+          <div class="profile-stats">
+            <span><b id="profilePostCount">0</b> постов</span>
+            <span><b>4.8</b> рейтинг</span>
+            <span><b>0</b> сделок</span>
+          </div>
+          <button class="secondary" type="button" id="saveProfileButton">Сохранить</button>
+        </div>
+      </section>
+
+      <section class="feed-section" aria-labelledby="feedTitle">
+        <div class="feed-head">
+          <h2 id="feedTitle">Лента</h2>
+          <input id="searchInput" type="search" placeholder="Поиск">
+        </div>
+        <div class="feed" id="feed"></div>
+      </section>
+    </main>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="./app.js?v=mobile-mvp-7" defer></script>
+</body>
+</html>

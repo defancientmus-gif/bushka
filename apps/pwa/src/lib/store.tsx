@@ -1,0 +1,136 @@
+import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react';
+import type { DraftItem, Item, ItemStatus, Profile } from '../types';
+import { defaultProfile, seedItems } from '../data/seed';
+import { loadItems, loadProfile, saveItems, saveProfile as persistProfile, type SaveResult } from './storage';
+import { uid } from './id';
+import { statusLabels } from './labels';
+import { reserveTimeFromNow } from './format';
+
+type StoreValue = {
+  profile: Profile;
+  items: Item[];
+  seed: Item[];
+  toast: string;
+  showToast: (message: string) => void;
+  updateProfile: (patch: Partial<Profile>) => void;
+  saveProfile: () => void;
+  addItem: (draft: DraftItem, sellerName: string) => boolean;
+  updateStatus: (id: string, status: ItemStatus) => void;
+  addQueue: (item: Item) => void;
+  deleteItem: (id: string) => void;
+};
+
+const StoreContext = createContext<StoreValue | null>(null);
+
+let toastTimer = 0;
+
+export function StoreProvider({ children }: { children: ReactNode }) {
+  const [profile, setProfile] = useState<Profile>(() => loadProfile());
+  const [items, setItems] = useState<Item[]>(() => loadItems());
+  const [toast, setToast] = useState('');
+
+  const showToast = useCallback((message: string) => {
+    setToast(message);
+    window.clearTimeout(toastTimer);
+    toastTimer = window.setTimeout(() => setToast(''), 1900);
+  }, []);
+
+  const persist = useCallback((next: Item[]) => {
+    setItems(next);
+    const result: SaveResult = saveItems(next);
+    if (result === 'degraded') showToast('Память почти полна — фото урезаны');
+    else if (result === 'failed') showToast('Не удалось сохранить локально');
+  }, [showToast]);
+
+  const updateProfile = useCallback((patch: Partial<Profile>) => {
+    setProfile(current => ({ ...current, ...patch }));
+  }, []);
+
+  const saveProfile = useCallback(() => {
+    setProfile(current => {
+      persistProfile(current);
+      return current;
+    });
+    showToast('Профиль сохранён');
+  }, [showToast]);
+
+  const addItem = useCallback((draft: DraftItem, sellerName: string): boolean => {
+    if (!draft.title.trim()) {
+      showToast('Нужно название');
+      return false;
+    }
+    if (!draft.contact.trim()) {
+      showToast('Нужен контакт');
+      return false;
+    }
+    const now = Date.now();
+    const item: Item = {
+      ...draft,
+      id: uid('item'),
+      title: draft.title.trim(),
+      price: draft.price.trim(),
+      description: draft.description.trim(),
+      sellerName: sellerName || defaultProfile.name,
+      queueCount: 0,
+      createdAt: now,
+      updatedAt: now
+    };
+    persist([item, ...items]);
+    showToast('Товар в складе');
+    return true;
+  }, [items, persist, showToast]);
+
+  const updateStatus = useCallback((id: string, status: ItemStatus) => {
+    persist(items.map(item => (
+      item.id === id
+        ? {
+            ...item,
+            status,
+            reservedUntil: status === 'reserved' ? (item.reservedUntil || reserveTimeFromNow()) : '',
+            updatedAt: Date.now()
+          }
+        : item
+    )));
+    showToast(statusLabels[status]);
+  }, [items, persist, showToast]);
+
+  const addQueue = useCallback((item: Item) => {
+    if (item.id.startsWith('seed-')) {
+      showToast('Запрос отправлен');
+      return;
+    }
+    persist(items.map(current => (
+      current.id === item.id
+        ? { ...current, queueCount: current.queueCount + 1, updatedAt: Date.now() }
+        : current
+    )));
+    showToast('Запрос отправлен — бронь после подтверждения');
+  }, [items, persist, showToast]);
+
+  const deleteItem = useCallback((id: string) => {
+    persist(items.filter(item => item.id !== id));
+    showToast('Удалено');
+  }, [items, persist, showToast]);
+
+  const value = useMemo<StoreValue>(() => ({
+    profile,
+    items,
+    seed: seedItems,
+    toast,
+    showToast,
+    updateProfile,
+    saveProfile,
+    addItem,
+    updateStatus,
+    addQueue,
+    deleteItem
+  }), [profile, items, toast, showToast, updateProfile, saveProfile, addItem, updateStatus, addQueue, deleteItem]);
+
+  return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;
+}
+
+export function useStore(): StoreValue {
+  const ctx = useContext(StoreContext);
+  if (!ctx) throw new Error('useStore must be used within StoreProvider');
+  return ctx;
+}

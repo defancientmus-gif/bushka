@@ -41,6 +41,8 @@ export function parseImport(rawValue: string): Partial<DraftItem> {
   const condition = detectCondition(raw);
   const grade = detectGrade(raw, condition);
   const city = detectCity(raw);
+  const battery = parseBattery(raw);
+  const kit = parseKit(lines);
 
   return {
     title: titleLine || titleFromUrl(sourceUrl),
@@ -51,6 +53,8 @@ export function parseImport(rawValue: string): Partial<DraftItem> {
     city,
     contact,
     sourceUrl,
+    battery,
+    kit,
     description: buildDescription(lines, titleLine, contact)
   };
 }
@@ -182,10 +186,11 @@ function detectCategory(value: string): Category {
 }
 
 function detectCondition(value: string): Condition {
-  const lower = value.toLowerCase();
-  if (/(новый|новая|новое|идеал|без следов|как новый)/i.test(lower)) return 'Идеальное';
-  if (/(скол|трещ|царап|коц|дефект|потерт|следы)/i.test(lower)) return 'Есть следы';
-  if (/(запчаст|не включ|разбит|утоплен|repair|под восстанов)/i.test(lower)) return 'На запчасти';
+  // Drop negated defect mentions ("без царапин", "нет сколов") before matching.
+  const lower = value.toLowerCase().replace(/(?:без|нет|ни одной?)\s+(?:единой\s+)?[а-яё]+/g, ' ');
+  if (/(запчаст|не включ|разбит|утоплен|repair|под восстанов)/.test(lower)) return 'На запчасти';
+  if (/(скол|трещ|царап|коц|дефект|потерт|следы)/.test(lower)) return 'Есть следы';
+  if (/(новый|новая|новое|идеал|отличн|как новый|like new)/.test(lower)) return 'Идеальное';
   return 'Хорошее';
 }
 
@@ -199,8 +204,29 @@ function detectGrade(value: string, condition: Condition): Grade {
 }
 
 function detectCity(value: string) {
-  const match = value.match(/\b(Москва|Симферополь|Севастополь|Краснодар|Ростов|СПб|Санкт-Петербург|Казань|Екатеринбург)\b/i);
-  return match ? match[0] : '';
+  // \b does not work with Cyrillic (it is ASCII-only in JS), so use explicit
+  // non-letter boundaries instead.
+  const match = value.match(/(?:^|[^а-яёa-z-])(Москва|Симферополь|Севастополь|Краснодар|Ростов(?:-на-Дону)?|СПб|Санкт-Петербург|Казань|Екатеринбург|Новосибирск|Нижний Новгород|Воронеж|Самара|Уфа|Пермь|Челябинск|Омск|Волгоград|Сочи|Тюмень|Ижевск|Барнаул|Иркутск|Хабаровск|Владивосток|Ялта|Керчь|Евпатория)(?=[^а-яёa-z-]|$)/i);
+  return match ? match[1] : '';
+}
+
+function parseBattery(value: string) {
+  const match = value.match(/(?:батаре[яийю]\w*|акб|аккумулятор\w*|health|ёмкость|емкость)\D{0,12}(\d{2,3})\s*%/i)
+    || value.match(/(\d{2,3})\s*%\s*(?:акб|батаре|аккум|health)/i);
+  if (!match) return '';
+  const percent = Number(match[1]);
+  return percent > 0 && percent <= 100 ? `${percent}%` : '';
+}
+
+function parseKit(lines: string[]) {
+  for (const line of lines) {
+    const match = line.match(/(?:комплект|в комплекте|комплектация)\s*[:\-—]?\s*(.{3,80})/i);
+    if (match && !/^(полный|весь)\s*$/i.test(match[1].trim())) {
+      return match[1].trim().replace(/[.;]+$/, '');
+    }
+    if (/полный комплект/i.test(line)) return 'Полный комплект';
+  }
+  return '';
 }
 
 function buildDescription(lines: string[], titleLine: string, contact: string) {
@@ -208,6 +234,7 @@ function buildDescription(lines: string[], titleLine: string, contact: string) {
     .filter(line => line !== titleLine)
     .filter(line => !contact || !line.includes(contact))
     .filter(line => !/(цена|₽|руб\.?)/i.test(line))
+    .filter(line => !/^(?:батаре|акб|аккумулятор|комплект|в комплекте|комплектация)/i.test(line.trim()))
     .join('. ')
     .replace(/\.\s*\./g, '.')
     .slice(0, 700);

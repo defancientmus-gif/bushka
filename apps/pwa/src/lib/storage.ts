@@ -4,28 +4,58 @@ import { defaultProfile } from '../data/seed';
 const itemsKey = 'bushka:pwa:items:v1';
 const profileKey = 'bushka:pwa:profile:v1';
 
+export const MAX_ITEMS = 120;
+
+export type SaveResult = 'ok' | 'degraded' | 'failed';
+
 export function loadItems(): Item[] {
   try {
     const value = window.localStorage.getItem(itemsKey);
-    return value ? JSON.parse(value) as Item[] : [];
+    if (!value) return [];
+    const parsed = JSON.parse(value);
+    return Array.isArray(parsed) ? (parsed as Item[]) : [];
   } catch {
     return [];
   }
 }
 
-export function saveItems(items: Item[]) {
-  window.localStorage.setItem(itemsKey, JSON.stringify(items.slice(0, 80)));
+/**
+ * Persists items, degrading gracefully when localStorage is full.
+ * Photos are stored as base64 data URLs and can exceed the ~5MB quota, so we
+ * progressively shed media instead of letting setItem throw and break the UI.
+ */
+export function saveItems(items: Item[]): SaveResult {
+  const trimmed = items.slice(0, MAX_ITEMS);
+  const attempts: Array<{ data: Item[]; result: SaveResult }> = [
+    { data: trimmed, result: 'ok' },
+    { data: trimmed.map(item => ({ ...item, media: item.media.slice(0, 1) })), result: 'degraded' },
+    { data: trimmed.map(item => ({ ...item, media: [] })), result: 'degraded' }
+  ];
+
+  for (const attempt of attempts) {
+    try {
+      window.localStorage.setItem(itemsKey, JSON.stringify(attempt.data));
+      return attempt.result;
+    } catch {
+      // try the next, lighter payload
+    }
+  }
+  return 'failed';
 }
 
 export function loadProfile(): Profile {
   try {
     const value = window.localStorage.getItem(profileKey);
-    return value ? { ...defaultProfile, ...JSON.parse(value) as Profile } : defaultProfile;
+    return value ? { ...defaultProfile, ...(JSON.parse(value) as Partial<Profile>) } : defaultProfile;
   } catch {
     return defaultProfile;
   }
 }
 
 export function saveProfile(profile: Profile) {
-  window.localStorage.setItem(profileKey, JSON.stringify(profile));
+  try {
+    window.localStorage.setItem(profileKey, JSON.stringify(profile));
+  } catch {
+    // non-critical: profile stays in memory for this session
+  }
 }

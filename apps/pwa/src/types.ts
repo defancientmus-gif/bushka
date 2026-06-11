@@ -48,3 +48,5 @@ export type Profile = {
 };
 
 export type DraftItem = Omit<Item, 'id' | 'sellerName' | 'queueCount' | 'createdAt' | 'updatedAt'>;
+
+export type View = 'feed' | 'create' | 'profile';

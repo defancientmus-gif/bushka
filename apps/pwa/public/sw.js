@@ -1,5 +1,11 @@
-const VERSION = 'v3';
-const CACHE_NAME = `bushka-${VERSION}`;
+// Version is injected at build time from src/lib/version.ts (see vite.config.ts).
+// Tying the cache name to the build means every new β-build gets a fresh cache
+// and the old one is dropped on activate — no stale PWA.
+const VERSION = '__APP_VERSION__';
+const BUILD = '__APP_BUILD__';
+const CACHE_NAME = `bushka-v${VERSION}-b${BUILD}`;
+const NETWORK_TIMEOUT = 3500;
+
 const SCOPE = self.registration.scope;
 const PRECACHE = [
   SCOPE,
@@ -27,6 +33,27 @@ self.addEventListener('activate', event => {
   );
 });
 
+function timeout(ms) {
+  return new Promise(resolve => setTimeout(() => resolve(undefined), ms));
+}
+
+// Navigations: fresh-first, but never hang — if the network is slow we fall
+// back to the cached shell after NETWORK_TIMEOUT so the PWA opens instantly.
+async function handleNavigation(request) {
+  try {
+    const response = await Promise.race([fetch(request), timeout(NETWORK_TIMEOUT)]);
+    if (response) {
+      const copy = response.clone();
+      caches.open(CACHE_NAME).then(cache => cache.put(SCOPE, copy));
+      return response;
+    }
+  } catch {
+    // offline — fall through to cache
+  }
+  const cached = await caches.match(SCOPE);
+  return cached || caches.match(request) || fetch(request);
+}
+
 self.addEventListener('fetch', event => {
   const request = event.request;
   if (request.method !== 'GET') return;
@@ -34,23 +61,12 @@ self.addEventListener('fetch', event => {
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) return;
 
-  // Network-first for navigations so a fresh deploy is picked up immediately
-  // (the new index.html references the new hashed assets). Falls back to the
-  // cached shell when offline.
   if (request.mode === 'navigate') {
-    event.respondWith(
-      fetch(request)
-        .then(response => {
-          const copy = response.clone();
-          caches.open(CACHE_NAME).then(cache => cache.put(SCOPE, copy));
-          return response;
-        })
-        .catch(() => caches.match(SCOPE).then(cached => cached || caches.match(request)))
-    );
+    event.respondWith(handleNavigation(request));
     return;
   }
 
-  // Stale-while-revalidate for same-origin assets (hashed + immutable from Vite).
+  // Same-origin assets (hashed + immutable): serve from cache, refresh in background.
   event.respondWith(
     caches.match(request).then(cached => {
       const network = fetch(request)

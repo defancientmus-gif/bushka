@@ -1,4 +1,4 @@
-import type { Category, DealMode, ItemStatus } from '../types';
+import type { Category, DealMode, DeliveryKind, ItemStatus } from '../types';
 
 export const statusLabels: Record<ItemStatus, string> = {
   available: 'В наличии',
@@ -17,6 +17,12 @@ export const dealModeLabels: Record<DealMode, string> = {
 };
 
 export const dealModeOrder: DealMode[] = ['free', 'queue', 'best-offer'];
+
+export const deliveryLabels: Record<DeliveryKind, string> = {
+  delivery: 'Доставка',
+  pickup: 'Самовывоз',
+  meet: 'Встреча'
+};
 
 export const categoryGlyph: Record<Category, string> = {
   'Смартфон': 'phone',

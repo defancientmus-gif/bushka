@@ -8,6 +8,8 @@ export type Grade = 'A' | 'B' | 'C' | 'D' | 'Repair';
 
 export type Category = 'Смартфон' | 'Ноутбук' | 'Консоль' | 'Фото' | 'Аудио' | 'Комплектующие' | 'Другое';
 
+export type DeliveryKind = 'delivery' | 'pickup' | 'meet';
+
 export type MediaAsset = {
   id: string;
   kind: 'image' | 'video';
@@ -34,6 +36,8 @@ export type Item = {
   sellerName: string;
   media: MediaAsset[];
   queueCount: number;
+  delivery?: DeliveryKind[];
+  sellerRating?: number;
   reservedUntil?: string;
   createdAt: number;
   updatedAt: number;
@@ -49,4 +53,4 @@ export type Profile = {
 
 export type DraftItem = Omit<Item, 'id' | 'sellerName' | 'queueCount' | 'createdAt' | 'updatedAt'>;
 
-export type View = 'feed' | 'create' | 'profile';
+export type View = 'market' | 'create' | 'profile';

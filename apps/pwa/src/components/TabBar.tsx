@@ -1,10 +1,10 @@
 import type { View } from '../types';
-import { BoxIcon, PlusIcon, UserIcon } from './icons';
+import { GridIcon, PlusIcon, UserIcon } from './icons';
 
-type Tab = { id: View; label: string; Icon: typeof BoxIcon };
+type Tab = { id: View; label: string; Icon: typeof GridIcon };
 
 const tabs: Tab[] = [
-  { id: 'feed', label: 'Склад', Icon: BoxIcon },
+  { id: 'market', label: 'Рынок', Icon: GridIcon },
   { id: 'create', label: 'Создать', Icon: PlusIcon },
   { id: 'profile', label: 'Профиль', Icon: UserIcon }
 ];

@@ -1,7 +1,15 @@
 import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react';
 import type { DraftItem, Item, ItemStatus, Profile } from '../types';
 import { defaultProfile, seedItems } from '../data/seed';
-import { loadItems, loadProfile, saveItems, saveProfile as persistProfile, type SaveResult } from './storage';
+import {
+  loadFavorites,
+  loadItems,
+  loadProfile,
+  saveFavorites,
+  saveItems,
+  saveProfile as persistProfile,
+  type SaveResult
+} from './storage';
 import { uid } from './id';
 import { statusLabels } from './labels';
 import { reserveTimeFromNow } from './format';
@@ -10,6 +18,7 @@ type StoreValue = {
   profile: Profile;
   items: Item[];
   seed: Item[];
+  favorites: string[];
   toast: string;
   showToast: (message: string) => void;
   updateProfile: (patch: Partial<Profile>) => void;
@@ -18,6 +27,8 @@ type StoreValue = {
   updateStatus: (id: string, status: ItemStatus) => void;
   addQueue: (item: Item) => void;
   deleteItem: (id: string) => void;
+  toggleFavorite: (id: string) => void;
+  isFavorite: (id: string) => boolean;
 };
 
 const StoreContext = createContext<StoreValue | null>(null);
@@ -27,6 +38,7 @@ let toastTimer = 0;
 export function StoreProvider({ children }: { children: ReactNode }) {
   const [profile, setProfile] = useState<Profile>(() => loadProfile());
   const [items, setItems] = useState<Item[]>(() => loadItems());
+  const [favorites, setFavorites] = useState<string[]>(() => loadFavorites());
   const [toast, setToast] = useState('');
 
   const showToast = useCallback((message: string) => {
@@ -112,10 +124,21 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     showToast('Удалено');
   }, [items, persist, showToast]);
 
+  const toggleFavorite = useCallback((id: string) => {
+    setFavorites(current => {
+      const next = current.includes(id) ? current.filter(value => value !== id) : [id, ...current];
+      saveFavorites(next);
+      return next;
+    });
+  }, []);
+
+  const isFavorite = useCallback((id: string) => favorites.includes(id), [favorites]);
+
   const value = useMemo<StoreValue>(() => ({
     profile,
     items,
     seed: seedItems,
+    favorites,
     toast,
     showToast,
     updateProfile,
@@ -123,8 +146,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     addItem,
     updateStatus,
     addQueue,
-    deleteItem
-  }), [profile, items, toast, showToast, updateProfile, saveProfile, addItem, updateStatus, addQueue, deleteItem]);
+    deleteItem,
+    toggleFavorite,
+    isFavorite
+  }), [profile, items, favorites, toast, showToast, updateProfile, saveProfile, addItem, updateStatus, addQueue, deleteItem, toggleFavorite, isFavorite]);
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;
 }

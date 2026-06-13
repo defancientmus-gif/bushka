@@ -134,6 +134,28 @@ export const WifiOffIcon = (p: IconProps) => (
   </Svg>
 );
 
+export const GridIcon = (p: IconProps) => (
+  <Svg {...p}>
+    <rect x="4" y="4" width="7" height="7" rx="2" />
+    <rect x="13" y="4" width="7" height="7" rx="2" />
+    <rect x="4" y="13" width="7" height="7" rx="2" />
+    <rect x="13" y="13" width="7" height="7" rx="2" />
+  </Svg>
+);
+
+export const HeartIcon = ({ filled, ...p }: IconProps & { filled?: boolean }) => (
+  <Svg {...p} fill={filled ? 'currentColor' : 'none'}>
+    <path d="M12 20s-7-4.4-9.2-8.6C1.3 8.5 2.7 5.5 5.6 5.1c1.9-.3 3.4.7 4.4 2 1-1.3 2.5-2.3 4.4-2 2.9.4 4.3 3.4 2.8 6.3C19 15.6 12 20 12 20z" />
+  </Svg>
+);
+
+export const PinIcon = (p: IconProps) => (
+  <Svg {...p}>
+    <path d="M12 21s6-5.3 6-10a6 6 0 1 0-12 0c0 4.7 6 10 6 10z" />
+    <circle cx="12" cy="11" r="2.2" />
+  </Svg>
+);
+
 function Glyph({ name, size = 24 }: { name: string; size?: number }) {
   switch (name) {
     case 'phone':

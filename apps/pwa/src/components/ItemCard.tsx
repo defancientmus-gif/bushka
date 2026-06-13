@@ -1,23 +1,29 @@
 import { useEffect, useRef, useState } from 'react';
 import type { Item, ItemStatus } from '../types';
-import { dealModeLabels, statusLabels, statusOrder } from '../lib/labels';
-import { CategoryGlyph, CopyIcon, PhoneIcon, SendIcon, TrashIcon } from './icons';
+import { dealModeLabels, deliveryLabels, statusLabels, statusOrder } from '../lib/labels';
+import { CategoryGlyph, CopyIcon, HeartIcon, PhoneIcon, SendIcon, TrashIcon } from './icons';
 
 export function ItemCard({
   item,
   index = 0,
-  variant = 'feed',
+  variant = 'market',
   isOwn = false,
+  favorite = false,
   onQueue,
+  onBuy,
+  onFavorite,
   onExport,
   onDelete,
   onStatusChange
 }: {
   item: Item;
   index?: number;
-  variant?: 'feed' | 'preview';
+  variant?: 'market' | 'preview' | 'own';
   isOwn?: boolean;
+  favorite?: boolean;
   onQueue?: () => void;
+  onBuy?: () => void;
+  onFavorite?: () => void;
   onExport?: () => void;
   onDelete?: () => void;
   onStatusChange?: (status: ItemStatus) => void;
@@ -41,7 +47,7 @@ export function ItemCard({
   }
 
   return (
-    <article className={`card ${isPreview ? 'preview' : ''}`} style={{ animationDelay: `${Math.min(index, 12) * 45}ms` }}>
+    <article className={`card ${isPreview ? 'preview' : ''}`} style={{ animationDelay: `${Math.min(index, 12) * 40}ms` }}>
       <div className={`card-media status-${item.status}`}>
         {media ? (
           <img src={media.src} alt="" loading="lazy" />
@@ -49,6 +55,17 @@ export function ItemCard({
           <span className="media-glyph"><CategoryGlyph category={item.category} size={38} /></span>
         )}
         <span className={`status-pill ${item.status}`}>{statusLabels[item.status]}</span>
+        {variant === 'market' && onFavorite && (
+          <button
+            type="button"
+            className={`heart-btn ${favorite ? 'on' : ''}`}
+            onClick={onFavorite}
+            aria-pressed={favorite}
+            aria-label={favorite ? 'Убрать из избранного' : 'В избранное'}
+          >
+            <HeartIcon size={18} filled={favorite} />
+          </button>
+        )}
         {item.media.length > 1 && <span className="media-count">{item.media.length}</span>}
       </div>
 
@@ -62,6 +79,9 @@ export function ItemCard({
           <span className="tag">{item.condition}</span>
           <span className="tag grade">{item.grade}</span>
           {item.dealMode !== 'free' && <span className="tag deal">{dealModeLabels[item.dealMode]}</span>}
+          {variant === 'market' && item.delivery?.map(kind => (
+            <span className="tag delivery" key={kind}>{deliveryLabels[kind]}</span>
+          ))}
         </div>
 
         {item.description && <p className="card-desc">{item.description}</p>}
@@ -79,31 +99,31 @@ export function ItemCard({
         )}
 
         <div className="card-meta">
-          <span>{[item.sellerName, item.city].filter(Boolean).join(' · ')}</span>
+          <span className="seller">
+            {item.sellerRating != null && <b className="star">★ {item.sellerRating.toFixed(1)}</b>}
+            {[item.sellerName, item.city].filter(Boolean).join(' · ')}
+          </span>
           {item.queueCount > 0 && <span className="queue">{item.queueCount} в очереди</span>}
         </div>
 
-        {!isPreview && (
+        {variant === 'market' && (
           <div className="card-actions">
-            {isOwn ? (
-              <>
-                <span className="status-select">
-                  <select value={item.status} onChange={event => onStatusChange?.(event.target.value as ItemStatus)} aria-label="Статус товара">
-                    {statusOrder.map(status => <option value={status} key={status}>{statusLabels[status]}</option>)}
-                  </select>
-                </span>
-                <button type="button" className="ghost-btn" onClick={onExport}><SendIcon size={16} />Репост</button>
-                <button type="button" className={`icon-btn danger ${confirm ? 'confirm' : ''}`} onClick={handleDelete} aria-label="Удалить">
-                  {confirm ? 'Точно?' : <TrashIcon size={16} />}
-                </button>
-              </>
-            ) : (
-              <>
-                <button type="button" className="solid-btn" onClick={onQueue}>Запрос</button>
-                <ContactLink contact={item.contact} />
-                <button type="button" className="icon-btn" onClick={onExport} aria-label="Текст репоста"><CopyIcon size={16} /></button>
-              </>
-            )}
+            <button type="button" className="solid-btn accent grow" onClick={onBuy}>Беру</button>
+            <button type="button" className="ghost-btn" onClick={onQueue}>Запрос</button>
+          </div>
+        )}
+
+        {variant === 'own' && (
+          <div className="card-actions">
+            <span className="status-select">
+              <select value={item.status} onChange={event => onStatusChange?.(event.target.value as ItemStatus)} aria-label="Статус товара">
+                {statusOrder.map(status => <option value={status} key={status}>{statusLabels[status]}</option>)}
+              </select>
+            </span>
+            <button type="button" className="ghost-btn" onClick={onExport}><SendIcon size={16} />Репост</button>
+            <button type="button" className={`icon-btn danger ${confirm ? 'confirm' : ''}`} onClick={handleDelete} aria-label="Удалить">
+              {confirm ? 'Точно?' : <TrashIcon size={16} />}
+            </button>
           </div>
         )}
 
@@ -117,7 +137,7 @@ export function ItemCard({
   );
 }
 
-function ContactLink({ contact }: { contact: string }) {
+export function ContactLink({ contact }: { contact: string }) {
   if (contact.startsWith('@')) {
     return (
       <a className="contact-link" href={`https://t.me/${contact.slice(1)}`} target="_blank" rel="noreferrer">
@@ -135,5 +155,12 @@ function ContactLink({ contact }: { contact: string }) {
   if (/^https?:\/\//i.test(contact)) {
     return <a className="contact-link" href={contact} target="_blank" rel="noreferrer">Ссылка</a>;
   }
-  return <span className="contact-link muted">{contact || 'Контакт'}</span>;
+  return <span className="contact-link muted"><CopyIcon size={15} />{contact || 'Контакт'}</span>;
+}
+
+export function contactHref(contact: string): string | null {
+  if (contact.startsWith('@')) return `https://t.me/${contact.slice(1)}`;
+  if (/^(?:\+7|8)/.test(contact)) return `tel:${contact.replace(/[^\d+]/g, '')}`;
+  if (/^https?:\/\//i.test(contact)) return contact;
+  return null;
 }

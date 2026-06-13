@@ -7,7 +7,7 @@ import { TabBar } from './components/TabBar';
 import { Toast } from './components/Toast';
 import { ExportSheet } from './components/ExportSheet';
 import { WifiOffIcon } from './components/icons';
-import { FeedView } from './views/FeedView';
+import { MarketView } from './views/MarketView';
 import { CreateView } from './views/CreateView';
 import { ProfileView } from './views/ProfileView';
 
@@ -20,7 +20,7 @@ export function App() {
 }
 
 function Shell() {
-  const [view, setView] = useState<View>('feed');
+  const [view, setView] = useState<View>('market');
   const [exportItem, setExportItem] = useState<Item | null>(null);
   const online = useOnline();
 
@@ -46,9 +46,9 @@ function Shell() {
       </header>
 
       <main className="screen" key={view}>
-        {view === 'feed' && <FeedView onExport={setExportItem} />}
-        {view === 'create' && <CreateView onExport={setExportItem} onCreated={() => changeView('feed')} />}
-        {view === 'profile' && <ProfileView />}
+        {view === 'market' && <MarketView onExport={setExportItem} />}
+        {view === 'create' && <CreateView onExport={setExportItem} onCreated={() => changeView('profile')} />}
+        {view === 'profile' && <ProfileView onExport={setExportItem} />}
       </main>
 
       <TabBar view={view} onChange={changeView} />

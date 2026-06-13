@@ -3,6 +3,7 @@ import { defaultProfile } from '../data/seed';
 
 const itemsKey = 'bushka:pwa:items:v1';
 const profileKey = 'bushka:pwa:profile:v1';
+const favoritesKey = 'bushka:pwa:favorites:v1';
 
 export const MAX_ITEMS = 120;
 
@@ -57,5 +58,24 @@ export function saveProfile(profile: Profile) {
     window.localStorage.setItem(profileKey, JSON.stringify(profile));
   } catch {
     // non-critical: profile stays in memory for this session
+  }
+}
+
+export function loadFavorites(): string[] {
+  try {
+    const value = window.localStorage.getItem(favoritesKey);
+    if (!value) return [];
+    const parsed = JSON.parse(value);
+    return Array.isArray(parsed) ? (parsed as string[]) : [];
+  } catch {
+    return [];
+  }
+}
+
+export function saveFavorites(ids: string[]) {
+  try {
+    window.localStorage.setItem(favoritesKey, JSON.stringify(ids));
+  } catch {
+    // non-critical
   }
 }

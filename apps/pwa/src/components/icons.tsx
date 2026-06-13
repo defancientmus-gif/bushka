@@ -149,6 +149,22 @@ export const HeartIcon = ({ filled, ...p }: IconProps & { filled?: boolean }) =>
   </Svg>
 );
 
+export const DownloadIcon = (p: IconProps) => (
+  <Svg {...p}>
+    <path d="M12 4v11" />
+    <path d="M8 11l4 4 4-4" />
+    <path d="M5 20h14" />
+  </Svg>
+);
+
+export const ShareIcon = (p: IconProps) => (
+  <Svg {...p}>
+    <path d="M12 15V4" />
+    <path d="M8 8l4-4 4 4" />
+    <path d="M6 12H5v8h14v-8h-1" />
+  </Svg>
+);
+
 export const PinIcon = (p: IconProps) => (
   <Svg {...p}>
     <path d="M12 21s6-5.3 6-10a6 6 0 1 0-12 0c0 4.7 6 10 6 10z" />

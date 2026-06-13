@@ -756,6 +756,13 @@ button { font-family: inherit; }
   outline: none;
 }
 
+.export-photos { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 2px; scrollbar-width: none; }
+.export-photos::-webkit-scrollbar { display: none; }
+.export-photos img { flex: none; width: 64px; height: 64px; object-fit: cover; border-radius: 12px; border: 1px solid var(--line); }
+.export-note { margin: 0; font-size: 12.5px; line-height: 1.45; color: var(--ink-3); text-align: center; }
+.sheet-actions { display: flex; gap: 8px; }
+.solid-btn[disabled] { opacity: 0.7; pointer-events: none; }
+
 /* ---------- Empty + toast ---------- */
 .empty-state {
   grid-column: 1 / -1;

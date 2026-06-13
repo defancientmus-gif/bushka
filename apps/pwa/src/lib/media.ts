@@ -9,6 +9,25 @@ export async function filesToMedia(files: FileList | File[], limit = 8): Promise
   return Promise.all(chosen.map(fileToMedia));
 }
 
+/** Pull direct image links out of pasted text (best-effort, CORS permitting). */
+export function extractImageUrls(text: string): string[] {
+  const matches = text.match(/https?:\/\/[^\s"'<>]+\.(?:jpe?g|png|webp|gif)(?:\?[^\s"'<>]*)?/gi) || [];
+  return Array.from(new Set(matches)).slice(0, 8);
+}
+
+export async function urlToMedia(url: string): Promise<MediaAsset | null> {
+  try {
+    const response = await fetch(url, { mode: 'cors' });
+    if (!response.ok) return null;
+    const blob = await response.blob();
+    if (!blob.type.startsWith('image/')) return null;
+    const [asset] = await filesToMedia([new File([blob], 'image', { type: blob.type })]);
+    return asset ?? null;
+  } catch {
+    return null;
+  }
+}
+
 function fileToMedia(file: File): Promise<MediaAsset> {
   return new Promise(resolve => {
     const reader = new FileReader();

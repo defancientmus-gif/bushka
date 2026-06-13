@@ -1,8 +1,8 @@
-import { useMemo, useState } from 'react';
-import type { DraftItem, Item, ItemStatus } from '../types';
+import { useMemo, useState, type ClipboardEvent } from 'react';
+import type { DraftItem, Item, ItemStatus, MediaAsset } from '../types';
 import { useStore } from '../lib/store';
 import { emptyDraft, parseImport, supportedCategories, supportedConditions, supportedGrades } from '../lib/importer';
-import { filesToMedia } from '../lib/media';
+import { extractImageUrls, filesToMedia, urlToMedia } from '../lib/media';
 import { dealModeLabels, dealModeOrder, statusLabels, statusOrder } from '../lib/labels';
 import { Field } from '../components/Field';
 import { ItemCard } from '../components/ItemCard';
@@ -23,7 +23,12 @@ export function CreateView({ onExport, onCreated }: { onExport: (item: Item) => 
     setDraft(current => ({ ...current, [key]: value }));
   }
 
-  function handleImport() {
+  function appendMedia(assets: MediaAsset[]) {
+    if (!assets.length) return;
+    setDraft(current => ({ ...current, media: [...current.media, ...assets].slice(0, 8) }));
+  }
+
+  async function handleImport() {
     if (!importValue.trim()) {
       showToast('Нечего разбирать');
       return;
@@ -38,10 +43,54 @@ export function CreateView({ onExport, onCreated }: { onExport: (item: Item) => 
       contact: parsed.contact || current.contact || profile.contact
     }));
     if (parsed.sourceUrl || (parsed.grade && parsed.grade !== 'B')) setShowDetails(true);
-    showToast(parsed.sourceUrl ? 'Заполнил из ссылки' : 'Разобрал текст');
+
+    // Best-effort: pull any direct image links from the pasted text.
+    const urls = extractImageUrls(importValue);
+    if (urls.length) {
+      showToast('Разобрал · тяну фото…');
+      const loaded = (await Promise.all(urls.map(urlToMedia))).filter((asset): asset is MediaAsset => asset != null);
+      if (loaded.length) {
+        appendMedia(loaded);
+        showToast(`Разобрал · ${loaded.length} фото`);
+        return;
+      }
+    }
+    showToast(parsed.sourceUrl ? 'Текст готов · фото вставь или добавь' : 'Разобрал текст');
+  }
+
+  async function loadClipboardImages(): Promise<boolean> {
+    if (typeof navigator.clipboard?.read !== 'function') return false;
+    const items = await navigator.clipboard.read();
+    const files: File[] = [];
+    let text = '';
+    for (const item of items) {
+      const imageType = item.types.find(type => type.startsWith('image/'));
+      if (imageType) {
+        const blob = await item.getType(imageType);
+        files.push(new File([blob], 'paste.png', { type: blob.type }));
+      } else if (item.types.includes('text/plain')) {
+        text = await (await item.getType('text/plain')).text();
+      }
+    }
+    if (files.length) {
+      setBusyPhoto(true);
+      appendMedia(await filesToMedia(files));
+      setBusyPhoto(false);
+    }
+    if (text.trim()) setImportValue(text);
+    if (files.length && text.trim()) showToast(`Текст и ${files.length} фото из буфера`);
+    else if (files.length) showToast(`${files.length} фото из буфера`);
+    else if (text.trim()) showToast('Текст вставлен');
+    else showToast('В буфере пусто');
+    return true;
   }
 
   async function handlePaste() {
+    try {
+      if (await loadClipboardImages()) return;
+    } catch {
+      // rich clipboard blocked — fall back to plain text below
+    }
     try {
       const text = await navigator.clipboard.readText();
       if (!text.trim()) {
@@ -49,10 +98,27 @@ export function CreateView({ onExport, onCreated }: { onExport: (item: Item) => 
         return;
       }
       setImportValue(text);
-      showToast('Вставлено из буфера');
+      showToast('Текст вставлен');
     } catch {
-      showToast('Нет доступа к буферу');
+      showToast('Разреши доступ к буферу или вставь вручную');
     }
+  }
+
+  async function handleTextareaPaste(event: ClipboardEvent<HTMLTextAreaElement>) {
+    const items = event.clipboardData?.items;
+    if (!items) return;
+    const files: File[] = [];
+    for (const item of Array.from(items)) {
+      if (item.kind === 'file' && item.type.startsWith('image/')) {
+        const file = item.getAsFile();
+        if (file) files.push(file);
+      }
+    }
+    if (!files.length) return;
+    setBusyPhoto(true);
+    appendMedia(await filesToMedia(files));
+    setBusyPhoto(false);
+    showToast(`${files.length} фото из вставки`);
   }
 
   async function handleFiles(files: FileList | null) {
@@ -60,7 +126,7 @@ export function CreateView({ onExport, onCreated }: { onExport: (item: Item) => 
     setBusyPhoto(true);
     showToast('Обрабатываю фото');
     const media = await filesToMedia(files);
-    update('media', media);
+    appendMedia(media);
     setBusyPhoto(false);
     showToast(`${media.length} фото готово`);
   }
@@ -100,14 +166,15 @@ export function CreateView({ onExport, onCreated }: { onExport: (item: Item) => 
           <span className="hero-icon"><BoltIcon size={18} /></span>
           <div>
             <strong>Перенос с площадки</strong>
-            <small>Ссылка Avito / t.me или текст поста — соберу карточку сам</small>
+            <small>Ссылка или текст — соберу описание и цену. Скрин или фото — вставь прямо сюда, подхвачу.</small>
           </div>
         </div>
         <textarea
           value={importValue}
           onChange={event => setImportValue(event.target.value)}
+          onPaste={handleTextareaPaste}
           rows={3}
-          placeholder="Вставь ссылку или текст объявления…"
+          placeholder="Вставь ссылку, текст или скрин объявления…"
         />
         <div className="import-hero-actions">
           <button type="button" className="ghost-btn" onClick={handlePaste}><ClipboardIcon size={16} />Вставить</button>

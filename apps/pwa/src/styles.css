@@ -125,6 +125,19 @@ button { font-family: inherit; }
   box-shadow: var(--shadow-md);
 }
 .brand-name { font-size: 18px; font-weight: 750; letter-spacing: -0.3px; }
+.build-badge {
+  align-self: center;
+  margin-left: 1px;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  color: var(--ink-3);
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  line-height: 1.4;
+}
 .offline-flag {
   display: inline-flex;
   align-items: center;

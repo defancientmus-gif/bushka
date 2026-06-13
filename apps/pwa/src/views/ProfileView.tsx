@@ -6,7 +6,7 @@ import { Field } from '../components/Field';
 import { ItemCard, contactHref } from '../components/ItemCard';
 import { useOnline } from '../lib/hooks';
 import { pluralize } from '../lib/format';
-import { APP_CHANNEL, APP_VERSION } from '../lib/version';
+import { APP_BUILD, APP_CHANNEL, APP_VERSION } from '../lib/version';
 
 type Side = 'buy' | 'sell';
 
@@ -129,7 +129,7 @@ export function ProfileView({ onExport }: { onExport: (item: Item) => void }) {
       )}
 
       <div className="profile-foot">
-        <span className="version-tag">БУ.шка · {APP_VERSION} · {APP_CHANNEL}</span>
+        <span className="version-tag">БУ.шка · {APP_VERSION} · {APP_CHANNEL} · сборка {APP_BUILD}</span>
         <small>Данные хранятся локально на этом устройстве</small>
       </div>
     </section>

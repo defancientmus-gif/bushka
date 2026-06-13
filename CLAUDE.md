@@ -40,6 +40,9 @@
 - RLS не отключать. AI — только через Edge Function. Деплой — только скриптом/CI.
 - Внешние либы вендорить локально (CDN без `crossorigin` = opaque response = сломанный офлайн).
 
+## Версия беты
+Метка беты — пилюля `β{APP_BUILD}` возле лого (плюс полная строка в подвале профиля). `APP_BUILD` в `apps/pwa/src/lib/version.ts`. **После каждой заметной правки фронта — поднять `APP_BUILD` на 1** (как счётчик сборок `rz-v###` у «Разберёмся»).
+
 ## Стек сейчас
 React + TS + Vite, PWA (SW v3 network-first), localStorage, деплой GitHub Pages.
 Прод: https://defancientmus-gif.github.io/bushka/ · репо: defancientmus-gif/bushka

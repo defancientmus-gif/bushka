@@ -165,6 +165,13 @@ export const ShareIcon = (p: IconProps) => (
   </Svg>
 );
 
+export const PencilIcon = (p: IconProps) => (
+  <Svg {...p}>
+    <path d="M4 20h4l10-10-4-4L4 16v4z" />
+    <path d="M13.5 6.5l4 4" />
+  </Svg>
+);
+
 export const PinIcon = (p: IconProps) => (
   <Svg {...p}>
     <path d="M12 21s6-5.3 6-10a6 6 0 1 0-12 0c0 4.7 6 10 6 10z" />

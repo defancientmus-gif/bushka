@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import type { Item, ItemStatus } from '../types';
 import { dealModeLabels, deliveryLabels, statusLabels, statusOrder } from '../lib/labels';
-import { CategoryGlyph, CopyIcon, HeartIcon, PhoneIcon, SendIcon, TrashIcon } from './icons';
+import { CategoryGlyph, CopyIcon, HeartIcon, PencilIcon, PhoneIcon, SendIcon, TrashIcon } from './icons';
 
 export function ItemCard({
   item,
@@ -13,6 +13,7 @@ export function ItemCard({
   onBuy,
   onFavorite,
   onExport,
+  onEdit,
   onDelete,
   onStatusChange
 }: {
@@ -25,6 +26,7 @@ export function ItemCard({
   onBuy?: () => void;
   onFavorite?: () => void;
   onExport?: () => void;
+  onEdit?: () => void;
   onDelete?: () => void;
   onStatusChange?: (status: ItemStatus) => void;
 }) {
@@ -120,7 +122,8 @@ export function ItemCard({
                 {statusOrder.map(status => <option value={status} key={status}>{statusLabels[status]}</option>)}
               </select>
             </span>
-            <button type="button" className="ghost-btn" onClick={onExport}><SendIcon size={16} />Репост</button>
+            <button type="button" className="icon-btn" onClick={onEdit} aria-label="Изменить"><PencilIcon size={16} /></button>
+            <button type="button" className="icon-btn" onClick={onExport} aria-label="Репост"><SendIcon size={16} /></button>
             <button type="button" className={`icon-btn danger ${confirm ? 'confirm' : ''}`} onClick={handleDelete} aria-label="Удалить">
               {confirm ? 'Точно?' : <TrashIcon size={16} />}
             </button>

@@ -1,9 +1,10 @@
-import type { Item, Profile } from '../types';
+import type { Item, Profile, Txn } from '../types';
 import { defaultProfile } from '../data/seed';
 
 const itemsKey = 'bushka:pwa:items:v1';
 const profileKey = 'bushka:pwa:profile:v1';
 const favoritesKey = 'bushka:pwa:favorites:v1';
+const txnsKey = 'bushka:pwa:txns:v1';
 
 export const MAX_ITEMS = 120;
 
@@ -75,6 +76,25 @@ export function loadFavorites(): string[] {
 export function saveFavorites(ids: string[]) {
   try {
     window.localStorage.setItem(favoritesKey, JSON.stringify(ids));
+  } catch {
+    // non-critical
+  }
+}
+
+export function loadTxns(): Txn[] {
+  try {
+    const value = window.localStorage.getItem(txnsKey);
+    if (!value) return [];
+    const parsed = JSON.parse(value);
+    return Array.isArray(parsed) ? (parsed as Txn[]) : [];
+  } catch {
+    return [];
+  }
+}
+
+export function saveTxns(txns: Txn[]) {
+  try {
+    window.localStorage.setItem(txnsKey, JSON.stringify(txns.slice(0, 500)));
   } catch {
     // non-critical
   }

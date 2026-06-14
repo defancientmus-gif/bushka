@@ -23,10 +23,22 @@ export function App() {
 function Shell() {
   const [view, setView] = useState<View>('market');
   const [exportItem, setExportItem] = useState<Item | null>(null);
+  const [editing, setEditing] = useState<Item | null>(null);
   const online = useOnline();
 
   const changeView = useCallback((next: View) => {
-    setView(prev => (prev === next ? prev : next));
+    if (next === 'create') setEditing(null);
+    setView(next);
+  }, []);
+
+  const startEdit = useCallback((item: Item) => {
+    setEditing(item);
+    setView('create');
+  }, []);
+
+  const finishCreate = useCallback(() => {
+    setEditing(null);
+    setView('profile');
   }, []);
 
   return (
@@ -47,10 +59,10 @@ function Shell() {
         )}
       </header>
 
-      <main className="screen" key={view}>
+      <main className="screen" key={view === 'create' ? `create-${editing?.id ?? 'new'}` : view}>
         {view === 'market' && <MarketView onExport={setExportItem} />}
-        {view === 'create' && <CreateView onExport={setExportItem} onCreated={() => changeView('profile')} />}
-        {view === 'profile' && <ProfileView onExport={setExportItem} />}
+        {view === 'create' && <CreateView editItem={editing} onExport={setExportItem} onCreated={finishCreate} />}
+        {view === 'profile' && <ProfileView onExport={setExportItem} onEdit={startEdit} />}
       </main>
 
       <TabBar view={view} onChange={changeView} />

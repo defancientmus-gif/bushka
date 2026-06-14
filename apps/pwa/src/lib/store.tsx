@@ -1,13 +1,15 @@
 import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react';
-import type { DraftItem, Item, ItemStatus, Profile } from '../types';
+import type { DraftItem, Item, ItemStatus, Profile, Txn, TxnKind } from '../types';
 import { defaultProfile, seedItems } from '../data/seed';
 import {
   loadFavorites,
   loadItems,
   loadProfile,
+  loadTxns,
   saveFavorites,
   saveItems,
   saveProfile as persistProfile,
+  saveTxns,
   type SaveResult
 } from './storage';
 import { uid } from './id';
@@ -19,16 +21,20 @@ type StoreValue = {
   items: Item[];
   seed: Item[];
   favorites: string[];
+  txns: Txn[];
   toast: string;
   showToast: (message: string) => void;
   updateProfile: (patch: Partial<Profile>) => void;
   saveProfile: () => void;
   addItem: (draft: DraftItem, sellerName: string) => boolean;
+  updateItem: (id: string, draft: DraftItem) => boolean;
   updateStatus: (id: string, status: ItemStatus) => void;
   addQueue: (item: Item) => void;
   deleteItem: (id: string) => void;
   toggleFavorite: (id: string) => void;
   isFavorite: (id: string) => boolean;
+  addTxn: (kind: TxnKind, amount: number, note: string) => void;
+  deleteTxn: (id: string) => void;
 };
 
 const StoreContext = createContext<StoreValue | null>(null);
@@ -39,6 +45,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [profile, setProfile] = useState<Profile>(() => loadProfile());
   const [items, setItems] = useState<Item[]>(() => loadItems());
   const [favorites, setFavorites] = useState<string[]>(() => loadFavorites());
+  const [txns, setTxns] = useState<Txn[]>(() => loadTxns());
   const [toast, setToast] = useState('');
 
   const showToast = useCallback((message: string) => {
@@ -66,6 +73,13 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     showToast('Профиль сохранён');
   }, [showToast]);
 
+  const cleanDraft = useCallback((draft: DraftItem) => ({
+    ...draft,
+    title: draft.title.trim(),
+    price: draft.price.trim(),
+    description: draft.description.trim()
+  }), []);
+
   const addItem = useCallback((draft: DraftItem, sellerName: string): boolean => {
     if (!draft.title.trim()) {
       showToast('Нужно название');
@@ -77,11 +91,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     }
     const now = Date.now();
     const item: Item = {
-      ...draft,
+      ...cleanDraft(draft),
       id: uid('item'),
-      title: draft.title.trim(),
-      price: draft.price.trim(),
-      description: draft.description.trim(),
       sellerName: sellerName || defaultProfile.name,
       queueCount: 0,
       createdAt: now,
@@ -90,7 +101,23 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     persist([item, ...items]);
     showToast('Товар в складе');
     return true;
-  }, [items, persist, showToast]);
+  }, [items, persist, showToast, cleanDraft]);
+
+  const updateItem = useCallback((id: string, draft: DraftItem): boolean => {
+    if (!draft.title.trim()) {
+      showToast('Нужно название');
+      return false;
+    }
+    if (!draft.contact.trim()) {
+      showToast('Нужен контакт');
+      return false;
+    }
+    persist(items.map(item => (
+      item.id === id ? { ...item, ...cleanDraft(draft), updatedAt: Date.now() } : item
+    )));
+    showToast('Изменения сохранены');
+    return true;
+  }, [items, persist, showToast, cleanDraft]);
 
   const updateStatus = useCallback((id: string, status: ItemStatus) => {
     persist(items.map(item => (
@@ -134,22 +161,47 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   const isFavorite = useCallback((id: string) => favorites.includes(id), [favorites]);
 
+  const addTxn = useCallback((kind: TxnKind, amount: number, note: string) => {
+    if (!amount || amount <= 0) {
+      showToast('Введи сумму');
+      return;
+    }
+    setTxns(current => {
+      const next = [{ id: uid('txn'), kind, amount, note: note.trim(), createdAt: Date.now() }, ...current];
+      saveTxns(next);
+      return next;
+    });
+    showToast(kind === 'income' ? 'Доход записан' : 'Расход записан');
+  }, [showToast]);
+
+  const deleteTxn = useCallback((id: string) => {
+    setTxns(current => {
+      const next = current.filter(txn => txn.id !== id);
+      saveTxns(next);
+      return next;
+    });
+  }, []);
+
   const value = useMemo<StoreValue>(() => ({
     profile,
     items,
     seed: seedItems,
     favorites,
+    txns,
     toast,
     showToast,
     updateProfile,
     saveProfile,
     addItem,
+    updateItem,
     updateStatus,
     addQueue,
     deleteItem,
     toggleFavorite,
-    isFavorite
-  }), [profile, items, favorites, toast, showToast, updateProfile, saveProfile, addItem, updateStatus, addQueue, deleteItem, toggleFavorite, isFavorite]);
+    isFavorite,
+    addTxn,
+    deleteTxn
+  }), [profile, items, favorites, txns, toast, showToast, updateProfile, saveProfile, addItem, updateItem, updateStatus, addQueue, deleteItem, toggleFavorite, isFavorite, addTxn, deleteTxn]);
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;
 }

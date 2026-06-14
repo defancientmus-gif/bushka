@@ -21,6 +21,7 @@ export type Item = {
   id: string;
   title: string;
   price: string;
+  costPrice?: string;
   category: Category;
   condition: Condition;
   grade: Grade;
@@ -54,3 +55,13 @@ export type Profile = {
 export type DraftItem = Omit<Item, 'id' | 'sellerName' | 'queueCount' | 'createdAt' | 'updatedAt'>;
 
 export type View = 'market' | 'create' | 'profile';
+
+export type TxnKind = 'income' | 'expense';
+
+export type Txn = {
+  id: string;
+  kind: TxnKind;
+  amount: number;
+  note: string;
+  createdAt: number;
+};

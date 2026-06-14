@@ -12,9 +12,16 @@ function makeDraft(city: string, contact: string): DraftItem {
   return { ...emptyDraft(), city, contact };
 }
 
-export function CreateView({ onExport, onCreated }: { onExport: (item: Item) => void; onCreated: () => void }) {
-  const { profile, addItem, showToast } = useStore();
-  const [draft, setDraft] = useState<DraftItem>(() => makeDraft(profile.city, profile.contact));
+function fromItem(item: Item): DraftItem {
+  const { id, sellerName, queueCount, createdAt, updatedAt, ...draft } = item;
+  void id; void sellerName; void queueCount; void createdAt; void updatedAt;
+  return draft;
+}
+
+export function CreateView({ editItem, onExport, onCreated }: { editItem?: Item | null; onExport: (item: Item) => void; onCreated: () => void }) {
+  const { profile, addItem, updateItem, showToast } = useStore();
+  const editing = editItem ?? null;
+  const [draft, setDraft] = useState<DraftItem>(() => (editing ? fromItem(editing) : makeDraft(profile.city, profile.contact)));
   const [importValue, setImportValue] = useState('');
   const [showDetails, setShowDetails] = useState(false);
   const [busyPhoto, setBusyPhoto] = useState(false);
@@ -145,7 +152,8 @@ export function CreateView({ onExport, onCreated }: { onExport: (item: Item) => 
 
   function save() {
     if (!draft.contact.trim()) setShowDetails(true);
-    if (addItem(draft, profile.name)) {
+    const ok = editing ? updateItem(editing.id, draft) : addItem(draft, profile.name);
+    if (ok) {
       setDraft(makeDraft(profile.city, profile.contact));
       setImportValue('');
       setShowDetails(false);
@@ -157,7 +165,7 @@ export function CreateView({ onExport, onCreated }: { onExport: (item: Item) => 
     <section className="view create-view">
       <header className="view-head">
         <p className="eyebrow">товар</p>
-        <h1>Новый</h1>
+        <h1>{editing ? 'Изменить' : 'Новый'}</h1>
         <span className={`status-pill ${draft.status}`}>{statusLabels[draft.status]}</span>
       </header>
 
@@ -233,6 +241,9 @@ export function CreateView({ onExport, onCreated }: { onExport: (item: Item) => 
       <div className={`details ${showDetails ? 'open' : ''}`}>
         <div className="details-inner">
           <div className="form-grid">
+            <Field label="Закупка" hint="для себя">
+              <input value={draft.costPrice ?? ''} onChange={event => update('costPrice', event.target.value)} inputMode="numeric" placeholder="за сколько взял" />
+            </Field>
             <Field label="Грейд">
               <select value={draft.grade} onChange={event => update('grade', event.target.value as DraftItem['grade'])}>
                 {supportedGrades().map(grade => <option key={grade}>{grade}</option>)}
@@ -273,7 +284,7 @@ export function CreateView({ onExport, onCreated }: { onExport: (item: Item) => 
         <ItemCard item={preview} variant="preview" onExport={() => onExport(preview)} />
       </div>
 
-      <button type="button" className="solid-btn wide big" onClick={save}>Сохранить в склад</button>
+      <button type="button" className="solid-btn wide big" onClick={save}>{editing ? 'Сохранить изменения' : 'Сохранить в склад'}</button>
     </section>
   );
 }

@@ -8,6 +8,7 @@ import { CloseIcon } from '../components/icons';
 import { useOnline } from '../lib/hooks';
 import { pluralize } from '../lib/format';
 import { formatMoney, toNum } from '../lib/money';
+import { applyTheme, loadTheme, saveTheme, type Theme } from '../lib/theme';
 import { APP_BUILD, APP_CHANNEL, APP_VERSION } from '../lib/version';
 
 type Side = 'buy' | 'sell';
@@ -19,6 +20,13 @@ export function ProfileView({ onExport, onEdit }: { onExport: (item: Item) => vo
   const [addKind, setAddKind] = useState<TxnKind | null>(null);
   const [amount, setAmount] = useState('');
   const [note, setNote] = useState('');
+  const [theme, setThemeState] = useState<Theme>(() => loadTheme());
+
+  function pickTheme(next: Theme) {
+    setThemeState(next);
+    saveTheme(next);
+    applyTheme(next);
+  }
 
   const favItems = useMemo(
     () => [...items, ...seed].filter(item => favorites.includes(item.id)),
@@ -203,6 +211,13 @@ export function ProfileView({ onExport, onEdit }: { onExport: (item: Item) => vo
           </div>
         </>
       )}
+
+      <p className="section-label">Оформление</p>
+      <div className="segmented two" role="tablist" aria-label="Тема">
+        <span className="seg-indicator" style={{ transform: `translateX(${theme === 'light' ? 0 : 100}%)` }} aria-hidden="true" />
+        <button type="button" role="tab" aria-selected={theme === 'light'} className={theme === 'light' ? 'active' : ''} onClick={() => pickTheme('light')}>Дневная</button>
+        <button type="button" role="tab" aria-selected={theme === 'emerald'} className={theme === 'emerald' ? 'active' : ''} onClick={() => pickTheme('emerald')}>Изумруд · золото</button>
+      </div>
 
       <div className="profile-foot">
         <span className="version-tag">БУ.шка · {APP_VERSION} · {APP_CHANNEL} · сборка {APP_BUILD}</span>

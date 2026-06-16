@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import type { Item, View } from './types';
 import { StoreProvider } from './lib/store';
 import { useOnline } from './lib/hooks';
@@ -40,6 +40,11 @@ function Shell() {
     setEditing(null);
     setView('profile');
   }, []);
+
+  // Land at the top whenever the screen changes — no half-scrolled views.
+  useEffect(() => {
+    window.scrollTo({ top: 0 });
+  }, [view]);
 
   return (
     <div className="app">

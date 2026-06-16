@@ -15,6 +15,7 @@ import {
 import { uid } from './id';
 import { statusLabels } from './labels';
 import { reserveTimeFromNow } from './format';
+import { normalizePrice } from './money';
 
 type StoreValue = {
   profile: Profile;
@@ -76,7 +77,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const cleanDraft = useCallback((draft: DraftItem) => ({
     ...draft,
     title: draft.title.trim(),
-    price: draft.price.trim(),
+    price: normalizePrice(draft.price),
     description: draft.description.trim()
   }), []);
 

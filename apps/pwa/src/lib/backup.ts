@@ -23,9 +23,10 @@ export function downloadBackup() {
   };
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
+  const date = new Date().toISOString().slice(0, 10);
   const link = document.createElement('a');
   link.href = url;
-  link.download = 'bushka-sklad.json';
+  link.download = `БУшка-склад-${date}.json`;
   document.body.appendChild(link);
   link.click();
   link.remove();

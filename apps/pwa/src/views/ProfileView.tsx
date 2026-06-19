@@ -263,7 +263,7 @@ export function ProfileView({ onExport, onEdit }: { onExport: (item: Item) => vo
           <input type="file" accept="application/json" onChange={loadCopy} />
         </label>
       </div>
-      <p className="export-note" style={{ textAlign: 'left' }}>Склад хранится в браузере. Сохрани копию — не потеряешь товары при чистке и перенесёшь на другой телефон.</p>
+      <p className="export-note" style={{ textAlign: 'left' }}>Склад хранится в браузере. Сохрани копию — не потеряешь товары при чистке и перенесёшь на другой телефон. Это рабочий файл для самого приложения, открывать его не нужно — вернуть всё назад можно кнопкой «Загрузить».</p>
 
       <button type="button" className="ghost-btn wide" onClick={feedback}><SendIcon size={16} />Поделиться отзывом</button>
 

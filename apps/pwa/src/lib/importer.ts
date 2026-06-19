@@ -1,4 +1,4 @@
-import type { Category, Condition, DraftItem, Grade } from '../types';
+import type { Category, Condition, DraftItem, Grade, Item } from '../types';
 
 const categories: Category[] = ['Смартфон', 'Ноутбук', 'Консоль', 'Фото', 'Аудио', 'Комплектующие', 'Другое'];
 const conditions: Condition[] = ['Идеальное', 'Хорошее', 'Есть следы', 'На запчасти'];
@@ -59,54 +59,56 @@ export function parseImport(rawValue: string): Partial<DraftItem> {
   };
 }
 
-export function createTelegramText(item: {
-  title: string;
-  price: string;
-  condition: Condition;
-  grade: Grade;
-  description: string;
-  defects: string;
-  kit: string;
-  battery: string;
-  city: string;
-  contact: string;
-  sourceUrl: string;
-}) {
-  return [
-    item.title,
-    item.price ? `Цена: ${item.price}` : '',
-    `Состояние: ${item.condition} / ${item.grade}`,
-    item.battery ? `Батарея: ${item.battery}` : '',
-    item.kit ? `Комплект: ${item.kit}` : '',
-    item.defects ? `Дефекты: ${item.defects}` : '',
-    item.description,
-    item.city ? `Город: ${item.city}` : '',
-    item.contact ? `Контакт: ${item.contact}` : '',
-    item.sourceUrl ? `Источник: ${item.sourceUrl}` : ''
-  ].filter(Boolean).join('\n');
+const brandWords = [
+  'iphone', 'айфон', 'samsung', 'galaxy', 'xiaomi', 'redmi', 'poco', 'realme', 'honor', 'huawei', 'oppo', 'vivo', 'tecno',
+  'macbook', 'imac', 'ipad', 'airpods', 'thinkpad', 'asus', 'acer', 'lenovo', 'hp', 'dell', 'msi',
+  'playstation', 'ps5', 'ps4', 'xbox', 'nintendo', 'switch', 'steam',
+  'sony', 'canon', 'nikon', 'fujifilm', 'gopro', 'dji', 'marshall', 'jbl'
+];
+
+function hashtag(value: string): string {
+  return '#' + value.toLowerCase().replace(/[^a-zа-яё0-9]+/gi, '');
 }
 
-export function createAvitoText(item: {
-  title: string;
-  condition: Condition;
-  grade: Grade;
-  description: string;
-  defects: string;
-  kit: string;
-  battery: string;
-  contact: string;
-}) {
+function hashtagsFor(item: { title: string; category: Category; city: string }): string {
+  const tags: string[] = ['#бушка'];
+  const lower = (item.title || '').toLowerCase();
+  const brand = brandWords.find(word => lower.includes(word));
+  if (brand) tags.push(hashtag(brand));
+  if (item.category && item.category !== 'Другое') tags.push(hashtag(item.category));
+  if (item.city) tags.push(hashtag(item.city));
+  return Array.from(new Set(tags)).join(' ');
+}
+
+// Clean, scannable Telegram post — labelled fields (no flea-market emoji spam),
+// honest defects line, and hashtags so the post is findable in channels/search.
+export function createTelegramText(item: Item) {
+  const body = [
+    item.title,
+    item.price ? `Цена: ${item.price}` : 'Цена договорная',
+    `Состояние: ${item.condition} · грейд ${item.grade}`,
+    item.battery ? `Батарея: ${item.battery}` : '',
+    item.kit ? `Комплект: ${item.kit}` : '',
+    item.defects ? `Честно о минусах: ${item.defects}` : '',
+    item.description ? `\n${item.description}` : '',
+    item.city ? `\nГород: ${item.city}` : '',
+    item.contact ? `Связь: ${item.contact}` : '',
+    item.sourceUrl ? `Источник: ${item.sourceUrl}` : ''
+  ].filter(Boolean).join('\n');
+  const tags = hashtagsFor(item);
+  return tags ? `${body}\n\n${tags}` : body;
+}
+
+// Avito description — no contact (Avito hides/blocks contacts in the text).
+export function createAvitoText(item: Item) {
   return [
     item.description,
     '',
-    `Состояние: ${item.condition}`,
-    `Грейд: ${item.grade}`,
+    `Состояние: ${item.condition} (грейд ${item.grade})`,
     item.battery ? `Батарея: ${item.battery}` : '',
     item.kit ? `Комплект: ${item.kit}` : '',
-    item.defects ? `Нюансы: ${item.defects}` : '',
-    '',
-    item.contact ? `Связь: ${item.contact}` : ''
-  ].filter(line => line !== undefined).join('\n').replace(/\n{3,}/g, '\n\n').trim();
+    item.defects ? `Нюансы: ${item.defects}` : ''
+  ].filter(line => line !== '').join('\n').replace(/\n{3,}/g, '\n\n').trim();
 }
 
 export function cleanText(value: string) {

@@ -1,10 +1,11 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, type ChangeEvent } from 'react';
 import type { Item, TxnKind } from '../types';
 import { useStore } from '../lib/store';
 import { StatRing } from '../components/StatRing';
 import { Field } from '../components/Field';
 import { ItemCard, contactHref } from '../components/ItemCard';
-import { CloseIcon } from '../components/icons';
+import { CloseIcon, DownloadIcon, UploadIcon } from '../components/icons';
+import { downloadBackup, importBackup } from '../lib/backup';
 import { useOnline } from '../lib/hooks';
 import { pluralize } from '../lib/format';
 import { formatMoney, toNum } from '../lib/money';
@@ -26,6 +27,23 @@ export function ProfileView({ onExport, onEdit }: { onExport: (item: Item) => vo
     setThemeState(next);
     saveTheme(next);
     applyTheme(next);
+  }
+
+  function saveCopy() {
+    downloadBackup();
+    showToast('Копия склада сохранена');
+  }
+
+  async function loadCopy(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    event.target.value = '';
+    if (!file) return;
+    if (await importBackup(file)) {
+      showToast('Загружено — обновляю');
+      window.setTimeout(() => window.location.reload(), 600);
+    } else {
+      showToast('Не удалось прочитать файл');
+    }
   }
 
   const favItems = useMemo(
@@ -218,6 +236,16 @@ export function ProfileView({ onExport, onEdit }: { onExport: (item: Item) => vo
         <button type="button" role="tab" aria-selected={theme === 'light'} className={theme === 'light' ? 'active' : ''} onClick={() => pickTheme('light')}>Дневная</button>
         <button type="button" role="tab" aria-selected={theme === 'emerald'} className={theme === 'emerald' ? 'active' : ''} onClick={() => pickTheme('emerald')}>Изумруд · золото</button>
       </div>
+
+      <p className="section-label">Данные</p>
+      <div className="money-add">
+        <button type="button" className="ghost-btn grow" onClick={saveCopy}><DownloadIcon size={16} />Сохранить копию</button>
+        <label className="ghost-btn grow file-btn">
+          <UploadIcon size={16} />Загрузить
+          <input type="file" accept="application/json" onChange={loadCopy} />
+        </label>
+      </div>
+      <p className="export-note" style={{ textAlign: 'left' }}>Склад хранится в браузере. Сохрани копию — не потеряешь товары при чистке и перенесёшь на другой телефон.</p>
 
       <div className="profile-foot">
         <span className="version-tag">БУ.шка · {APP_VERSION} · {APP_CHANNEL} · сборка {APP_BUILD}</span>

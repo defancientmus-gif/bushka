@@ -939,6 +939,23 @@ button { font-family: inherit; }
 }
 .toast.show { opacity: 1; transform: translate(-50%, 0); }
 
+.install-hint {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 2px 0 8px;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+  animation: cardin 0.4s both;
+}
+.install-text { flex: 1; min-width: 0; }
+.install-text strong { display: block; font-size: 14px; font-weight: 700; }
+.install-text small { display: block; font-size: 12px; color: var(--ink-3); margin-top: 2px; }
+.install-hint .solid-btn { flex: none; padding: 9px 14px; }
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.001ms !important;

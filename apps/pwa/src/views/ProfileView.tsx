@@ -4,7 +4,7 @@ import { useStore } from '../lib/store';
 import { StatRing } from '../components/StatRing';
 import { Field } from '../components/Field';
 import { ItemCard, contactHref } from '../components/ItemCard';
-import { CloseIcon, DownloadIcon, UploadIcon } from '../components/icons';
+import { CloseIcon, DownloadIcon, SendIcon, UploadIcon } from '../components/icons';
 import { downloadBackup, importBackup } from '../lib/backup';
 import { useOnline } from '../lib/hooks';
 import { pluralize } from '../lib/format';
@@ -43,6 +43,24 @@ export function ProfileView({ onExport, onEdit }: { onExport: (item: Item) => vo
       window.setTimeout(() => window.location.reload(), 600);
     } else {
       showToast('Не удалось прочитать файл');
+    }
+  }
+
+  async function feedback() {
+    const text = 'Отзыв о БУ.шке — что понравилось / что неудобно: ';
+    if (typeof navigator.share === 'function') {
+      try {
+        await navigator.share({ title: 'Отзыв о БУ.шке', text });
+        return;
+      } catch {
+        return;
+      }
+    }
+    try {
+      await navigator.clipboard.writeText(text);
+      showToast('Шаблон скопирован — черкни создателю');
+    } catch {
+      showToast('Расскажи создателю, что улучшить');
     }
   }
 
@@ -246,6 +264,8 @@ export function ProfileView({ onExport, onEdit }: { onExport: (item: Item) => vo
         </label>
       </div>
       <p className="export-note" style={{ textAlign: 'left' }}>Склад хранится в браузере. Сохрани копию — не потеряешь товары при чистке и перенесёшь на другой телефон.</p>
+
+      <button type="button" className="ghost-btn wide" onClick={feedback}><SendIcon size={16} />Поделиться отзывом</button>
 
       <div className="profile-foot">
         <span className="version-tag">БУ.шка · {APP_VERSION} · {APP_CHANNEL} · сборка {APP_BUILD}</span>

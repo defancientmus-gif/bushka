@@ -7,6 +7,7 @@ import { TabBar } from './components/TabBar';
 import { Toast } from './components/Toast';
 import { ExportSheet } from './components/ExportSheet';
 import { WifiOffIcon } from './components/icons';
+import { InstallHint } from './components/InstallHint';
 import { APP_BUILD, APP_VERSION } from './lib/version';
 import { MarketView } from './views/MarketView';
 import { CreateView } from './views/CreateView';
@@ -63,6 +64,8 @@ function Shell() {
           </span>
         )}
       </header>
+
+      <InstallHint />
 
       <main className="screen" key={view === 'create' ? `create-${editing?.id ?? 'new'}` : view}>
         {view === 'market' && <MarketView onExport={setExportItem} />}

@@ -61,6 +61,9 @@ self.addEventListener('fetch', event => {
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) return;
 
+  // version.json must always come fresh from network — it's the freshness probe.
+  if (url.pathname.endsWith('/version.json')) return;
+
   if (request.mode === 'navigate') {
     event.respondWith(handleNavigation(request));
     return;

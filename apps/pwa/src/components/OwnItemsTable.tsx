@@ -1,6 +1,6 @@
 import type { Item, ItemStatus } from '../types';
 import { statusLabels, statusOrder } from '../lib/labels';
-import { formatMoney, marginLight, toNum } from '../lib/money';
+import { daysOld, formatMoney, isStale, marginLight, toNum } from '../lib/money';
 import { PencilIcon, SendIcon, TrashIcon } from './icons';
 
 // Desktop CRM view of the seller's stock — dense, scannable, editable inline.
@@ -36,11 +36,13 @@ export function OwnItemsTable({
           {items.map(item => {
             const hasCost = toNum(item.costPrice) > 0;
             const margin = toNum(item.price) - toNum(item.costPrice);
+            const stale = isStale(item);
             return (
-              <tr key={item.id}>
+              <tr key={item.id} className={stale ? 'stale' : ''}>
                 <td className="t-name">
                   <span className={`grade-badge g-${item.grade}`}>{item.grade}</span>
                   <span className="t-title">{item.title || 'Без названия'}</span>
+                  {stale && <span className="stale-tag">висит {daysOld(item.createdAt)} дн</span>}
                 </td>
                 <td>{item.condition}</td>
                 <td>{item.battery || '—'}</td>

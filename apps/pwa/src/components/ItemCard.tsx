@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import type { Item, ItemStatus } from '../types';
 import { dealModeLabels, deliveryLabels, statusLabels, statusOrder } from '../lib/labels';
-import { formatMoney, lightLabel, marginLight, toNum } from '../lib/money';
+import { daysOld, formatMoney, isStale, lightLabel, marginLight, toNum } from '../lib/money';
+import { pluralize } from '../lib/format';
 import { CategoryGlyph, CopyIcon, HeartIcon, PencilIcon, PhoneIcon, SendIcon, TrashIcon } from './icons';
 
 export function ItemCard({
@@ -35,6 +36,8 @@ export function ItemCard({
   const isPreview = variant === 'preview';
   const light = marginLight(item.price, item.costPrice);
   const margin = toNum(item.price) - toNum(item.costPrice);
+  const stale = variant === 'own' && isStale(item);
+  const age = daysOld(item.createdAt);
   const [confirm, setConfirm] = useState(false);
   const timer = useRef(0);
 
@@ -93,6 +96,8 @@ export function ItemCard({
             Навар {margin >= 0 ? `+${formatMoney(margin)}` : formatMoney(margin)} · {lightLabel[light]}
           </p>
         )}
+
+        {stale && <p className="stale-line">Висит {age} {pluralize(age, 'день', 'дня', 'дней')} · подвинь цену, освободи кэш</p>}
 
         {item.defects && <p className="defect-line">Нюансы: {item.defects}</p>}
 

@@ -1,3 +1,28 @@
+import type { Item } from '../types';
+
+export const STALE_DAYS = 7;
+
+export function daysOld(createdAt: number): number {
+  return Math.max(0, Math.floor((Date.now() - createdAt) / 86400000));
+}
+
+/** "Висяк" — unsold and lying around ≥ STALE_DAYS. */
+export function isStale(item: Item): boolean {
+  return item.status !== 'sold' && daysOld(item.createdAt) >= STALE_DAYS;
+}
+
+/** Consecutive days up to today that had at least one sale. */
+export function saleStreak(soldUpdatedAt: number[]): number {
+  const days = new Set(soldUpdatedAt.map(ts => new Date(ts).toDateString()));
+  let streak = 0;
+  const cursor = new Date();
+  while (days.has(cursor.toDateString())) {
+    streak += 1;
+    cursor.setDate(cursor.getDate() - 1);
+  }
+  return streak;
+}
+
 export function toNum(value?: string): number {
   if (!value) return 0;
   const digits = String(value).replace(/[^\d]/g, '');

@@ -464,6 +464,12 @@ html[data-theme="emerald"] .grade-badge.g-B { background: rgba(216, 181, 106, 0.
 .navar-line.red { color: #cf3b3f; }
 .navar-line .light-dot.green { animation: dotpulse 2.6s ease-in-out infinite; }
 @keyframes dotpulse { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.2); opacity: 0.8; } }
+
+/* Радар висяков */
+.stale-line { margin: 0; font-size: 12.5px; font-weight: 600; color: #b06f08; }
+.money-sleep { margin: 4px 0 0; font-size: 12.5px; color: #b06f08; }
+.stale-tag { font-size: 11px; font-weight: 700; color: #b06f08; background: rgba(245, 158, 11, 0.16); padding: 2px 7px; border-radius: 999px; margin-left: 8px; white-space: nowrap; }
+.own-table tr.stale td { background: rgba(245, 158, 11, 0.06); }
 .defect-line {
   margin: 0;
   font-size: 12.5px;

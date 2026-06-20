@@ -9,7 +9,7 @@ import { CloseIcon, DownloadIcon, SendIcon, UploadIcon } from '../components/ico
 import { downloadBackup, importBackup } from '../lib/backup';
 import { useOnline } from '../lib/hooks';
 import { pluralize } from '../lib/format';
-import { formatMoney, isToday, toNum } from '../lib/money';
+import { formatMoney, isStale, isToday, saleStreak, toNum } from '../lib/money';
 import { applyTheme, loadTheme, saveTheme, type Theme } from '../lib/theme';
 import { APP_BUILD, APP_CHANNEL, APP_VERSION } from '../lib/version';
 
@@ -81,7 +81,10 @@ export function ProfileView({ onExport, onEdit }: { onExport: (item: Item) => vo
     const todayMargin = soldToday.reduce((sum, item) => sum + (toNum(item.price) - toNum(item.costPrice)), 0);
     const bestMargin = soldItems.reduce((best, item) => Math.max(best, toNum(item.price) - toNum(item.costPrice)), 0);
     const inStock = items.filter(item => item.status !== 'sold').reduce((sum, item) => sum + toNum(item.costPrice), 0);
-    return { profit, todayMargin, todayCount: soldToday.length, bestMargin, inStock };
+    const staleItems = items.filter(isStale);
+    const sleeping = staleItems.reduce((sum, item) => sum + toNum(item.costPrice), 0);
+    const streak = saleStreak(soldItems.map(item => item.updatedAt));
+    return { profit, todayMargin, todayCount: soldToday.length, bestMargin, inStock, sleeping, staleCount: staleItems.length, streak };
   }, [items, txns]);
 
   const sold = items.filter(item => item.status === 'sold').length;
@@ -186,9 +189,13 @@ export function ProfileView({ onExport, onEdit }: { onExport: (item: Item) => vo
               <div><span>В товаре</span><b>{formatMoney(money.inStock)}</b></div>
             </div>
             <p className="money-pot">
-              {money.todayCount > 0 ? `Сегодня сделок: ${money.todayCount}` : 'Сегодня сделок ещё нет — давай первую'}
+              {money.streak >= 2 ? `Серия ${money.streak} дн · ` : ''}
+              {money.todayCount > 0 ? `сегодня сделок: ${money.todayCount}` : 'сегодня сделок ещё нет — давай первую'}
               {money.bestMargin > 0 ? ` · рекорд ${formatMoney(money.bestMargin)}` : ''}
             </p>
+            {money.sleeping > 0 && (
+              <p className="money-sleep">В висяках спит {formatMoney(money.sleeping)} ({money.staleCount}) — подвинь цену, освободи кэш</p>
+            )}
           </div>
 
           <div className="money-add">

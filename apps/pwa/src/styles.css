@@ -200,6 +200,7 @@ button { font-family: inherit; }
   letter-spacing: 0.2px;
   line-height: 1.4;
 }
+.sidebar-brand { display: none; }
 .offline-flag {
   display: inline-flex;
   align-items: center;
@@ -1091,15 +1092,7 @@ html[data-theme="emerald"] .grade-badge.g-B { background: rgba(216, 181, 106, 0.
     border-right: 1px solid var(--line);
     pointer-events: auto;
   }
-  .tabbar::before {
-    content: 'БУ.шка';
-    display: block;
-    padding: 4px 14px 18px;
-    font-size: 18px;
-    font-weight: 750;
-    letter-spacing: -0.3px;
-    color: var(--ink);
-  }
+  .sidebar-brand { display: flex; align-items: center; gap: 10px; padding: 2px 14px 18px; }
   .tabbar-inner {
     flex-direction: column;
     width: 100%;

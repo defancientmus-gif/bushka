@@ -3,14 +3,26 @@ import type { Category, Item } from '../types';
 import { useStore } from '../lib/store';
 import { ItemCard, contactHref } from '../components/ItemCard';
 import { SearchIcon } from '../components/icons';
+import { FilterSheet, activeFilterCount, emptyFilters, inPriceBand, type MarketFilters } from '../components/FilterSheet';
 import { supportedCategories } from '../lib/importer';
+import { toNum } from '../lib/money';
 
 type CatFilter = 'all' | Category;
+type Sort = 'fresh' | 'cheap' | 'pricey';
+
+const sortLabels: Array<{ id: Sort; label: string }> = [
+  { id: 'fresh', label: 'Новые' },
+  { id: 'cheap', label: 'Дешевле' },
+  { id: 'pricey', label: 'Дороже' }
+];
 
 export function MarketView({ onExport }: { onExport: (item: Item) => void }) {
   const { seed, items, addQueue, toggleFavorite, isFavorite, showToast } = useStore();
   const [query, setQuery] = useState('');
   const [cat, setCat] = useState<CatFilter>('all');
+  const [sort, setSort] = useState<Sort>('fresh');
+  const [filters, setFilters] = useState<MarketFilters>(emptyFilters);
+  const [filterOpen, setFilterOpen] = useState(false);
 
   // The market shows everyone's live lots (mock seed + my own that are for sale),
   // never sold ones — a buyer shops what they can actually take home.
@@ -26,13 +38,27 @@ export function MarketView({ onExport }: { onExport: (item: Item) => void }) {
 
   const visible = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return lots.filter(item => {
+    const matched = lots.filter(item => {
       if (cat !== 'all' && item.category !== cat) return false;
+      if (filters.price !== 'any' && !inPriceBand(toNum(item.price), filters.price)) return false;
+      if (filters.condition !== 'any' && item.condition !== filters.condition) return false;
+      if (filters.delivery !== 'any' && !(item.delivery || []).includes(filters.delivery)) return false;
       if (!q) return true;
       const hay = `${item.title} ${item.price} ${item.description} ${item.category} ${item.city}`.toLowerCase();
       return hay.includes(q);
     });
-  }, [lots, query, cat]);
+    return [...matched].sort((a, b) => {
+      if (sort === 'fresh') return b.createdAt - a.createdAt;
+      const pa = toNum(a.price);
+      const pb = toNum(b.price);
+      // priceless ("договорная") always sinks to the bottom
+      if (pa === 0) return 1;
+      if (pb === 0) return -1;
+      return sort === 'cheap' ? pa - pb : pb - pa;
+    });
+  }, [lots, query, cat, filters, sort]);
+
+  const activeCount = activeFilterCount(filters);
 
   function buy(item: Item) {
     const href = contactHref(item.contact);
@@ -75,6 +101,17 @@ export function MarketView({ onExport }: { onExport: (item: Item) => void }) {
         ))}
       </div>
 
+      <div className="market-controls">
+        <div className="sort-chips">
+          {sortLabels.map(option => (
+            <button key={option.id} type="button" className={`pick-chip ${sort === option.id ? 'active' : ''}`} onClick={() => setSort(option.id)}>{option.label}</button>
+          ))}
+        </div>
+        <button type="button" className={`filter-btn ${activeCount ? 'on' : ''}`} onClick={() => setFilterOpen(true)}>
+          Фильтр{activeCount > 0 && <i>{activeCount}</i>}
+        </button>
+      </div>
+
       <div className="feed-grid">
         {visible.map((item, index) => (
           <ItemCard
@@ -91,11 +128,23 @@ export function MarketView({ onExport }: { onExport: (item: Item) => void }) {
         ))}
         {!visible.length && (
           <div className="empty-state">
-            <p>Ничего не нашлось</p>
-            <small>Поменяй запрос или категорию — рынок большой</small>
+            <p>Под фильтр ничего нет</p>
+            <small>{activeCount || query || cat !== 'all' ? 'Ослабь фильтр или поиск' : 'Рынок пока пуст'}</small>
+            {(activeCount || query || cat !== 'all') && (
+              <button type="button" className="ghost-btn" style={{ marginTop: 12 }} onClick={() => { setFilters(emptyFilters); setQuery(''); setCat('all'); }}>Сбросить всё</button>
+            )}
           </div>
         )}
       </div>
+
+      {filterOpen && (
+        <FilterSheet
+          filters={filters}
+          onChange={setFilters}
+          resultCount={visible.length}
+          onClose={() => setFilterOpen(false)}
+        />
+      )}
     </section>
   );
 }

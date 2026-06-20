@@ -15,7 +15,7 @@ import {
 import { uid } from './id';
 import { statusLabels } from './labels';
 import { reserveTimeFromNow } from './format';
-import { normalizePrice } from './money';
+import { formatMoney, normalizePrice, toNum } from './money';
 
 type StoreValue = {
   profile: Profile;
@@ -121,6 +121,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   }, [items, persist, showToast, cleanDraft]);
 
   const updateStatus = useCallback((id: string, status: ItemStatus) => {
+    const target = items.find(item => item.id === id);
     persist(items.map(item => (
       item.id === id
         ? {
@@ -131,7 +132,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           }
         : item
     )));
-    showToast(statusLabels[status]);
+    if (status === 'sold' && target && toNum(target.costPrice) > 0) {
+      const margin = toNum(target.price) - toNum(target.costPrice);
+      showToast(margin >= 0 ? `Продано · +${formatMoney(margin)} в карман` : `Продано · ${formatMoney(margin)}`);
+    } else {
+      showToast(statusLabels[status]);
+    }
   }, [items, persist, showToast]);
 
   const addQueue = useCallback((item: Item) => {

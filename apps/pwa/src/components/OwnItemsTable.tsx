@@ -1,6 +1,6 @@
 import type { Item, ItemStatus } from '../types';
 import { statusLabels, statusOrder } from '../lib/labels';
-import { formatMoney, toNum } from '../lib/money';
+import { formatMoney, marginLight, toNum } from '../lib/money';
 import { PencilIcon, SendIcon, TrashIcon } from './icons';
 
 // Desktop CRM view of the seller's stock — dense, scannable, editable inline.
@@ -46,7 +46,9 @@ export function OwnItemsTable({
                 <td>{item.battery || '—'}</td>
                 <td className="t-num">{item.price || 'договорная'}</td>
                 <td className="t-num">{hasCost ? formatMoney(toNum(item.costPrice)) : '—'}</td>
-                <td className={`t-num ${hasCost ? (margin >= 0 ? 'pos' : 'neg') : ''}`}>{hasCost ? formatMoney(margin) : '—'}</td>
+                <td className={`t-num ${hasCost ? (margin >= 0 ? 'pos' : 'neg') : ''}`}>
+                  {hasCost ? <><span className={`light-dot ${marginLight(item.price, item.costPrice)}`} aria-hidden="true" />{formatMoney(margin)}</> : '—'}
+                </td>
                 <td>
                   <span className="status-select">
                     <select value={item.status} onChange={event => onStatusChange(item.id, event.target.value as ItemStatus)} aria-label="Статус">

@@ -9,7 +9,7 @@ import { CloseIcon, DownloadIcon, SendIcon, UploadIcon } from '../components/ico
 import { downloadBackup, importBackup } from '../lib/backup';
 import { useOnline } from '../lib/hooks';
 import { pluralize } from '../lib/format';
-import { formatMoney, toNum } from '../lib/money';
+import { formatMoney, isToday, toNum } from '../lib/money';
 import { applyTheme, loadTheme, saveTheme, type Theme } from '../lib/theme';
 import { APP_BUILD, APP_CHANNEL, APP_VERSION } from '../lib/version';
 
@@ -76,12 +76,12 @@ export function ProfileView({ onExport, onEdit }: { onExport: (item: Item) => vo
     const salesCost = soldItems.reduce((sum, item) => sum + toNum(item.costPrice), 0);
     const manualIncome = txns.filter(t => t.kind === 'income').reduce((sum, t) => sum + t.amount, 0);
     const manualExpense = txns.filter(t => t.kind === 'expense').reduce((sum, t) => sum + t.amount, 0);
-    const income = salesRevenue + manualIncome;
-    const expense = salesCost + manualExpense;
-    const stockMargin = items
-      .filter(item => item.status === 'available' || item.status === 'lot')
-      .reduce((sum, item) => sum + Math.max(0, toNum(item.price) - toNum(item.costPrice)), 0);
-    return { income, expense, profit: income - expense, stockMargin };
+    const profit = (salesRevenue + manualIncome) - (salesCost + manualExpense);
+    const soldToday = soldItems.filter(item => isToday(item.updatedAt));
+    const todayMargin = soldToday.reduce((sum, item) => sum + (toNum(item.price) - toNum(item.costPrice)), 0);
+    const bestMargin = soldItems.reduce((best, item) => Math.max(best, toNum(item.price) - toNum(item.costPrice)), 0);
+    const inStock = items.filter(item => item.status !== 'sold').reduce((sum, item) => sum + toNum(item.costPrice), 0);
+    return { profit, todayMargin, todayCount: soldToday.length, bestMargin, inStock };
   }, [items, txns]);
 
   const sold = items.filter(item => item.status === 'sold').length;
@@ -178,14 +178,17 @@ export function ProfileView({ onExport, onEdit }: { onExport: (item: Item) => vo
           <p className="section-label">Деньги</p>
           <div className="money-card">
             <div className="money-hero">
-              <span>Прибыль</span>
-              <strong className={money.profit >= 0 ? 'pos' : 'neg'}>{formatMoney(money.profit)}</strong>
+              <span>Навар сегодня</span>
+              <strong className={money.todayMargin > 0 ? 'pos' : ''}>{formatMoney(money.todayMargin)}</strong>
             </div>
             <div className="money-split">
-              <div><span>Доход</span><b>{formatMoney(money.income)}</b></div>
-              <div><span>Расход</span><b>{formatMoney(money.expense)}</b></div>
+              <div><span>Навар всего</span><b>{formatMoney(money.profit)}</b></div>
+              <div><span>В товаре</span><b>{formatMoney(money.inStock)}</b></div>
             </div>
-            {money.stockMargin > 0 && <p className="money-pot">В наличии заложено прибыли: {formatMoney(money.stockMargin)}</p>}
+            <p className="money-pot">
+              {money.todayCount > 0 ? `Сегодня сделок: ${money.todayCount}` : 'Сегодня сделок ещё нет — давай первую'}
+              {money.bestMargin > 0 ? ` · рекорд ${formatMoney(money.bestMargin)}` : ''}
+            </p>
           </div>
 
           <div className="money-add">

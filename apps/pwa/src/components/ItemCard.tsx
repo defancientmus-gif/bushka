@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import type { Item, ItemStatus } from '../types';
 import { dealModeLabels, deliveryLabels, statusLabels, statusOrder } from '../lib/labels';
+import { formatMoney, lightLabel, marginLight, toNum } from '../lib/money';
 import { CategoryGlyph, CopyIcon, HeartIcon, PencilIcon, PhoneIcon, SendIcon, TrashIcon } from './icons';
 
 export function ItemCard({
@@ -32,6 +33,8 @@ export function ItemCard({
 }) {
   const media = item.media[0];
   const isPreview = variant === 'preview';
+  const light = marginLight(item.price, item.costPrice);
+  const margin = toNum(item.price) - toNum(item.costPrice);
   const [confirm, setConfirm] = useState(false);
   const timer = useRef(0);
 
@@ -83,6 +86,13 @@ export function ItemCard({
           {item.battery && <span className="quality-sub">· АКБ {item.battery}</span>}
           {item.dealMode !== 'free' && <span className="quality-sub">· {dealModeLabels[item.dealMode]}</span>}
         </div>
+
+        {variant === 'own' && light && (
+          <p className={`navar-line ${light}`}>
+            <span className="light-dot" aria-hidden="true" />
+            Навар {margin >= 0 ? `+${formatMoney(margin)}` : formatMoney(margin)} · {lightLabel[light]}
+          </p>
+        )}
 
         {item.defects && <p className="defect-line">Нюансы: {item.defects}</p>}
 

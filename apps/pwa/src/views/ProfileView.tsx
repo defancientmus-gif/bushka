@@ -7,9 +7,10 @@ import { ItemCard, contactHref } from '../components/ItemCard';
 import { OwnItemsTable } from '../components/OwnItemsTable';
 import { CloseIcon, DownloadIcon, SendIcon, UploadIcon } from '../components/icons';
 import { downloadBackup, importBackup } from '../lib/backup';
-import { useOnline } from '../lib/hooks';
+import { useCountUp, useOnline } from '../lib/hooks';
 import { pluralize } from '../lib/format';
-import { formatMoney, isStale, isToday, saleStreak, toNum } from '../lib/money';
+import { DayPulse } from '../components/DayPulse';
+import { formatMoney, isStale, isToday, marginLight, saleStreak, toNum } from '../lib/money';
 import { applyTheme, loadTheme, saveTheme, type Theme } from '../lib/theme';
 import { APP_CHANNEL, APP_TAG, APP_VERSION } from '../lib/version';
 
@@ -84,8 +85,13 @@ export function ProfileView({ onExport, onEdit }: { onExport: (item: Item) => vo
     const staleItems = items.filter(isStale);
     const sleeping = staleItems.reduce((sum, item) => sum + toNum(item.costPrice), 0);
     const streak = saleStreak(soldItems.map(item => item.updatedAt));
-    return { profit, todayMargin, todayCount: soldToday.length, bestMargin, inStock, sleeping, staleCount: staleItems.length, streak };
+    const greenCount = items.filter(item => item.status !== 'sold' && marginLight(item.price, item.costPrice) === 'green').length;
+    return { profit, todayMargin, todayCount: soldToday.length, bestMargin, inStock, sleeping, staleCount: staleItems.length, streak, greenCount };
   }, [items, txns]);
+
+  const liveToday = useCountUp(money.todayMargin);
+  const liveProfit = useCountUp(money.profit);
+  const liveStock = useCountUp(money.inStock);
 
   const sold = items.filter(item => item.status === 'sold').length;
 
@@ -172,6 +178,16 @@ export function ProfileView({ onExport, onEdit }: { onExport: (item: Item) => vo
         </>
       ) : (
         <>
+          <DayPulse
+            name={profile.name}
+            todayMargin={money.todayMargin}
+            todayCount={money.todayCount}
+            streak={money.streak}
+            staleCount={money.staleCount}
+            greenCount={money.greenCount}
+            inStock={money.inStock}
+          />
+
           <div className="rings">
             <StatRing value={items.length} max={Math.max(10, items.length)} display={String(items.length)} label={pluralize(items.length, 'товар', 'товара', 'товаров')} />
             <StatRing value={profile.rating} max={5} display={profile.rating.toFixed(1)} label="рейтинг" />
@@ -182,11 +198,11 @@ export function ProfileView({ onExport, onEdit }: { onExport: (item: Item) => vo
           <div className="money-card">
             <div className="money-hero">
               <span>Навар сегодня</span>
-              <strong className={money.todayMargin > 0 ? 'pos' : ''}>{formatMoney(money.todayMargin)}</strong>
+              <strong className={money.todayMargin > 0 ? 'pos' : ''}>{formatMoney(liveToday)}</strong>
             </div>
             <div className="money-split">
-              <div><span>Навар всего</span><b>{formatMoney(money.profit)}</b></div>
-              <div><span>В товаре</span><b>{formatMoney(money.inStock)}</b></div>
+              <div><span>Навар всего</span><b>{formatMoney(liveProfit)}</b></div>
+              <div><span>В товаре</span><b>{formatMoney(liveStock)}</b></div>
             </div>
             <p className="money-pot">
               {money.streak >= 2 ? `Серия ${money.streak} дн · ` : ''}

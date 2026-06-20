@@ -798,6 +798,20 @@ html[data-theme="emerald"] .grade-badge.g-B { background: rgba(216, 181, 106, 0.
 .stat-ring-center strong { font-size: 19px; font-weight: 800; }
 .stat-ring-center span { font-size: 11px; color: var(--ink-3); margin-top: 1px; }
 
+/* Живой пульс — продукт встречает и решает, что важно сейчас */
+.day-pulse {
+  padding: 16px 18px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+  animation: pulsein 0.5s both cubic-bezier(0.22, 1, 0.36, 1);
+}
+.pulse-greet { margin: 0; font-size: 12.5px; font-weight: 600; color: var(--ink-3); }
+.pulse-lead { display: block; margin: 4px 0 6px; font-size: 22px; font-weight: 820; letter-spacing: -0.5px; }
+.pulse-hint { margin: 0; font-size: 13.5px; font-weight: 600; color: var(--accent); }
+@keyframes pulsein { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+
 .profile-foot { display: flex; flex-direction: column; gap: 4px; align-items: center; text-align: center; padding: 14px 0 4px; color: var(--ink-3); font-size: 12.5px; }
 .version-tag { font-weight: 600; color: var(--ink-2); }
 .profile-foot small { font-size: 11.5px; opacity: 0.8; }

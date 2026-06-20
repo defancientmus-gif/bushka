@@ -77,24 +77,20 @@ export function ItemCard({
           <strong>{item.price || 'договорная'}</strong>
         </div>
 
-        <div className="chip-line">
-          <span className="tag">{item.condition}</span>
-          <span className="tag grade">{item.grade}</span>
-          {item.dealMode !== 'free' && <span className="tag deal">{dealModeLabels[item.dealMode]}</span>}
-          {variant === 'market' && item.delivery?.map(kind => (
-            <span className="tag delivery" key={kind}>{deliveryLabels[kind]}</span>
-          ))}
+        <div className="quality">
+          <span className={`grade-badge g-${item.grade}`}>{item.grade}</span>
+          <span className="quality-word">{item.condition}</span>
+          {item.battery && <span className="quality-sub">· АКБ {item.battery}</span>}
+          {item.dealMode !== 'free' && <span className="quality-sub">· {dealModeLabels[item.dealMode]}</span>}
         </div>
 
-        {item.description && <p className="card-desc">{item.description}</p>}
+        {item.defects && <p className="defect-line">Нюансы: {item.defects}</p>}
 
-        {(item.battery || item.kit || item.defects) && (
-          <dl className="specs">
-            {item.battery && <div><dt>Батарея</dt><dd>{item.battery}</dd></div>}
-            {item.kit && <div><dt>Комплект</dt><dd>{item.kit}</dd></div>}
-            {item.defects && <div><dt>Нюансы</dt><dd>{item.defects}</dd></div>}
-          </dl>
+        {variant === 'market' && item.delivery && item.delivery.length > 0 && (
+          <p className="delivery-line">{item.delivery.map(kind => deliveryLabels[kind]).join(' · ')}</p>
         )}
+
+        {item.description && <p className="card-desc">{item.description}</p>}
 
         {item.status === 'reserved' && item.reservedUntil && (
           <p className="reserve-note">Бронь до {item.reservedUntil}</p>

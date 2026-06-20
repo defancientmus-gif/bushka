@@ -4,6 +4,7 @@ import { useStore } from '../lib/store';
 import { StatRing } from '../components/StatRing';
 import { Field } from '../components/Field';
 import { ItemCard, contactHref } from '../components/ItemCard';
+import { OwnItemsTable } from '../components/OwnItemsTable';
 import { CloseIcon, DownloadIcon, SendIcon, UploadIcon } from '../components/icons';
 import { downloadBackup, importBackup } from '../lib/backup';
 import { useOnline } from '../lib/hooks';
@@ -225,26 +226,38 @@ export function ProfileView({ onExport, onEdit }: { onExport: (item: Item) => vo
           <button type="button" className="solid-btn wide big" onClick={saveProfile}>Сохранить профиль</button>
 
           <p className="section-label">Мои товары · в наличии {items.length - sold}, продано {sold}</p>
-          <div className="feed-grid">
-            {items.map((item, index) => (
-              <ItemCard
-                key={item.id}
-                item={item}
-                index={index}
-                variant="own"
-                onStatusChange={status => updateStatus(item.id, status)}
-                onEdit={() => onEdit(item)}
-                onDelete={() => deleteItem(item.id)}
-                onExport={() => onExport(item)}
-              />
-            ))}
-            {!items.length && (
-              <div className="empty-state">
-                <p>Склад пуст</p>
-                <small>Во вкладке «Создать» выставишь первый товар за минуту</small>
+          {items.length ? (
+            <>
+              <div className="own-cards">
+                <div className="feed-grid">
+                  {items.map((item, index) => (
+                    <ItemCard
+                      key={item.id}
+                      item={item}
+                      index={index}
+                      variant="own"
+                      onStatusChange={status => updateStatus(item.id, status)}
+                      onEdit={() => onEdit(item)}
+                      onDelete={() => deleteItem(item.id)}
+                      onExport={() => onExport(item)}
+                    />
+                  ))}
+                </div>
               </div>
-            )}
-          </div>
+              <OwnItemsTable
+                items={items}
+                onStatusChange={updateStatus}
+                onEdit={onEdit}
+                onExport={onExport}
+                onDelete={deleteItem}
+              />
+            </>
+          ) : (
+            <div className="empty-state">
+              <p>Склад пуст</p>
+              <small>Во вкладке «Создать» выставишь первый товар за минуту</small>
+            </div>
+          )}
         </>
       )}
 

@@ -11,7 +11,7 @@ import { useOnline } from '../lib/hooks';
 import { pluralize } from '../lib/format';
 import { formatMoney, isStale, isToday, saleStreak, toNum } from '../lib/money';
 import { applyTheme, loadTheme, saveTheme, type Theme } from '../lib/theme';
-import { APP_BUILD, APP_CHANNEL, APP_VERSION } from '../lib/version';
+import { APP_CHANNEL, APP_TAG, APP_VERSION } from '../lib/version';
 
 type Side = 'buy' | 'sell';
 
@@ -291,7 +291,7 @@ export function ProfileView({ onExport, onEdit }: { onExport: (item: Item) => vo
       <button type="button" className="ghost-btn wide" onClick={feedback}><SendIcon size={16} />Поделиться отзывом</button>
 
       <div className="profile-foot">
-        <span className="version-tag">БУ.шка · {APP_VERSION} · {APP_CHANNEL} · сборка {APP_BUILD}</span>
+        <span className="version-tag">БУ.шка · {APP_VERSION} · {APP_CHANNEL} · {APP_TAG}</span>
         <small>Данные хранятся локально на этом устройстве</small>
       </div>
     </section>

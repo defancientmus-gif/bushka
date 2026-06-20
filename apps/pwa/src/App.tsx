@@ -8,7 +8,7 @@ import { Toast } from './components/Toast';
 import { ExportSheet } from './components/ExportSheet';
 import { WifiOffIcon } from './components/icons';
 import { InstallHint } from './components/InstallHint';
-import { APP_BUILD, APP_VERSION } from './lib/version';
+import { APP_TAG, APP_VERSION } from './lib/version';
 import { MarketView } from './views/MarketView';
 import { CreateView } from './views/CreateView';
 import { ProfileView } from './views/ProfileView';
@@ -55,7 +55,7 @@ function Shell() {
         <div className="brand">
           <span className="brand-mark">бу</span>
           <span className="brand-name">БУ.шка</span>
-          <span className="build-badge" title={`БУ.шка ${APP_VERSION} · бета · сборка ${APP_BUILD}`}>β{APP_BUILD}</span>
+          <span className="build-badge" title={`БУ.шка ${APP_VERSION} · бета · ${APP_TAG}`}>{APP_TAG}</span>
         </div>
         {!online && (
           <span className="offline-flag">

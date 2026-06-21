@@ -1094,56 +1094,63 @@ html[data-theme="emerald"] .grade-badge.g-B { background: rgba(216, 181, 106, 0.
 
 /* ---------- Desktop / PC layout ---------- */
 @media (min-width: 900px) {
+  /* Десктоп: меню — та же пилюля «3 кнопки по центру», но пристыкована */
+  /* к верху. Никакого столба слева — контент дышит во всю ширину и высоту. */
   .tabbar {
-    left: 0;
-    right: auto;
+    position: fixed;
     top: 0;
-    bottom: 0;
-    width: 232px;
-    display: block;
-    padding: 20px 14px;
-    background: var(--surface);
-    border-right: 1px solid var(--line);
+    left: 0;
+    right: 0;
+    bottom: auto;
+    width: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 14px 28px;
+    background: var(--topbar-fade);
     pointer-events: auto;
+    z-index: 30;
   }
-  .sidebar-brand { display: flex; align-items: center; gap: 10px; padding: 2px 14px 18px; }
+  /* Лого + версия — слева, не толкают пилюлю из центра. */
+  .sidebar-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    position: absolute;
+    left: 28px;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+  /* Пилюля по центру: твёрдая (без blur — под ней скроллится контент), */
+  /* скользящий индикатор живёт. */
   .tabbar-inner {
-    flex-direction: column;
-    width: 100%;
+    width: 420px;
     max-width: none;
-    padding: 0;
-    gap: 4px;
-    background: transparent;
-    border: 0;
-    box-shadow: none;
+    padding: 5px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    box-shadow: var(--shadow-md);
     backdrop-filter: none;
   }
-  .tab-indicator { display: none; }
   .tab {
     flex-direction: row;
-    justify-content: flex-start;
-    gap: 12px;
-    padding: 12px 14px;
-    border-radius: 14px;
-    font-size: 14.5px;
-    font-weight: 600;
+    gap: 8px;
+    padding: 9px 0;
+    font-size: 13.5px;
+    font-weight: 650;
   }
-  .tab svg { width: 20px; height: 20px; }
-  .tab.active { background: var(--solid); color: var(--solid-fg); }
-  .tab.active svg { transform: none; }
+  .tab svg { width: 18px; height: 18px; }
 
+  /* Контент — уютной колонкой по центру всего экрана, под верхним меню. */
   .app {
     max-width: none;
-    margin: 0;
-    /* Контент живёт в зоне справа от меню и центрируется в ней — */
-    /* никаких «полей телевизора», пустота расходится симметрично. */
-    padding: 24px 32px 32px calc(232px + 32px);
+    margin: 0 auto;
+    padding: 92px 28px 40px; /* верхний отступ под фиксированное меню */
   }
   .topbar { display: none; }
-  /* Уютные колонки по центру свободного места, а не растёкшийся экран. */
-  .create-view  { max-width: 640px;  margin-inline: auto; }
-  .profile-view { max-width: 640px;  margin-inline: auto; }
-  .market-view  { max-width: 1040px; margin-inline: auto; }
+  .create-view  { max-width: 660px;  margin-inline: auto; }
+  .profile-view { max-width: 660px;  margin-inline: auto; }
+  .market-view  { max-width: 1080px; margin-inline: auto; }
 
   .own-cards { display: none; }
   .own-table { display: block; }

@@ -1097,6 +1097,9 @@ html[data-theme="emerald"] .grade-badge.g-B { background: rgba(216, 181, 106, 0.
 .sell-dash { display: flex; flex-direction: column; gap: 16px; }
 .col-main, .col-side { display: contents; }
 
+/* ---------- «Создать»: ввод слева, живое превью справа ---------- */
+.create-dash, .create-main, .create-side { display: contents; }
+
 /* ---------- Desktop / PC layout ---------- */
 @media (min-width: 900px) {
   /* Десктоп: меню — та же пилюля «3 кнопки по центру», но пристыкована */
@@ -1155,9 +1158,30 @@ html[data-theme="emerald"] .grade-badge.g-B { background: rgba(216, 181, 106, 0.
     padding: 92px 28px 40px; /* верхний отступ под фиксированное меню */
   }
   .topbar { display: none; }
-  .create-view  { max-width: 680px;  margin-inline: auto; }
+  .create-view  { max-width: 1080px; margin-inline: auto; }
   .profile-view { max-width: 1180px; margin-inline: auto; }
   .market-view  { max-width: 1080px; margin-inline: auto; }
+
+  /* «Создать»: слева работа, справа липкое превью — видишь лот на витрине. */
+  .create-dash { display: flex; flex-direction: row; align-items: flex-start; gap: 26px; }
+  .create-main {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    flex: 1.5;
+    min-width: 0;
+  }
+  .create-side {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    flex: 1;
+    min-width: 300px;
+    max-width: 380px;
+    position: sticky;
+    top: 92px; /* под фиксированным верхним меню */
+  }
+  .create-side .preview-wrap { margin: 0; }
 
   /* Дашборд: слева рабочее (пульс, деньги, склад), справа тихое */
   /* (рейтинг, профиль продавца, оформление, данные). Меньше прокрутки. */

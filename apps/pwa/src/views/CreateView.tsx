@@ -169,6 +169,9 @@ export function CreateView({ editItem, onExport, onCreated }: { editItem?: Item 
         <span className={`status-pill ${draft.status}`}>{statusLabels[draft.status]}</span>
       </header>
 
+      <div className="create-dash">
+        <div className="create-main">
+
       <div className="import-hero">
         <div className="import-hero-top">
           <span className="hero-icon"><BoltIcon size={18} /></span>
@@ -279,12 +282,17 @@ export function CreateView({ editItem, onExport, onCreated }: { editItem?: Item 
         </div>
       </div>
 
+        </div>
+
+        <aside className="create-side">
       <div className="preview-wrap">
         <p className="preview-label">Как увидит покупатель</p>
         <ItemCard item={preview} variant="preview" onExport={() => onExport(preview)} />
       </div>
 
       <button type="button" className="solid-btn wide big" onClick={save}>{editing ? 'Сохранить изменения' : 'Сохранить в склад'}</button>
+        </aside>
+      </div>
     </section>
   );
 }

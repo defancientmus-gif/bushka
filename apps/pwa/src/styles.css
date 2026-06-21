@@ -396,6 +396,31 @@ button { font-family: inherit; }
   font-weight: 700;
 }
 
+/* Метка немой петли (видео-гифка) — как «GIF» в Телеграме. */
+.media-clip {
+  position: absolute;
+  left: 10px;
+  bottom: 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 8px 3px 7px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.62);
+  color: #fff;
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 0.4px;
+}
+.media-clip::before {
+  content: '';
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 4px 0 4px 6px;
+  border-color: transparent transparent transparent #fff;
+}
+
 .status-pill {
   display: inline-block;
   padding: 5px 11px;
@@ -668,6 +693,20 @@ html[data-theme="emerald"] .grade-badge.g-B { background: rgba(216, 181, 106, 0.
 .photo-loader input { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
 .photo-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 10px; }
 .photo-row img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: var(--r-sm); animation: cardin 0.4s both; }
+.photo-thumb { position: relative; display: block; }
+.photo-thumb img { display: block; }
+.thumb-clip {
+  position: absolute;
+  left: 5px;
+  bottom: 5px;
+  padding: 1px 5px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.62);
+  color: #fff;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.4px;
+}
 .photo-empty {
   aspect-ratio: 1;
   border-radius: var(--r-sm);

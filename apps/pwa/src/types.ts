@@ -14,6 +14,8 @@ export type MediaAsset = {
   id: string;
   kind: 'image' | 'video';
   src: string;
+  /** Для kind==='video' — кадры немой петли (как ТГ-гифка). src = первый кадр (постер). */
+  frames?: string[];
   name?: string;
 };
 

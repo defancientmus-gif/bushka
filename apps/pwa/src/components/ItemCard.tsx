@@ -1,9 +1,35 @@
 import { useEffect, useRef, useState } from 'react';
-import type { Item, ItemStatus } from '../types';
+import type { Item, ItemStatus, MediaAsset } from '../types';
 import { dealModeLabels, deliveryLabels, statusLabels, statusOrder } from '../lib/labels';
 import { daysOld, formatMoney, isStale, lightLabel, marginLight, toNum } from '../lib/money';
 import { pluralize } from '../lib/format';
 import { CategoryGlyph, CopyIcon, HeartIcon, PencilIcon, PhoneIcon, SendIcon, TrashIcon } from './icons';
+
+/** Немая петля кадров (как ТГ-гифка). Для фото — обычная картинка. */
+function ClipMedia({ asset }: { asset: MediaAsset }) {
+  const frames = asset.frames;
+  const [idx, setIdx] = useState(0);
+  useEffect(() => {
+    if (!frames || frames.length < 2) return;
+    if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return;
+    let raf = 0;
+    let last = 0;
+    let i = 0;
+    const step = 1000 / 8; // ~8 кадров/сек — живо, но спокойно
+    const loop = (ts: number) => {
+      if (ts - last >= step) {
+        i = (i + 1) % frames.length;
+        setIdx(i);
+        last = ts;
+      }
+      raf = requestAnimationFrame(loop);
+    };
+    raf = requestAnimationFrame(loop);
+    return () => cancelAnimationFrame(raf);
+  }, [frames]);
+  const src = frames && frames.length ? frames[idx] : asset.src;
+  return <img src={src} alt="" loading="lazy" />;
+}
 
 export function ItemCard({
   item,
@@ -58,10 +84,11 @@ export function ItemCard({
     <article className={`card ${isPreview ? 'preview' : ''}`} style={{ animationDelay: `${Math.min(index, 12) * 40}ms` }}>
       <div className={`card-media status-${item.status}`}>
         {media ? (
-          <img src={media.src} alt="" loading="lazy" />
+          <ClipMedia asset={media} />
         ) : (
           <span className="media-glyph"><CategoryGlyph category={item.category} size={38} /></span>
         )}
+        {media?.kind === 'video' && <span className="media-clip" aria-label="видео-петля">GIF</span>}
         <span className={`status-pill ${item.status}`}>{statusLabels[item.status]}</span>
         {variant === 'market' && onFavorite && (
           <button

@@ -2,7 +2,7 @@ import { useMemo, useState, type ClipboardEvent } from 'react';
 import type { DraftItem, Item, ItemStatus, MediaAsset } from '../types';
 import { useStore } from '../lib/store';
 import { emptyDraft, parseImport, supportedCategories, supportedConditions, supportedGrades } from '../lib/importer';
-import { extractImageUrls, filesToMedia, urlToMedia } from '../lib/media';
+import { extractImageUrls, filesToMedia, urlToMedia, videoToClip } from '../lib/media';
 import { dealModeLabels, dealModeOrder, statusLabels, statusOrder } from '../lib/labels';
 import { Field } from '../components/Field';
 import { ItemCard } from '../components/ItemCard';
@@ -130,12 +130,33 @@ export function CreateView({ editItem, onExport, onCreated }: { editItem?: Item 
 
   async function handleFiles(files: FileList | null) {
     if (!files || !files.length) return;
+    const list = Array.from(files);
+    const videos = list.filter(file => file.type.startsWith('video/'));
+    const images = list.filter(file => file.type.startsWith('image/'));
     setBusyPhoto(true);
-    showToast('Обрабатываю фото');
-    const media = await filesToMedia(files);
-    appendMedia(media);
-    setBusyPhoto(false);
-    showToast(`${media.length} фото готово`);
+    showToast(videos.length ? 'Собираю петлю из видео…' : 'Обрабатываю фото');
+
+    const collected: MediaAsset[] = [];
+    let failed = 0;
+    try {
+      if (images.length) collected.push(...await filesToMedia(images));
+      for (const file of videos) {
+        const clip = await videoToClip(file);
+        if (clip) collected.push(clip);
+        else failed++;
+      }
+    } catch {
+      failed += videos.length;
+    } finally {
+      setBusyPhoto(false);
+    }
+    if (collected.length) appendMedia(collected);
+
+    const clips = collected.filter(asset => asset.kind === 'video').length;
+    const photos = collected.length - clips;
+    if (clips) showToast(`Петля готова${photos ? ` · ${photos} фото` : ''}`);
+    else if (photos) showToast(`${photos} фото готово`);
+    else if (failed) showToast('Видео не отдало кадры — в камере iPhone поставь «Наиболее совместимый»');
   }
 
   const preview = useMemo<Item>(() => ({
@@ -194,16 +215,21 @@ export function CreateView({ editItem, onExport, onCreated }: { editItem?: Item 
       </div>
 
       <div className="photo-loader">
-        <input id="media" type="file" accept="image/*" multiple onChange={event => handleFiles(event.currentTarget.files)} />
+        <input id="media" type="file" accept="image/*,video/*" multiple onChange={event => handleFiles(event.currentTarget.files)} />
         <div className="photo-row">
-          {draft.media.slice(0, 4).map(asset => <img key={asset.id} src={asset.src} alt="" />)}
+          {draft.media.slice(0, 4).map(asset => (
+            <span className="photo-thumb" key={asset.id}>
+              <img src={asset.src} alt="" />
+              {asset.kind === 'video' && <span className="thumb-clip">GIF</span>}
+            </span>
+          ))}
           {Array.from({ length: Math.max(0, 4 - draft.media.length) }).map((_, i) => (
             <span className="photo-empty" key={`empty-${i}`} style={{ animationDelay: `${i * 80}ms` }} />
           ))}
         </div>
         <label className="upload-btn" htmlFor="media">
           <CameraIcon size={18} />
-          {busyPhoto ? 'Загрузка…' : `Фото · ${draft.media.length}/8`}
+          {busyPhoto ? 'Собираю…' : `Фото / видео · ${draft.media.length}/8`}
         </label>
       </div>
 

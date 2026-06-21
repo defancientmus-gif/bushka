@@ -1135,20 +1135,19 @@ html[data-theme="emerald"] .grade-badge.g-B { background: rgba(216, 181, 106, 0.
   .app {
     max-width: none;
     margin: 0;
-    padding: 24px 28px 28px 260px;
+    /* Контент живёт в зоне справа от меню и центрируется в ней — */
+    /* никаких «полей телевизора», пустота расходится симметрично. */
+    padding: 24px 32px 32px calc(232px + 32px);
   }
   .topbar { display: none; }
-  .create-view { max-width: 780px; }
-  .profile-view { max-width: 1120px; }
-  .market-view { max-width: 1180px; }
+  /* Уютные колонки по центру свободного места, а не растёкшийся экран. */
+  .create-view  { max-width: 640px;  margin-inline: auto; }
+  .profile-view { max-width: 640px;  margin-inline: auto; }
+  .market-view  { max-width: 1040px; margin-inline: auto; }
 
   .own-cards { display: none; }
   .own-table { display: block; }
 }
-@media (min-width: 1320px) {
-  .feed-grid { grid-template-columns: repeat(4, 1fr); }
-}
-
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.001ms !important;

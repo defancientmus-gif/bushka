@@ -1121,12 +1121,13 @@ html[data-theme="emerald"] .grade-badge.g-B { background: rgba(216, 181, 106, 0.
     top: 50%;
     transform: translateY(-50%);
   }
-  /* Пилюля по центру: твёрдая (без blur — под ней скроллится контент), */
-  /* скользящий индикатор живёт. */
+  /* Пилюля по центру: твёрдая (без blur — под ней скроллится контент). */
+  /* padding:6 обязателен — под него считается скользящий индикатор (left:6, */
+  /* width:(100%-12)/3); иначе тёмная капсула съезжает с подписи. */
   .tabbar-inner {
-    width: 420px;
+    width: 360px;
     max-width: none;
-    padding: 5px;
+    padding: 6px;
     background: var(--surface);
     border: 1px solid var(--line);
     box-shadow: var(--shadow-md);
@@ -1134,7 +1135,8 @@ html[data-theme="emerald"] .grade-badge.g-B { background: rgba(216, 181, 106, 0.
   }
   .tab {
     flex-direction: row;
-    gap: 8px;
+    justify-content: center; /* иконка+подпись по центру ячейки, без перекоса */
+    gap: 7px;
     padding: 9px 0;
     font-size: 13.5px;
     font-weight: 650;

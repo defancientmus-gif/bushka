@@ -124,6 +124,29 @@ export function ProfileView({ onExport, onEdit }: { onExport: (item: Item) => vo
     setNote('');
   }
 
+  const settings = (
+    <>
+      <p className="section-label">Оформление</p>
+      <div className="segmented two" role="tablist" aria-label="Тема">
+        <span className="seg-indicator" style={{ transform: `translateX(${theme === 'light' ? 0 : 100}%)` }} aria-hidden="true" />
+        <button type="button" role="tab" aria-selected={theme === 'light'} className={theme === 'light' ? 'active' : ''} onClick={() => pickTheme('light')}>Дневная</button>
+        <button type="button" role="tab" aria-selected={theme === 'emerald'} className={theme === 'emerald' ? 'active' : ''} onClick={() => pickTheme('emerald')}>Изумруд · золото</button>
+      </div>
+
+      <p className="section-label">Данные</p>
+      <div className="money-add">
+        <button type="button" className="ghost-btn grow" onClick={saveCopy}><DownloadIcon size={16} />Сохранить копию</button>
+        <label className="ghost-btn grow file-btn">
+          <UploadIcon size={16} />Загрузить
+          <input type="file" accept="application/json" onChange={loadCopy} />
+        </label>
+      </div>
+      <p className="export-note" style={{ textAlign: 'left' }}>Склад хранится в браузере. Сохрани копию — не потеряешь товары при чистке и перенесёшь на другой телефон. Это рабочий файл для самого приложения, открывать его не нужно — вернуть всё назад можно кнопкой «Загрузить».</p>
+
+      <button type="button" className="ghost-btn wide" onClick={feedback}><SendIcon size={16} />Поделиться отзывом</button>
+    </>
+  );
+
   return (
     <section className="view profile-view">
       <header className="view-head">
@@ -175,136 +198,124 @@ export function ProfileView({ onExport, onEdit }: { onExport: (item: Item) => vo
               </div>
             )}
           </div>
+          {settings}
         </>
       ) : (
-        <>
-          <DayPulse
-            name={profile.name}
-            todayMargin={money.todayMargin}
-            todayCount={money.todayCount}
-            streak={money.streak}
-            staleCount={money.staleCount}
-            greenCount={money.greenCount}
-            inStock={money.inStock}
-          />
+        <div className="sell-dash">
+          <div className="col-main">
+            <DayPulse
+              name={profile.name}
+              todayMargin={money.todayMargin}
+              todayCount={money.todayCount}
+              streak={money.streak}
+              staleCount={money.staleCount}
+              greenCount={money.greenCount}
+              inStock={money.inStock}
+            />
 
-          <div className="rings">
-            <StatRing value={items.length} max={Math.max(10, items.length)} display={String(items.length)} label={pluralize(items.length, 'товар', 'товара', 'товаров')} />
-            <StatRing value={profile.rating} max={5} display={profile.rating.toFixed(1)} label="рейтинг" />
-            <StatRing value={profile.deals} max={Math.max(10, profile.deals)} display={String(profile.deals)} label={pluralize(profile.deals, 'сделка', 'сделки', 'сделок')} />
-          </div>
+            <p className="section-label">Деньги</p>
+            <div className="money-card">
+              <div className="money-hero">
+                <span>Навар сегодня</span>
+                <strong className={money.todayMargin > 0 ? 'pos' : ''}>{formatMoney(liveToday)}</strong>
+              </div>
+              <div className="money-split">
+                <div><span>Навар всего</span><b>{formatMoney(liveProfit)}</b></div>
+                <div><span>В товаре</span><b>{formatMoney(liveStock)}</b></div>
+              </div>
+              <p className="money-pot">
+                {money.streak >= 2 ? `Серия ${money.streak} дн · ` : ''}
+                {money.todayCount > 0 ? `сегодня сделок: ${money.todayCount}` : 'сегодня сделок ещё нет — давай первую'}
+                {money.bestMargin > 0 ? ` · рекорд ${formatMoney(money.bestMargin)}` : ''}
+              </p>
+              {money.sleeping > 0 && (
+                <p className="money-sleep">В висяках спит {formatMoney(money.sleeping)} ({money.staleCount}) — подвинь цену, освободи кэш</p>
+              )}
+            </div>
 
-          <p className="section-label">Деньги</p>
-          <div className="money-card">
-            <div className="money-hero">
-              <span>Навар сегодня</span>
-              <strong className={money.todayMargin > 0 ? 'pos' : ''}>{formatMoney(liveToday)}</strong>
+            <div className="money-add">
+              <button type="button" className={`ghost-btn grow ${addKind === 'income' ? 'on' : ''}`} onClick={() => openAdd('income')}>+ Доход</button>
+              <button type="button" className={`ghost-btn grow ${addKind === 'expense' ? 'on' : ''}`} onClick={() => openAdd('expense')}>− Расход</button>
             </div>
-            <div className="money-split">
-              <div><span>Навар всего</span><b>{formatMoney(liveProfit)}</b></div>
-              <div><span>В товаре</span><b>{formatMoney(liveStock)}</b></div>
-            </div>
-            <p className="money-pot">
-              {money.streak >= 2 ? `Серия ${money.streak} дн · ` : ''}
-              {money.todayCount > 0 ? `сегодня сделок: ${money.todayCount}` : 'сегодня сделок ещё нет — давай первую'}
-              {money.bestMargin > 0 ? ` · рекорд ${formatMoney(money.bestMargin)}` : ''}
-            </p>
-            {money.sleeping > 0 && (
-              <p className="money-sleep">В висяках спит {formatMoney(money.sleeping)} ({money.staleCount}) — подвинь цену, освободи кэш</p>
+            {addKind && (
+              <div className="txn-form">
+                <input inputMode="numeric" placeholder="Сумма ₽" value={amount} onChange={event => setAmount(event.target.value)} autoFocus />
+                <input placeholder="За что (необяз.)" value={note} onChange={event => setNote(event.target.value)} />
+                <button type="button" className="solid-btn" onClick={submitTxn}>OK</button>
+              </div>
+            )}
+            {txns.length > 0 && (
+              <ul className="txn-list">
+                {txns.slice(0, 8).map(txn => (
+                  <li key={txn.id} className={`txn ${txn.kind}`}>
+                    <span className="txn-amount">{txn.kind === 'income' ? '+' : '−'} {formatMoney(txn.amount)}</span>
+                    <span className="txn-note">{txn.note || (txn.kind === 'income' ? 'доход' : 'расход')}</span>
+                    <button type="button" className="txn-del" onClick={() => deleteTxn(txn.id)} aria-label="Удалить операцию"><CloseIcon size={14} /></button>
+                  </li>
+                ))}
+              </ul>
+            )}
+
+            <p className="section-label">Мои товары · в наличии {items.length - sold}, продано {sold}</p>
+            {items.length ? (
+              <>
+                <div className="own-cards">
+                  <div className="feed-grid">
+                    {items.map((item, index) => (
+                      <ItemCard
+                        key={item.id}
+                        item={item}
+                        index={index}
+                        variant="own"
+                        onStatusChange={status => updateStatus(item.id, status)}
+                        onEdit={() => onEdit(item)}
+                        onDelete={() => deleteItem(item.id)}
+                        onExport={() => onExport(item)}
+                      />
+                    ))}
+                  </div>
+                </div>
+                <OwnItemsTable
+                  items={items}
+                  onStatusChange={updateStatus}
+                  onEdit={onEdit}
+                  onExport={onExport}
+                  onDelete={deleteItem}
+                />
+              </>
+            ) : (
+              <div className="empty-state">
+                <p>Склад пуст</p>
+                <small>Во вкладке «Создать» выставишь первый товар за минуту</small>
+              </div>
             )}
           </div>
 
-          <div className="money-add">
-            <button type="button" className={`ghost-btn grow ${addKind === 'income' ? 'on' : ''}`} onClick={() => openAdd('income')}>+ Доход</button>
-            <button type="button" className={`ghost-btn grow ${addKind === 'expense' ? 'on' : ''}`} onClick={() => openAdd('expense')}>− Расход</button>
-          </div>
-          {addKind && (
-            <div className="txn-form">
-              <input inputMode="numeric" placeholder="Сумма ₽" value={amount} onChange={event => setAmount(event.target.value)} autoFocus />
-              <input placeholder="За что (необяз.)" value={note} onChange={event => setNote(event.target.value)} />
-              <button type="button" className="solid-btn" onClick={submitTxn}>OK</button>
+          <aside className="col-side">
+            <div className="rings">
+              <StatRing value={items.length} max={Math.max(10, items.length)} display={String(items.length)} label={pluralize(items.length, 'товар', 'товара', 'товаров')} />
+              <StatRing value={profile.rating} max={5} display={profile.rating.toFixed(1)} label="рейтинг" />
+              <StatRing value={profile.deals} max={Math.max(10, profile.deals)} display={String(profile.deals)} label={pluralize(profile.deals, 'сделка', 'сделки', 'сделок')} />
             </div>
-          )}
-          {txns.length > 0 && (
-            <ul className="txn-list">
-              {txns.slice(0, 8).map(txn => (
-                <li key={txn.id} className={`txn ${txn.kind}`}>
-                  <span className="txn-amount">{txn.kind === 'income' ? '+' : '−'} {formatMoney(txn.amount)}</span>
-                  <span className="txn-note">{txn.note || (txn.kind === 'income' ? 'доход' : 'расход')}</span>
-                  <button type="button" className="txn-del" onClick={() => deleteTxn(txn.id)} aria-label="Удалить операцию"><CloseIcon size={14} /></button>
-                </li>
-              ))}
-            </ul>
-          )}
 
-          <p className="section-label">Профиль продавца</p>
-          <div className="form-grid">
-            <Field label="Имя или магазин" wide>
-              <input value={profile.name} onChange={event => updateProfile({ name: event.target.value })} placeholder="Как тебя зовут покупателю" />
-            </Field>
-            <Field label="Город">
-              <input value={profile.city} onChange={event => updateProfile({ city: event.target.value })} placeholder="Симферополь" />
-            </Field>
-            <Field label="Контакт">
-              <input value={profile.contact} onChange={event => updateProfile({ contact: event.target.value })} placeholder="@username" />
-            </Field>
-          </div>
-          <button type="button" className="solid-btn wide big" onClick={saveProfile}>Сохранить профиль</button>
-
-          <p className="section-label">Мои товары · в наличии {items.length - sold}, продано {sold}</p>
-          {items.length ? (
-            <>
-              <div className="own-cards">
-                <div className="feed-grid">
-                  {items.map((item, index) => (
-                    <ItemCard
-                      key={item.id}
-                      item={item}
-                      index={index}
-                      variant="own"
-                      onStatusChange={status => updateStatus(item.id, status)}
-                      onEdit={() => onEdit(item)}
-                      onDelete={() => deleteItem(item.id)}
-                      onExport={() => onExport(item)}
-                    />
-                  ))}
-                </div>
-              </div>
-              <OwnItemsTable
-                items={items}
-                onStatusChange={updateStatus}
-                onEdit={onEdit}
-                onExport={onExport}
-                onDelete={deleteItem}
-              />
-            </>
-          ) : (
-            <div className="empty-state">
-              <p>Склад пуст</p>
-              <small>Во вкладке «Создать» выставишь первый товар за минуту</small>
+            <p className="section-label">Профиль продавца</p>
+            <div className="form-grid">
+              <Field label="Имя или магазин" wide>
+                <input value={profile.name} onChange={event => updateProfile({ name: event.target.value })} placeholder="Как тебя зовут покупателю" />
+              </Field>
+              <Field label="Город">
+                <input value={profile.city} onChange={event => updateProfile({ city: event.target.value })} placeholder="Симферополь" />
+              </Field>
+              <Field label="Контакт">
+                <input value={profile.contact} onChange={event => updateProfile({ contact: event.target.value })} placeholder="@username" />
+              </Field>
             </div>
-          )}
-        </>
+            <button type="button" className="solid-btn wide big" onClick={saveProfile}>Сохранить профиль</button>
+
+            {settings}
+          </aside>
+        </div>
       )}
-
-      <p className="section-label">Оформление</p>
-      <div className="segmented two" role="tablist" aria-label="Тема">
-        <span className="seg-indicator" style={{ transform: `translateX(${theme === 'light' ? 0 : 100}%)` }} aria-hidden="true" />
-        <button type="button" role="tab" aria-selected={theme === 'light'} className={theme === 'light' ? 'active' : ''} onClick={() => pickTheme('light')}>Дневная</button>
-        <button type="button" role="tab" aria-selected={theme === 'emerald'} className={theme === 'emerald' ? 'active' : ''} onClick={() => pickTheme('emerald')}>Изумруд · золото</button>
-      </div>
-
-      <p className="section-label">Данные</p>
-      <div className="money-add">
-        <button type="button" className="ghost-btn grow" onClick={saveCopy}><DownloadIcon size={16} />Сохранить копию</button>
-        <label className="ghost-btn grow file-btn">
-          <UploadIcon size={16} />Загрузить
-          <input type="file" accept="application/json" onChange={loadCopy} />
-        </label>
-      </div>
-      <p className="export-note" style={{ textAlign: 'left' }}>Склад хранится в браузере. Сохрани копию — не потеряешь товары при чистке и перенесёшь на другой телефон. Это рабочий файл для самого приложения, открывать его не нужно — вернуть всё назад можно кнопкой «Загрузить».</p>
-
-      <button type="button" className="ghost-btn wide" onClick={feedback}><SendIcon size={16} />Поделиться отзывом</button>
 
       <div className="profile-foot">
         <span className="version-tag">БУ.шка · {APP_VERSION} · {APP_CHANNEL} · {APP_TAG}</span>

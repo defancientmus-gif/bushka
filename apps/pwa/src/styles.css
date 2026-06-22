@@ -350,9 +350,11 @@ button { font-family: inherit; }
 .pick-row { display: flex; flex-wrap: wrap; gap: 8px; }
 
 /* ---------- Feed + cards ---------- */
-.feed-grid { display: grid; grid-template-columns: 1fr; gap: 14px; }
-@media (min-width: 680px) { .feed-grid { grid-template-columns: repeat(2, 1fr); } }
-@media (min-width: 940px) { .feed-grid { grid-template-columns: repeat(3, 1fr); } }
+/* Вертикальные карточки — плотная сетка, колонки на 1fr заполняют всю ширину */
+/* (без пустых зон справа). Растёт с шириной: 2 → 3 → 4. */
+.feed-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+@media (min-width: 560px) { .feed-grid { grid-template-columns: repeat(3, 1fr); gap: 14px; } }
+@media (min-width: 900px) { .feed-grid { grid-template-columns: repeat(4, 1fr); } }
 
 .card {
   display: flex;
@@ -371,7 +373,7 @@ button { font-family: inherit; }
 
 .card-media {
   position: relative;
-  aspect-ratio: 16 / 10;
+  aspect-ratio: 4 / 5; /* вертикально — под телефонные фото/видео, плотнее ложится */
   display: grid;
   place-items: center;
   background: var(--surface-2);
@@ -444,10 +446,22 @@ button { font-family: inherit; }
 .status-pill.exchange { background: rgba(59, 130, 246, 0.95); }
 .status-pill.lot { background: rgba(139, 92, 246, 0.95); }
 
-.card-body { display: flex; flex-direction: column; gap: 10px; padding: 14px; }
-.card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
-.card-head h3 { margin: 0; font-size: 16px; font-weight: 680; line-height: 1.25; letter-spacing: -0.2px; }
-.card-head strong { font-size: 16px; font-weight: 820; white-space: nowrap; }
+.card-body { display: flex; flex-direction: column; flex: 1; gap: 8px; padding: 12px; }
+/* Вертикальная карточка: цена крупно под названием (как на Авито), без кривых переносов. */
+.card-head { display: flex; flex-direction: column; align-items: flex-start; gap: 3px; }
+.card-head h3 {
+  margin: 0;
+  font-size: 14.5px;
+  font-weight: 680;
+  line-height: 1.25;
+  letter-spacing: -0.2px;
+  width: 100%;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.card-head strong { font-size: 16.5px; font-weight: 820; }
 
 .chip-line { display: flex; flex-wrap: wrap; gap: 6px; }
 .tag {
@@ -463,7 +477,7 @@ button { font-family: inherit; }
 .tag.delivery { background: rgba(16, 179, 100, 0.12); color: #0f9b6c; font-weight: 600; }
 
 /* Quality-first row: grade badge + condition + battery read at a glance */
-.quality { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
+.quality { display: flex; align-items: center; flex-wrap: wrap; gap: 5px 7px; }
 .grade-badge {
   display: inline-grid;
   place-items: center;
@@ -481,8 +495,8 @@ button { font-family: inherit; }
 .grade-badge.g-D { background: rgba(229, 72, 77, 0.15); color: #cf3b3f; }
 .grade-badge.g-Repair { background: rgba(229, 72, 77, 0.15); color: #cf3b3f; font-size: 11px; font-weight: 700; }
 html[data-theme="emerald"] .grade-badge.g-B { background: rgba(216, 181, 106, 0.16); }
-.quality-word { font-size: 14px; font-weight: 700; color: var(--ink); }
-.quality-sub { font-size: 12.5px; font-weight: 600; color: var(--ink-2); }
+.quality-word { font-size: 13px; font-weight: 700; color: var(--ink); }
+.quality-sub { font-size: 12px; font-weight: 600; color: var(--ink-2); }
 .delivery-line { margin: 0; font-size: 12px; color: var(--ink-3); }
 
 /* Светофор лота + навар (private seller signal) */
@@ -543,7 +557,15 @@ html[data-theme="emerald"] .grade-badge.g-B { background: rgba(216, 181, 106, 0.
 .card-meta .star { color: #f5a623; font-weight: 700; white-space: nowrap; }
 .card-meta .queue { color: var(--accent); font-weight: 600; white-space: nowrap; }
 
-.card-actions { display: flex; align-items: center; gap: 8px; margin-top: 2px; }
+/* Витрина: компактные карточки — доставку прячем, описание в одну строку-тизер. */
+.card-market .delivery-line { display: none; }
+.card-market .card-desc { -webkit-line-clamp: 1; }
+
+.card-actions { display: flex; align-items: center; gap: 7px; margin-top: auto; padding-top: 2px; }
+/* В узкой карточке кнопки компактнее и не вылезают. */
+.card-actions .solid-btn,
+.card-actions .ghost-btn { padding: 9px 10px; font-size: 13px; min-width: 0; }
+.card-actions .ghost-btn { flex: 0 0 auto; }
 
 .heart-btn {
   position: absolute;
@@ -719,7 +741,7 @@ html[data-theme="emerald"] .grade-badge.g-B { background: rgba(216, 181, 106, 0.
 }
 .photo-thumb img {
   width: 100%;
-  aspect-ratio: 1;
+  aspect-ratio: 4 / 5;
   object-fit: cover;
   border-radius: var(--r-sm);
   display: block;

@@ -60,7 +60,7 @@ export function ItemCard({
   }
 
   return (
-    <article className={`card ${isPreview ? 'preview' : ''}`} style={{ animationDelay: `${Math.min(index, 12) * 40}ms` }}>
+    <article className={`card card-${variant} ${isPreview ? 'preview' : ''}`} style={{ animationDelay: `${Math.min(index, 12) * 40}ms` }}>
       <div
         className={`card-media status-${item.status} ${canOpen ? 'openable' : ''}`}
         onClick={canOpen ? () => setViewer(true) : undefined}

@@ -8,6 +8,7 @@ import { dealModeLabels, dealModeOrder, statusLabels, statusOrder } from '../lib
 import { batteryLabel, normalizePrice } from '../lib/money';
 import { Field } from '../components/Field';
 import { ItemCard } from '../components/ItemCard';
+import { MediaStrip } from '../components/MediaStrip';
 import { BoltIcon, CameraIcon, ChevronIcon, ClipboardIcon } from '../components/icons';
 
 function makeDraft(city: string, contact: string): DraftItem {
@@ -42,12 +43,11 @@ export function CreateView({ editItem, onExport, onCreated }: { editItem?: Item 
     void delVideo(id); // если это был ролик — убираем его blob из IndexedDB
   }
 
-  function moveMedia(index: number, dir: -1 | 1) {
+  function reorderMedia(from: number, to: number) {
     setDraft(current => {
       const next = current.media.slice();
-      const j = index + dir;
-      if (j < 0 || j >= next.length) return current;
-      [next[index], next[j]] = [next[j], next[index]];
+      const [moved] = next.splice(from, 1);
+      next.splice(to, 0, moved);
       return { ...current, media: next };
     });
   }
@@ -233,27 +233,14 @@ export function CreateView({ editItem, onExport, onCreated }: { editItem?: Item 
 
       <div className="photo-loader">
         <input id="media" type="file" accept="image/*,video/*" multiple onChange={event => handleFiles(event.currentTarget.files)} />
-        <div className="photo-row">
-          {draft.media.map((asset, i) => (
-            <span className="photo-thumb" key={asset.id}>
-              <img src={asset.src} alt="" />
-              {asset.kind === 'video' && <span className="thumb-clip">видео</span>}
-              {i === 0 && <span className="thumb-cover">обложка</span>}
-              <span className="thumb-tools">
-                <button type="button" disabled={i === 0} onClick={() => moveMedia(i, -1)} aria-label="Левее">‹</button>
-                <button type="button" className="thumb-del" onClick={() => removeMedia(asset.id)} aria-label="Убрать">✕</button>
-                <button type="button" disabled={i === draft.media.length - 1} onClick={() => moveMedia(i, 1)} aria-label="Правее">›</button>
-              </span>
-            </span>
-          ))}
-          {Array.from({ length: Math.max(0, 4 - draft.media.length) }).map((_, i) => (
-            <span className="photo-empty" key={`empty-${i}`} style={{ animationDelay: `${i * 80}ms` }} />
-          ))}
-        </div>
+        {draft.media.length > 0 && (
+          <MediaStrip media={draft.media} onReorder={reorderMedia} onRemove={removeMedia} />
+        )}
         <label className="upload-btn" htmlFor="media">
           <CameraIcon size={18} />
           {busyPhoto ? 'Собираю…' : `Фото / видео · ${draft.media.length}/8`}
         </label>
+        {draft.media.length > 1 && <p className="strip-hint">Перетащи зажатием — поменять порядок; вниз — убрать. Первое фото — обложка.</p>}
       </div>
 
       <div className="form-grid">

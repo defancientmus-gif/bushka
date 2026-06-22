@@ -745,8 +745,9 @@ html[data-theme="emerald"] .grade-badge.g-B { background: rgba(216, 181, 106, 0.
   object-fit: cover;
   border-radius: var(--r-sm);
   display: block;
-  animation: cardin 0.4s both;
   -webkit-user-drag: none;
+  /* без анимации появления: при перестановке узел двигается в DOM и */
+  /* браузер перезапускал бы её → «моргание» всех картинок. */
 }
 .photo-thumb.dragging {
   cursor: grabbing;

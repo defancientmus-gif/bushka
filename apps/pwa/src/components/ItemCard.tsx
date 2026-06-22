@@ -1,14 +1,18 @@
 import { useEffect, useRef, useState } from 'react';
-import type { Item, ItemStatus, MediaAsset } from '../types';
+import type { Category, Item, ItemStatus, MediaAsset } from '../types';
 import { dealModeLabels, deliveryLabels, statusLabels, statusOrder } from '../lib/labels';
 import { daysOld, formatMoney, isStale, lightLabel, marginLight, toNum } from '../lib/money';
 import { pluralize } from '../lib/format';
 import { CategoryGlyph, CopyIcon, HeartIcon, PencilIcon, PhoneIcon, SendIcon, TrashIcon } from './icons';
 
-/** Немая петля кадров (как ТГ-гифка). Для фото — обычная картинка. */
-function ClipMedia({ asset }: { asset: MediaAsset }) {
+/** Немая петля кадров (как ТГ-гифка). Для фото — обычная картинка.
+ *  Если фото битое (не сохранилось / пустой src) — показываем значок категории,
+ *  а не «полоску». */
+function ClipMedia({ asset, category }: { asset: MediaAsset; category: Category }) {
   const frames = asset.frames;
   const [idx, setIdx] = useState(0);
+  const [failed, setFailed] = useState(false);
+  useEffect(() => { setFailed(false); }, [asset.id]);
   useEffect(() => {
     if (!frames || frames.length < 2) return;
     if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return;
@@ -28,7 +32,8 @@ function ClipMedia({ asset }: { asset: MediaAsset }) {
     return () => cancelAnimationFrame(raf);
   }, [frames]);
   const src = frames && frames.length ? frames[idx] : asset.src;
-  return <img src={src} alt="" loading="lazy" />;
+  if (failed || !src) return <span className="media-glyph"><CategoryGlyph category={category} size={38} /></span>;
+  return <img src={src} alt="" loading="lazy" onError={() => setFailed(true)} />;
 }
 
 export function ItemCard({
@@ -84,7 +89,7 @@ export function ItemCard({
     <article className={`card ${isPreview ? 'preview' : ''}`} style={{ animationDelay: `${Math.min(index, 12) * 40}ms` }}>
       <div className={`card-media status-${item.status}`}>
         {media ? (
-          <ClipMedia asset={media} />
+          <ClipMedia asset={media} category={item.category} />
         ) : (
           <span className="media-glyph"><CategoryGlyph category={item.category} size={38} /></span>
         )}

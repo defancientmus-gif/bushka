@@ -697,8 +697,8 @@ html[data-theme="emerald"] .grade-badge.g-B { background: rgba(216, 181, 106, 0.
 .photo-thumb img { display: block; }
 .thumb-clip {
   position: absolute;
-  left: 5px;
-  bottom: 5px;
+  top: 5px;
+  right: 5px;
   padding: 1px 5px;
   border-radius: 999px;
   background: rgba(0, 0, 0, 0.62);
@@ -707,6 +707,46 @@ html[data-theme="emerald"] .grade-badge.g-B { background: rgba(216, 181, 106, 0.
   font-weight: 800;
   letter-spacing: 0.4px;
 }
+.thumb-cover {
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: var(--solid);
+  color: var(--solid-fg);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.2px;
+}
+/* Панель: переставить ‹ ›, убрать ✕ — появляется снизу миниатюры. */
+.thumb-tools {
+  position: absolute;
+  left: 4px;
+  right: 4px;
+  bottom: 4px;
+  display: flex;
+  justify-content: space-between;
+  gap: 3px;
+}
+.thumb-tools button {
+  flex: 1;
+  display: grid;
+  place-items: center;
+  height: 24px;
+  border: 0;
+  border-radius: 7px;
+  background: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  font-size: 15px;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 0.2s, opacity 0.2s;
+}
+.thumb-tools button:hover { background: rgba(0, 0, 0, 0.82); }
+.thumb-tools button:disabled { opacity: 0.32; cursor: default; }
+.thumb-tools .thumb-del { background: rgba(214, 60, 60, 0.82); font-size: 12px; }
+.thumb-tools .thumb-del:hover { background: rgba(214, 60, 60, 1); }
 .photo-empty {
   aspect-ratio: 1;
   border-radius: var(--r-sm);

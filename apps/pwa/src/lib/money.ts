@@ -63,3 +63,11 @@ export function normalizePrice(value: string): string {
   }
   return raw;
 }
+
+/** Battery: "86" → "86%", "90 %" → "90%", clamps to 100. Empty/без числа → ''. */
+export function batteryLabel(value: string): string {
+  const found = (value || '').match(/\d+/);
+  if (!found) return '';
+  const n = Math.min(100, parseInt(found[0], 10));
+  return `${n}%`;
+}

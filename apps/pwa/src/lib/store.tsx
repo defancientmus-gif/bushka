@@ -15,7 +15,7 @@ import {
 import { uid } from './id';
 import { statusLabels } from './labels';
 import { reserveTimeFromNow } from './format';
-import { formatMoney, normalizePrice, toNum } from './money';
+import { batteryLabel, formatMoney, normalizePrice, toNum } from './money';
 
 type StoreValue = {
   profile: Profile;
@@ -78,6 +78,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     ...draft,
     title: draft.title.trim(),
     price: normalizePrice(draft.price),
+    battery: batteryLabel(draft.battery),
     description: draft.description.trim()
   }), []);
 

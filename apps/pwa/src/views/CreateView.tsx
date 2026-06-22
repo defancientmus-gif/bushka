@@ -4,6 +4,7 @@ import { useStore } from '../lib/store';
 import { emptyDraft, parseImport, supportedCategories, supportedConditions, supportedGrades } from '../lib/importer';
 import { extractImageUrls, filesToMedia, urlToMedia, videoToClip } from '../lib/media';
 import { dealModeLabels, dealModeOrder, statusLabels, statusOrder } from '../lib/labels';
+import { batteryLabel, normalizePrice } from '../lib/money';
 import { Field } from '../components/Field';
 import { ItemCard } from '../components/ItemCard';
 import { BoltIcon, CameraIcon, ChevronIcon, ClipboardIcon } from '../components/icons';
@@ -33,6 +34,20 @@ export function CreateView({ editItem, onExport, onCreated }: { editItem?: Item 
   function appendMedia(assets: MediaAsset[]) {
     if (!assets.length) return;
     setDraft(current => ({ ...current, media: [...current.media, ...assets].slice(0, 8) }));
+  }
+
+  function removeMedia(id: string) {
+    setDraft(current => ({ ...current, media: current.media.filter(asset => asset.id !== id) }));
+  }
+
+  function moveMedia(index: number, dir: -1 | 1) {
+    setDraft(current => {
+      const next = current.media.slice();
+      const j = index + dir;
+      if (j < 0 || j >= next.length) return current;
+      [next[index], next[j]] = [next[j], next[index]];
+      return { ...current, media: next };
+    });
   }
 
   async function handleImport() {
@@ -162,7 +177,8 @@ export function CreateView({ editItem, onExport, onCreated }: { editItem?: Item 
     ...draft,
     id: 'preview',
     title: draft.title.trim(),
-    price: draft.price.trim(),
+    price: normalizePrice(draft.price), // превью как на витрине: «35 000 ₽»
+    battery: batteryLabel(draft.battery), // «86» → «86%»
     description: draft.description.trim(),
     sellerName: profile.name,
     queueCount: 0,
@@ -216,10 +232,16 @@ export function CreateView({ editItem, onExport, onCreated }: { editItem?: Item 
       <div className="photo-loader">
         <input id="media" type="file" accept="image/*,video/*" multiple onChange={event => handleFiles(event.currentTarget.files)} />
         <div className="photo-row">
-          {draft.media.slice(0, 4).map(asset => (
+          {draft.media.map((asset, i) => (
             <span className="photo-thumb" key={asset.id}>
               <img src={asset.src} alt="" />
               {asset.kind === 'video' && <span className="thumb-clip">GIF</span>}
+              {i === 0 && <span className="thumb-cover">обложка</span>}
+              <span className="thumb-tools">
+                <button type="button" disabled={i === 0} onClick={() => moveMedia(i, -1)} aria-label="Левее">‹</button>
+                <button type="button" className="thumb-del" onClick={() => removeMedia(asset.id)} aria-label="Убрать">✕</button>
+                <button type="button" disabled={i === draft.media.length - 1} onClick={() => moveMedia(i, 1)} aria-label="Правее">›</button>
+              </span>
             </span>
           ))}
           {Array.from({ length: Math.max(0, 4 - draft.media.length) }).map((_, i) => (
@@ -289,7 +311,7 @@ export function CreateView({ editItem, onExport, onCreated }: { editItem?: Item 
               <input value={draft.contact} onChange={event => update('contact', event.target.value)} placeholder="@username" />
             </Field>
             <Field label="Батарея">
-              <input value={draft.battery} onChange={event => update('battery', event.target.value)} placeholder="86%" />
+              <input value={draft.battery} onChange={event => update('battery', event.target.value)} onBlur={event => update('battery', batteryLabel(event.target.value))} inputMode="numeric" placeholder="86%" />
             </Field>
             <Field label="Комплект">
               <input value={draft.kit} onChange={event => update('kit', event.target.value)} placeholder="Коробка, зарядка" />

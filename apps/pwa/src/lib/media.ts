@@ -1,8 +1,10 @@
 import type { MediaAsset } from '../types';
 import { uid } from './id';
 
-const MAX_DIMENSION = 1200;
-const JPEG_QUALITY = 0.82;
+// Храним компактно: карточке и галерее хватает ~900px, а память браузера
+// (localStorage) не резиновая — большие фото её переполняют и не сохраняются.
+const MAX_DIMENSION = 900;
+const JPEG_QUALITY = 0.72;
 
 export async function filesToMedia(files: FileList | File[], limit = 8): Promise<MediaAsset[]> {
   const chosen = Array.from(files).slice(0, limit);

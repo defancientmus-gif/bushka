@@ -378,6 +378,9 @@ button { font-family: inherit; }
   place-items: center;
   background: var(--surface-2);
   overflow: hidden;
+  -webkit-touch-callout: none; /* не вызывать системное «сохранить картинку» при зажатии */
+  -webkit-user-select: none;
+  user-select: none;
 }
 /* Абсолютно на всю область: иначе <video> берёт высоту из своих пропорций */
 /* и переполняет (height:100% в grid-ячейке у него игнорируется) → «обрезка». */
@@ -389,6 +392,9 @@ button { font-family: inherit; }
   height: 100%;
   object-fit: cover;
   display: block;
+  -webkit-touch-callout: none;
+  -webkit-user-drag: none;
+  pointer-events: none; /* жесты ловит .card-media, картинка не перехватывает */
 }
 .card-media.status-available { background: linear-gradient(135deg, #e9fbf1, #d3f3e1); }
 .card-media.status-reserved { background: linear-gradient(135deg, #fff5e4, #ffe7c6); }

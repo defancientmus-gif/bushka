@@ -65,36 +65,37 @@ export function CreateView({ editItem, onExport, onCreated }: { editItem?: Item 
     showToast(parsed.sourceUrl ? 'Текст готов · фото вставь или добавь' : 'Разобрал текст');
   }
 
-  async function loadClipboardImages(): Promise<boolean> {
+  async function loadClipboardMedia(): Promise<boolean> {
     if (typeof navigator.clipboard?.read !== 'function') return false;
     const items = await navigator.clipboard.read();
-    const files: File[] = [];
+    const mediaFiles: File[] = [];
     let text = '';
     for (const item of items) {
+      const videoType = item.types.find(type => type.startsWith('video/'));
       const imageType = item.types.find(type => type.startsWith('image/'));
-      if (imageType) {
+      if (videoType) {
+        const blob = await item.getType(videoType);
+        mediaFiles.push(new File([blob], 'clip', { type: blob.type }));
+      } else if (imageType) {
         const blob = await item.getType(imageType);
-        files.push(new File([blob], 'paste.png', { type: blob.type }));
+        mediaFiles.push(new File([blob], 'paste.png', { type: blob.type }));
       } else if (item.types.includes('text/plain')) {
         text = await (await item.getType('text/plain')).text();
       }
     }
-    if (files.length) {
-      setBusyPhoto(true);
-      appendMedia(await filesToMedia(files));
-      setBusyPhoto(false);
+    if (mediaFiles.length) await handleFiles(mediaFiles); // фото и видео — единым путём
+    if (text.trim()) {
+      setImportValue(text);
+      if (!mediaFiles.length) showToast('Текст вставлен');
+    } else if (!mediaFiles.length) {
+      showToast('В буфере пусто');
     }
-    if (text.trim()) setImportValue(text);
-    if (files.length && text.trim()) showToast(`Текст и ${files.length} фото из буфера`);
-    else if (files.length) showToast(`${files.length} фото из буфера`);
-    else if (text.trim()) showToast('Текст вставлен');
-    else showToast('В буфере пусто');
     return true;
   }
 
   async function handlePaste() {
     try {
-      if (await loadClipboardImages()) return;
+      if (await loadClipboardMedia()) return;
     } catch {
       // rich clipboard blocked — fall back to plain text below
     }
@@ -116,19 +117,17 @@ export function CreateView({ editItem, onExport, onCreated }: { editItem?: Item 
     if (!items) return;
     const files: File[] = [];
     for (const item of Array.from(items)) {
-      if (item.kind === 'file' && item.type.startsWith('image/')) {
+      if (item.kind === 'file' && (item.type.startsWith('image/') || item.type.startsWith('video/'))) {
         const file = item.getAsFile();
         if (file) files.push(file);
       }
     }
     if (!files.length) return;
-    setBusyPhoto(true);
-    appendMedia(await filesToMedia(files));
-    setBusyPhoto(false);
-    showToast(`${files.length} фото из вставки`);
+    event.preventDefault();
+    await handleFiles(files); // фото и видео — единым путём (с петлёй и тостами)
   }
 
-  async function handleFiles(files: FileList | null) {
+  async function handleFiles(files: FileList | File[] | null) {
     if (!files || !files.length) return;
     const list = Array.from(files);
     const videos = list.filter(file => file.type.startsWith('video/'));
@@ -198,7 +197,7 @@ export function CreateView({ editItem, onExport, onCreated }: { editItem?: Item 
           <span className="hero-icon"><BoltIcon size={18} /></span>
           <div>
             <strong>Перенос с площадки</strong>
-            <small>Ссылка или текст — соберу описание и цену. Скрин или фото — вставь прямо сюда, подхвачу.</small>
+            <small>Ссылка или текст — соберу описание и цену. Скрин, фото или короткое видео — вставь прямо сюда, подхвачу.</small>
           </div>
         </div>
         <textarea

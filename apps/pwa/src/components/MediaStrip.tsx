@@ -1,95 +1,144 @@
 import { useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent } from 'react';
 import type { MediaAsset } from '../types';
+import { TrashIcon } from './icons';
 
-type DragState = {
+type Live = {
+  mode: 'pending' | 'scroll' | 'drag';
   id: string;
-  from: number;
-  to: number;
-  dx: number;
-  dy: number;
+  index: number;
+  el: HTMLElement;
+  pointerId: number;
   w: number;
-  moved: boolean;
+  startX: number;
+  startY: number;
+  startScroll: number;
+  to: number;
   del: boolean;
 };
 
-const GAP = 8;
-const THRESHOLD = 6;     // px прежде чем считать это перетаскиванием, а не тапом
-const DELETE_DROP = 36;  // насколько ниже ленты тянуть, чтобы убрать
+type DragView = { id: string; from: number; to: number; dx: number; dy: number; w: number; del: boolean };
 
-/** Лента вложений с перетаскиванием зажатием: взял фото — приподнимается,
- *  соседние расступаются, видно куда встанет. Вниз — убрать. Без крестиков/стрелок. */
+const GAP = 8;
+const HOLD_MS = 240;    // зажать столько → включается перетаскивание
+const MOVE_CANCEL = 8;  // двинул раньше — это листание, не перетаскивание
+
+/** Лента вложений: свайп листает, зажатие (~0.24с) включает перетаскивание,
+ *  перетащить на зону «Убрать» снизу — удалить. Без крестиков/стрелок. */
 export function MediaStrip({ media, onReorder, onRemove }: {
   media: MediaAsset[];
   onReorder: (from: number, to: number) => void;
   onRemove: (id: string) => void;
 }) {
   const stripRef = useRef<HTMLDivElement>(null);
-  const startRef = useRef({ x: 0, y: 0 });
-  const [drag, setDrag] = useState<DragState | null>(null);
+  const trashRef = useRef<HTMLDivElement>(null);
+  const timerRef = useRef(0);
+  const liveRef = useRef<Live | null>(null);
+  const [drag, setDrag] = useState<DragView | null>(null);
+
+  function clearTimer() {
+    if (timerRef.current) { window.clearTimeout(timerRef.current); timerRef.current = 0; }
+  }
 
   function onDown(event: ReactPointerEvent, index: number, id: string) {
     if (event.button != null && event.button !== 0) return;
     const el = event.currentTarget as HTMLElement;
+    const strip = stripRef.current;
     el.setPointerCapture?.(event.pointerId);
-    const rect = el.getBoundingClientRect();
-    startRef.current = { x: event.clientX, y: event.clientY };
-    setDrag({ id, from: index, to: index, dx: 0, dy: 0, w: rect.width + GAP, moved: false, del: false });
+    liveRef.current = {
+      mode: 'pending', id, index, el, pointerId: event.pointerId,
+      w: el.getBoundingClientRect().width + GAP,
+      startX: event.clientX, startY: event.clientY,
+      startScroll: strip ? strip.scrollLeft : 0,
+      to: index, del: false
+    };
+    clearTimer();
+    timerRef.current = window.setTimeout(() => {
+      const s = liveRef.current;
+      if (!s || s.mode !== 'pending') return;
+      s.mode = 'drag';
+      navigator.vibrate?.(8);
+      setDrag({ id: s.id, from: s.index, to: s.index, dx: 0, dy: 0, w: s.w, del: false });
+    }, HOLD_MS);
   }
 
   function onMove(event: ReactPointerEvent) {
-    if (!drag) return;
-    const dx = event.clientX - startRef.current.x;
-    const dy = event.clientY - startRef.current.y;
-    const moved = drag.moved || Math.hypot(dx, dy) > THRESHOLD;
-    const strip = stripRef.current;
-    let to = drag.to;
-    let del = false;
-    if (strip) {
-      const sr = strip.getBoundingClientRect();
-      del = event.clientY > sr.bottom + DELETE_DROP;
-      const rel = event.clientX - sr.left + strip.scrollLeft;
-      to = Math.max(0, Math.min(media.length - 1, Math.floor(rel / drag.w)));
+    const s = liveRef.current;
+    if (!s) return;
+    const dx = event.clientX - s.startX;
+    const dy = event.clientY - s.startY;
+
+    if (s.mode === 'pending') {
+      if (Math.hypot(dx, dy) > MOVE_CANCEL) { clearTimer(); s.mode = 'scroll'; }
+      else return;
     }
-    setDrag({ ...drag, dx, dy, moved, to: del ? drag.from : to, del });
+
+    if (s.mode === 'scroll') {
+      const strip = stripRef.current;
+      if (strip) strip.scrollLeft = s.startScroll - dx;
+      return;
+    }
+
+    // mode === 'drag'
+    event.preventDefault();
+    const strip = stripRef.current;
+    if (!strip) return;
+    const sr = strip.getBoundingClientRect();
+    const tr = trashRef.current?.getBoundingClientRect();
+    const del = !!tr && event.clientY >= tr.top - 6 && event.clientX >= tr.left && event.clientX <= tr.right;
+    const rel = event.clientX - sr.left + strip.scrollLeft;
+    const to = Math.max(0, Math.min(media.length - 1, Math.floor(rel / s.w)));
+    s.to = del ? s.index : to;
+    s.del = del;
+    setDrag({ id: s.id, from: s.index, to: s.to, dx, dy, w: s.w, del });
   }
 
   function onUp() {
-    if (drag && drag.moved) {
-      if (drag.del) onRemove(drag.id);
-      else if (drag.to !== drag.from) onReorder(drag.from, drag.to);
+    clearTimer();
+    const s = liveRef.current;
+    if (s && s.mode === 'drag') {
+      if (s.del) onRemove(s.id);
+      else if (s.to !== s.index) onReorder(s.index, s.to);
     }
+    liveRef.current = null;
     setDrag(null);
   }
 
   return (
-    <div className="photo-strip" ref={stripRef}>
-      {media.map((asset, i) => {
-        const dragging = drag?.id === asset.id && drag.moved;
-        let shift = 0;
-        if (drag && drag.moved && !drag.del && drag.id !== asset.id) {
-          if (drag.from < drag.to && i > drag.from && i <= drag.to) shift = -drag.w;
-          else if (drag.from > drag.to && i >= drag.to && i < drag.from) shift = drag.w;
-        }
-        const style: CSSProperties = dragging
-          ? { transform: `translate(${drag.dx}px, ${drag.dy}px) scale(1.06)`, transition: 'none', zIndex: 6 }
-          : { transform: `translateX(${shift}px)` };
-        return (
-          <span
-            key={asset.id}
-            className={`photo-thumb ${dragging ? 'dragging' : ''} ${dragging && drag?.del ? 'del' : ''}`}
-            style={style}
-            onPointerDown={event => onDown(event, i, asset.id)}
-            onPointerMove={onMove}
-            onPointerUp={onUp}
-            onPointerCancel={onUp}
-          >
-            <img src={asset.src} alt="" draggable={false} />
-            {asset.kind === 'video' && <span className="thumb-clip">видео</span>}
-            {i === 0 && !dragging && <span className="thumb-cover">обложка</span>}
-            {dragging && drag?.del && <span className="thumb-trash">убрать</span>}
-          </span>
-        );
-      })}
+    <div className="strip-wrap">
+      <div className="photo-strip" ref={stripRef}>
+        {media.map((asset, i) => {
+          const dragging = drag?.id === asset.id;
+          let shift = 0;
+          if (drag && !drag.del && drag.id !== asset.id) {
+            if (drag.from < drag.to && i > drag.from && i <= drag.to) shift = -drag.w;
+            else if (drag.from > drag.to && i >= drag.to && i < drag.from) shift = drag.w;
+          }
+          const style: CSSProperties = dragging
+            ? { transform: `translate(${drag.dx}px, ${drag.dy}px) scale(1.06)`, transition: 'none', zIndex: 6 }
+            : { transform: `translateX(${shift}px)` };
+          return (
+            <span
+              key={asset.id}
+              className={`photo-thumb ${dragging ? 'dragging' : ''} ${dragging && drag?.del ? 'del' : ''}`}
+              style={style}
+              onPointerDown={event => onDown(event, i, asset.id)}
+              onPointerMove={onMove}
+              onPointerUp={onUp}
+              onPointerCancel={onUp}
+            >
+              <img src={asset.src} alt="" draggable={false} />
+              {asset.kind === 'video' && <span className="thumb-clip">видео</span>}
+              {i === 0 && !dragging && <span className="thumb-cover">обложка</span>}
+            </span>
+          );
+        })}
+      </div>
+      {drag && (
+        <div className={`strip-trash ${drag.del ? 'armed' : ''}`} ref={trashRef}>
+          <TrashIcon size={17} />
+          {drag.del ? 'Отпусти — убрать' : 'Перетащи сюда, чтобы убрать'}
+        </div>
+      )}
     </div>
   );
 }

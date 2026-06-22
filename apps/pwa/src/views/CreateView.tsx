@@ -240,7 +240,7 @@ export function CreateView({ editItem, onExport, onCreated }: { editItem?: Item 
           <CameraIcon size={18} />
           {busyPhoto ? 'Собираю…' : `Фото / видео · ${draft.media.length}/8`}
         </label>
-        {draft.media.length > 1 && <p className="strip-hint">Перетащи зажатием — поменять порядок; вниз — убрать. Первое фото — обложка.</p>}
+        {draft.media.length > 1 && <p className="strip-hint">Листай — посмотреть; зажми и тащи — поменять порядок или убрать. Первое фото — обложка.</p>}
       </div>
 
       <div className="form-grid">

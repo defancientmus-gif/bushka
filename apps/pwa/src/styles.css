@@ -747,6 +747,79 @@ html[data-theme="emerald"] .grade-badge.g-B { background: rgba(216, 181, 106, 0.
 .thumb-tools button:disabled { opacity: 0.32; cursor: default; }
 .thumb-tools .thumb-del { background: rgba(214, 60, 60, 0.82); font-size: 12px; }
 .thumb-tools .thumb-del:hover { background: rgba(214, 60, 60, 1); }
+
+/* ---------- Просмотр вложений (галерея) ---------- */
+.card-media.openable { cursor: pointer; }
+.viewer-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(8, 10, 16, 0.92);
+  animation: fadein 0.2s both;
+}
+@keyframes fadein { from { opacity: 0; } to { opacity: 1; } }
+.viewer-stage { position: relative; display: grid; place-items: center; width: 100%; max-width: 920px; }
+.viewer-media { position: relative; display: grid; place-items: center; }
+.viewer-media img {
+  max-width: min(92vw, 900px);
+  max-height: 82vh;
+  object-fit: contain;
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  animation: cardin 0.3s both;
+}
+.viewer-media .media-glyph { color: #fff; opacity: 0.5; transform: scale(2.4); }
+.viewer-media .media-clip { left: 12px; bottom: 12px; font-size: 12px; }
+.viewer-close,
+.viewer-nav {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  border: 0;
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.viewer-close:hover,
+.viewer-nav:hover { background: rgba(255, 255, 255, 0.26); }
+.viewer-close {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+}
+.viewer-count {
+  position: fixed;
+  top: 22px;
+  left: 20px;
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 13px;
+  font-weight: 700;
+}
+.viewer-nav {
+  top: 50%;
+  transform: translateY(-50%);
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  font-size: 26px;
+  line-height: 1;
+}
+.viewer-nav.prev { left: -6px; }
+.viewer-nav.next { right: -6px; }
+.viewer-dots { position: absolute; bottom: -26px; left: 0; right: 0; display: flex; justify-content: center; gap: 7px; }
+.viewer-dots span { width: 7px; height: 7px; border-radius: 50%; background: rgba(255, 255, 255, 0.3); transition: background 0.2s, transform 0.2s; }
+.viewer-dots span.on { background: #fff; transform: scale(1.25); }
+@media (min-width: 900px) {
+  .viewer-nav.prev { left: -64px; }
+  .viewer-nav.next { right: -64px; }
+}
 .photo-empty {
   aspect-ratio: 1;
   border-radius: var(--r-sm);

@@ -1,40 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
-import type { Category, Item, ItemStatus, MediaAsset } from '../types';
+import type { Item, ItemStatus } from '../types';
 import { dealModeLabels, deliveryLabels, statusLabels, statusOrder } from '../lib/labels';
 import { daysOld, formatMoney, isStale, lightLabel, marginLight, toNum } from '../lib/money';
 import { pluralize } from '../lib/format';
 import { CategoryGlyph, CopyIcon, HeartIcon, PencilIcon, PhoneIcon, SendIcon, TrashIcon } from './icons';
-
-/** Немая петля кадров (как ТГ-гифка). Для фото — обычная картинка.
- *  Если фото битое (не сохранилось / пустой src) — показываем значок категории,
- *  а не «полоску». */
-function ClipMedia({ asset, category }: { asset: MediaAsset; category: Category }) {
-  const frames = asset.frames;
-  const [idx, setIdx] = useState(0);
-  const [failed, setFailed] = useState(false);
-  useEffect(() => { setFailed(false); }, [asset.id]);
-  useEffect(() => {
-    if (!frames || frames.length < 2) return;
-    if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return;
-    let raf = 0;
-    let last = 0;
-    let i = 0;
-    const step = 1000 / 8; // ~8 кадров/сек — живо, но спокойно
-    const loop = (ts: number) => {
-      if (ts - last >= step) {
-        i = (i + 1) % frames.length;
-        setIdx(i);
-        last = ts;
-      }
-      raf = requestAnimationFrame(loop);
-    };
-    raf = requestAnimationFrame(loop);
-    return () => cancelAnimationFrame(raf);
-  }, [frames]);
-  const src = frames && frames.length ? frames[idx] : asset.src;
-  if (failed || !src) return <span className="media-glyph"><CategoryGlyph category={category} size={38} /></span>;
-  return <img src={src} alt="" loading="lazy" onError={() => setFailed(true)} />;
-}
+import { ClipMedia } from './ClipMedia';
+import { MediaViewer } from './MediaViewer';
 
 export function ItemCard({
   item,
@@ -70,7 +41,9 @@ export function ItemCard({
   const stale = variant === 'own' && isStale(item);
   const age = daysOld(item.createdAt);
   const [confirm, setConfirm] = useState(false);
+  const [viewer, setViewer] = useState(false);
   const timer = useRef(0);
+  const canOpen = !isPreview && item.media.length > 0;
 
   useEffect(() => () => window.clearTimeout(timer.current), []);
 
@@ -87,7 +60,12 @@ export function ItemCard({
 
   return (
     <article className={`card ${isPreview ? 'preview' : ''}`} style={{ animationDelay: `${Math.min(index, 12) * 40}ms` }}>
-      <div className={`card-media status-${item.status}`}>
+      <div
+        className={`card-media status-${item.status} ${canOpen ? 'openable' : ''}`}
+        onClick={canOpen ? () => setViewer(true) : undefined}
+        role={canOpen ? 'button' : undefined}
+        aria-label={canOpen ? 'Открыть фото и видео' : undefined}
+      >
         {media ? (
           <ClipMedia asset={media} category={item.category} />
         ) : (
@@ -99,7 +77,7 @@ export function ItemCard({
           <button
             type="button"
             className={`heart-btn ${favorite ? 'on' : ''}`}
-            onClick={onFavorite}
+            onClick={event => { event.stopPropagation(); onFavorite(); }}
             aria-pressed={favorite}
             aria-label={favorite ? 'Убрать из избранного' : 'В избранное'}
           >
@@ -108,6 +86,9 @@ export function ItemCard({
         )}
         {item.media.length > 1 && <span className="media-count">{item.media.length}</span>}
       </div>
+      {viewer && (
+        <MediaViewer media={item.media} category={item.category} onClose={() => setViewer(false)} />
+      )}
 
       <div className="card-body">
         <div className="card-head">

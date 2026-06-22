@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import type { Category, MediaAsset } from '../types';
 import { ClipMedia } from './ClipMedia';
+import { VideoMedia } from './VideoMedia';
 import { CloseIcon } from './icons';
 
 /** Полноэкранный просмотр вложений товара: листать фото и видео-петли. */
@@ -53,8 +54,9 @@ export function MediaViewer({ media, category, startIndex = 0, onClose }: {
         }}
       >
         <div className="viewer-media">
-          <ClipMedia asset={cur} category={category} />
-          {cur.kind === 'video' && <span className="media-clip">GIF</span>}
+          {cur.kind === 'video' && !cur.frames
+            ? <VideoMedia asset={cur} category={category} />
+            : <ClipMedia asset={cur} category={category} />}
         </div>
         {count > 1 && (
           <>

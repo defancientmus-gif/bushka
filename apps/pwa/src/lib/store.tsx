@@ -16,6 +16,7 @@ import { uid } from './id';
 import { statusLabels } from './labels';
 import { reserveTimeFromNow } from './format';
 import { batteryLabel, formatMoney, normalizePrice, toNum } from './money';
+import { delVideo } from './videostore';
 
 type StoreValue = {
   profile: Profile;
@@ -155,6 +156,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   }, [items, persist, showToast]);
 
   const deleteItem = useCallback((id: string) => {
+    const gone = items.find(item => item.id === id);
+    gone?.media.forEach(asset => { if (asset.kind === 'video') void delVideo(asset.id); });
     persist(items.filter(item => item.id !== id));
     showToast('Удалено');
   }, [items, persist, showToast]);

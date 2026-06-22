@@ -5,6 +5,7 @@ import { daysOld, formatMoney, isStale, lightLabel, marginLight, toNum } from '.
 import { pluralize } from '../lib/format';
 import { CategoryGlyph, CopyIcon, HeartIcon, PencilIcon, PhoneIcon, SendIcon, TrashIcon } from './icons';
 import { ClipMedia } from './ClipMedia';
+import { VideoMedia } from './VideoMedia';
 import { MediaViewer } from './MediaViewer';
 
 export function ItemCard({
@@ -67,11 +68,13 @@ export function ItemCard({
         aria-label={canOpen ? 'Открыть фото и видео' : undefined}
       >
         {media ? (
-          <ClipMedia asset={media} category={item.category} />
+          media.kind === 'video' && !media.frames
+            ? <VideoMedia asset={media} category={item.category} />
+            : <ClipMedia asset={media} category={item.category} />
         ) : (
           <span className="media-glyph"><CategoryGlyph category={item.category} size={38} /></span>
         )}
-        {media?.kind === 'video' && <span className="media-clip" aria-label="видео-петля">GIF</span>}
+        {media?.kind === 'video' && <span className="media-clip" aria-label="видео" />}
         <span className={`status-pill ${item.status}`}>{statusLabels[item.status]}</span>
         {variant === 'market' && onFavorite && (
           <button

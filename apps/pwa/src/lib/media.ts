@@ -1,5 +1,6 @@
 import type { MediaAsset } from '../types';
 import { uid } from './id';
+import { putVideo } from './videostore';
 
 // Храним компактно: карточке и галерее хватает ~900px, а память браузера
 // (localStorage) не резиновая — большие фото её переполняют и не сохраняются.
@@ -30,15 +31,14 @@ export async function urlToMedia(url: string): Promise<MediaAsset | null> {
   }
 }
 
-const CLIP_FRAMES = 10;       // кадров в петле
-const CLIP_SECONDS = 2.6;     // длина куска, из которого берём кадры
-const CLIP_WIDTH = 300;       // ширина кадра (мельче — легче в памяти)
-const CLIP_QUALITY = 0.58;
+const POSTER_WIDTH = 640;     // ширина кадра-постера (для миниатюры/фолбэка)
+const POSTER_QUALITY = 0.72;
+const MAX_VIDEO_BYTES = 80 * 1024 * 1024; // 80 МБ — выше уже не короткий ролик
 
-/** Короткое видео (.mov/.mp4) → немая петля кадров, как гифка в Телеграме.
- *  Целиком видео не храним (тяжело для браузера) — нарезаем лёгкие кадры.
- *  Декод делает браузер продавца; если кодек не отдаёт кадры — вернём null. */
-export async function videoToClip(file: File): Promise<MediaAsset | null> {
+/** Короткое видео (.mov/.mp4) → как «гифка» в Телеграме: сам ролик кладём
+ *  в IndexedDB и потом крутим немым <video loop> (плавно, без потери качества).
+ *  Дополнительно вытаскиваем один НЕ чёрный кадр-постер (обложка/фолбэк). */
+export async function videoToAsset(file: File): Promise<MediaAsset | null> {
   const url = URL.createObjectURL(file);
   const video = document.createElement('video');
   try {
@@ -58,32 +58,69 @@ export async function videoToClip(file: File): Promise<MediaAsset | null> {
 
     const vw = video.videoWidth;
     const vh = video.videoHeight;
-    const full = video.duration && isFinite(video.duration) ? video.duration : CLIP_SECONDS;
+    const full = video.duration && isFinite(video.duration) ? video.duration : 3;
     if (!vw || !vh) return null;
 
-    const span = Math.min(CLIP_SECONDS, full);
-    const scale = Math.min(1, CLIP_WIDTH / vw);
+    const scale = Math.min(1, POSTER_WIDTH / vw);
     const canvas = document.createElement('canvas');
     canvas.width = Math.round(vw * scale) || vw;
     canvas.height = Math.round(vh * scale) || vh;
     const ctx = canvas.getContext('2d');
     if (!ctx) return null;
 
-    const frames: string[] = [];
-    for (let i = 0; i < CLIP_FRAMES; i++) {
-      const t = (span * i) / (CLIP_FRAMES - 1);
-      await seekVideo(video, Math.min(t, Math.max(0, full - 0.05)));
+    // Берём несколько кадров и выбираем самый светлый — чтобы обложка не была чёрной.
+    let best = '';
+    let bestScore = -1;
+    const grab = () => {
       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-      const frame = canvas.toDataURL('image/jpeg', CLIP_QUALITY);
-      if (frame.length > 64) frames.push(frame);
+      const score = frameBrightness(ctx, canvas.width, canvas.height);
+      if (score > bestScore) {
+        bestScore = score;
+        best = canvas.toDataURL('image/jpeg', POSTER_QUALITY);
+      }
+    };
+    for (const p of [0.18, 0.4, 0.6, 0.82]) {
+      await seekVideo(video, Math.min(p * full, Math.max(0, full - 0.05)));
+      grab();
     }
-    if (frames.length < 2) return null;
-    return { id: uid('clip'), kind: 'video', name: file.name, src: frames[0], frames };
+    // Если всё тёмное (перемотка не сработала / чёрное начало) — добываем кадр проигрыванием.
+    if (bestScore < 16) {
+      try {
+        await video.play();
+        await new Promise(r => window.setTimeout(r, 500));
+        grab();
+        video.pause();
+      } catch {
+        /* автоплей мог не дать — оставляем что есть */
+      }
+    }
+    if (!best) return null;
+
+    const id = uid('vid');
+    if (file.size <= MAX_VIDEO_BYTES) await putVideo(id, file); // сам ролик в IndexedDB
+    return { id, kind: 'video', name: file.name, src: best };
   } catch {
     return null;
   } finally {
     video.removeAttribute('src');
     URL.revokeObjectURL(url);
+  }
+}
+
+/** Средняя яркость кадра (0..255) — чтобы отсеять чёрные кадры под обложку. */
+function frameBrightness(ctx: CanvasRenderingContext2D, w: number, h: number): number {
+  try {
+    const step = 8;
+    const data = ctx.getImageData(0, 0, w, h).data;
+    let sum = 0;
+    let n = 0;
+    for (let i = 0; i < data.length; i += 4 * step) {
+      sum += (data[i] + data[i + 1] + data[i + 2]) / 3;
+      n++;
+    }
+    return n ? sum / n : 0;
+  } catch {
+    return 0; // tainted canvas и т.п. — не роняем
   }
 }
 

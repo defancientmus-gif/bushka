@@ -2,7 +2,8 @@ import { useMemo, useState, type ClipboardEvent } from 'react';
 import type { DraftItem, Item, ItemStatus, MediaAsset } from '../types';
 import { useStore } from '../lib/store';
 import { emptyDraft, parseImport, supportedCategories, supportedConditions, supportedGrades } from '../lib/importer';
-import { extractImageUrls, filesToMedia, urlToMedia, videoToClip } from '../lib/media';
+import { extractImageUrls, filesToMedia, urlToMedia, videoToAsset } from '../lib/media';
+import { delVideo } from '../lib/videostore';
 import { dealModeLabels, dealModeOrder, statusLabels, statusOrder } from '../lib/labels';
 import { batteryLabel, normalizePrice } from '../lib/money';
 import { Field } from '../components/Field';
@@ -38,6 +39,7 @@ export function CreateView({ editItem, onExport, onCreated }: { editItem?: Item 
 
   function removeMedia(id: string) {
     setDraft(current => ({ ...current, media: current.media.filter(asset => asset.id !== id) }));
+    void delVideo(id); // если это был ролик — убираем его blob из IndexedDB
   }
 
   function moveMedia(index: number, dir: -1 | 1) {
@@ -155,7 +157,7 @@ export function CreateView({ editItem, onExport, onCreated }: { editItem?: Item 
     try {
       if (images.length) collected.push(...await filesToMedia(images));
       for (const file of videos) {
-        const clip = await videoToClip(file);
+        const clip = await videoToAsset(file);
         if (clip) collected.push(clip);
         else failed++;
       }
@@ -235,7 +237,7 @@ export function CreateView({ editItem, onExport, onCreated }: { editItem?: Item 
           {draft.media.map((asset, i) => (
             <span className="photo-thumb" key={asset.id}>
               <img src={asset.src} alt="" />
-              {asset.kind === 'video' && <span className="thumb-clip">GIF</span>}
+              {asset.kind === 'video' && <span className="thumb-clip">видео</span>}
               {i === 0 && <span className="thumb-cover">обложка</span>}
               <span className="thumb-tools">
                 <button type="button" disabled={i === 0} onClick={() => moveMedia(i, -1)} aria-label="Левее">‹</button>

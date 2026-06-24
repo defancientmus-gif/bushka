@@ -378,9 +378,6 @@ button { font-family: inherit; }
   place-items: center;
   background: var(--surface-2);
   overflow: hidden;
-  -webkit-touch-callout: none; /* не вызывать системное «сохранить картинку» при зажатии */
-  -webkit-user-select: none;
-  user-select: none;
 }
 /* Абсолютно на всю область: иначе <video> берёт высоту из своих пропорций */
 /* и переполняет (height:100% в grid-ячейке у него игнорируется) → «обрезка». */
@@ -392,9 +389,6 @@ button { font-family: inherit; }
   height: 100%;
   object-fit: cover;
   display: block;
-  -webkit-touch-callout: none;
-  -webkit-user-drag: none;
-  pointer-events: none; /* жесты ловит .card-media, картинка не перехватывает */
 }
 .card-media.status-available { background: linear-gradient(135deg, #e9fbf1, #d3f3e1); }
 .card-media.status-reserved { background: linear-gradient(135deg, #fff5e4, #ffe7c6); }
@@ -831,24 +825,6 @@ html[data-theme="emerald"] .grade-badge.g-B { background: rgba(216, 181, 106, 0.
   font-weight: 800;
   letter-spacing: 0.2px;
 }
-
-/* ---------- Лупа: рассмотреть деталь, не открывая фото ---------- */
-.card-media.louping { cursor: zoom-in; }
-.loupe {
-  position: fixed;
-  z-index: 95;
-  width: 132px;
-  height: 132px;
-  border-radius: 50%;
-  overflow: hidden;
-  background: var(--surface-2);
-  border: 3px solid #fff;
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.38), 0 0 0 1px rgba(0, 0, 0, 0.06);
-  pointer-events: none;
-  animation: loupein 0.14s ease both;
-}
-.loupe img { position: absolute; max-width: none; }
-@keyframes loupein { from { opacity: 0; transform: scale(0.82); } to { opacity: 1; transform: scale(1); } }
 
 /* ---------- Просмотр вложений (галерея) ---------- */
 .card-media.openable { cursor: pointer; }

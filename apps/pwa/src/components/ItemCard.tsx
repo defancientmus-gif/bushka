@@ -61,27 +61,29 @@ export function ItemCard({
   const [loupe, setLoupe] = useState<{ x: number; y: number; cx: number; cy: number } | null>(null);
   const canLoupe = !!(media && media.src);
 
-  const fns = useRef<{ pending: (e: PointerEvent) => void; active: (e: PointerEvent) => void; end: () => void } | null>(null);
+  const fns = useRef<{ pending: (e: PointerEvent) => void; active: (e: PointerEvent) => void; block: (e: TouchEvent) => void; end: () => void } | null>(null);
   if (!fns.current) {
     fns.current = {
       pending: (e) => {
         const L = Lref.current;
         if (!L || L.active) return;
-        if (Math.hypot(e.clientX - L.x0, e.clientY - L.y0) > 8) { L.moved = true; window.clearTimeout(loupeTimer.current); }
+        if (Math.hypot(e.clientX - L.x0, e.clientY - L.y0) > 12) { L.moved = true; window.clearTimeout(loupeTimer.current); }
       },
       active: (e) => {
         const L = Lref.current;
         const el = mediaRef.current;
         if (!L || !L.active || !el) return;
-        e.preventDefault();
         const r = el.getBoundingClientRect();
         setLoupe({ x: e.clientX - r.left, y: e.clientY - r.top, cx: e.clientX, cy: e.clientY });
       },
+      // На мобиле прокрутку глушит только non-passive touchmove (не pointermove).
+      block: (e) => { if (Lref.current?.active && e.cancelable) e.preventDefault(); },
       end: () => {
         window.clearTimeout(loupeTimer.current);
         const f = fns.current!;
         window.removeEventListener('pointermove', f.pending);
         window.removeEventListener('pointermove', f.active);
+        window.removeEventListener('touchmove', f.block);
         window.removeEventListener('pointerup', f.end);
         window.removeEventListener('pointercancel', f.end);
         const L = Lref.current;
@@ -99,6 +101,7 @@ export function ItemCard({
     if (f) {
       window.removeEventListener('pointermove', f.pending);
       window.removeEventListener('pointermove', f.active);
+      window.removeEventListener('touchmove', f.block);
       window.removeEventListener('pointerup', f.end);
       window.removeEventListener('pointercancel', f.end);
     }
@@ -127,7 +130,8 @@ export function ItemCard({
         h: (inner as HTMLImageElement)?.naturalHeight || (inner as HTMLVideoElement)?.videoHeight || el.clientHeight
       };
       window.removeEventListener('pointermove', f.pending);
-      window.addEventListener('pointermove', f.active, { passive: false });
+      window.addEventListener('pointermove', f.active, { passive: true });
+      window.addEventListener('touchmove', f.block, { passive: false }); // глушим прокрутку под лупой
       const r = el.getBoundingClientRect();
       setLoupe({ x: L.x0 - r.left, y: L.y0 - r.top, cx: L.x0, cy: L.y0 });
     }, 240);
@@ -148,9 +152,10 @@ export function ItemCard({
     if (!loupe || !media || !mediaRef.current) return null;
     const CW = mediaRef.current.clientWidth;
     const CH = mediaRef.current.clientHeight;
+    if (!(CW > 0 && CH > 0)) return null; // ещё нет размеров — не считаем NaN
     const IW = nat.current.w || CW;
     const IH = nat.current.h || CH;
-    const s = Math.max(CW / IW, CH / IH); // как object-fit: cover
+    const s = Math.max(CW / IW, CH / IH) || 1; // как object-fit: cover
     const rw = IW * s;
     const rh = IH * s;
     const ox = (CW - rw) / 2;
@@ -179,6 +184,7 @@ export function ItemCard({
         ref={mediaRef}
         className={`card-media status-${item.status} ${canOpen ? 'openable' : ''} ${loupe ? 'louping' : ''}`}
         onPointerDown={canLoupe ? loupeDown : undefined}
+        onContextMenu={canLoupe ? (event => event.preventDefault()) : undefined}
         role={canOpen ? 'button' : undefined}
         aria-label={canOpen ? 'Открыть фото и видео' : undefined}
       >

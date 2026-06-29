@@ -1,19 +1,23 @@
-import type { Condition, DeliveryKind } from '../types';
+import type { Category, Condition, DeliveryKind } from '../types';
 import { supportedConditions } from '../lib/importer';
 import { CloseIcon } from './icons';
 
 export type PriceBand = 'any' | 'lt10' | 'b1030' | 'b3060' | 'gt60';
+export type Sort = 'fresh' | 'cheap' | 'pricey';
 
 export type MarketFilters = {
+  category: 'all' | Category;
   price: PriceBand;
   condition: 'any' | Condition;
   delivery: 'any' | DeliveryKind;
+  sort: Sort;
 };
 
-export const emptyFilters: MarketFilters = { price: 'any', condition: 'any', delivery: 'any' };
+export const emptyFilters: MarketFilters = { category: 'all', price: 'any', condition: 'any', delivery: 'any', sort: 'fresh' };
 
+/** Сколько фильтров реально сужают выдачу (сортировка не в счёт — она всегда задана). */
 export function activeFilterCount(f: MarketFilters): number {
-  return (f.price !== 'any' ? 1 : 0) + (f.condition !== 'any' ? 1 : 0) + (f.delivery !== 'any' ? 1 : 0);
+  return (f.category !== 'all' ? 1 : 0) + (f.price !== 'any' ? 1 : 0) + (f.condition !== 'any' ? 1 : 0) + (f.delivery !== 'any' ? 1 : 0);
 }
 
 export function inPriceBand(value: number, band: PriceBand): boolean {
@@ -40,16 +44,26 @@ const deliveries: Array<{ id: 'any' | DeliveryKind; label: string }> = [
   { id: 'pickup', label: 'Самовывоз' }
 ];
 
+const sortOptions: Array<{ id: Sort; label: string }> = [
+  { id: 'fresh', label: 'Сначала новые' },
+  { id: 'cheap', label: 'Сначала дешевле' },
+  { id: 'pricey', label: 'Сначала дороже' }
+];
+
+export type CategoryOption = { id: 'all' | Category; label: string; count: number };
+
 export function FilterSheet({
   filters,
   onChange,
   resultCount,
-  onClose
+  onClose,
+  categories
 }: {
   filters: MarketFilters;
   onChange: (next: MarketFilters) => void;
   resultCount: number;
   onClose: () => void;
+  categories: CategoryOption[];
 }) {
   return (
     <div className="sheet-backdrop" role="presentation" onClick={onClose}>
@@ -61,6 +75,17 @@ export function FilterSheet({
             <h2>Подобрать за секунды</h2>
           </div>
           <button type="button" className="icon-btn" onClick={onClose} aria-label="Закрыть"><CloseIcon size={18} /></button>
+        </div>
+
+        <div className="filter-group">
+          <span>Категория</span>
+          <div className="pick-row">
+            {categories.map(option => (
+              <button key={option.id} type="button" className={`pick-chip ${filters.category === option.id ? 'active' : ''}`} onClick={() => onChange({ ...filters, category: option.id })}>
+                {option.label}<i>{option.count}</i>
+              </button>
+            ))}
+          </div>
         </div>
 
         <div className="filter-group">
@@ -87,6 +112,15 @@ export function FilterSheet({
           <div className="pick-row">
             {deliveries.map(option => (
               <button key={option.id} type="button" className={`pick-chip ${filters.delivery === option.id ? 'active' : ''}`} onClick={() => onChange({ ...filters, delivery: option.id })}>{option.label}</button>
+            ))}
+          </div>
+        </div>
+
+        <div className="filter-group">
+          <span>Сортировка</span>
+          <div className="pick-row">
+            {sortOptions.map(option => (
+              <button key={option.id} type="button" className={`pick-chip ${filters.sort === option.id ? 'active' : ''}`} onClick={() => onChange({ ...filters, sort: option.id })}>{option.label}</button>
             ))}
           </div>
         </div>

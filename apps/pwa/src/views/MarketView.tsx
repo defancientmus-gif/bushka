@@ -1,26 +1,15 @@
 import { useMemo, useState } from 'react';
-import type { Category, Item } from '../types';
+import type { Item } from '../types';
 import { useStore } from '../lib/store';
 import { ItemCard, contactHref } from '../components/ItemCard';
 import { SearchIcon } from '../components/icons';
-import { FilterSheet, activeFilterCount, emptyFilters, inPriceBand, type MarketFilters } from '../components/FilterSheet';
+import { FilterSheet, activeFilterCount, emptyFilters, inPriceBand, type CategoryOption, type MarketFilters } from '../components/FilterSheet';
 import { supportedCategories } from '../lib/importer';
 import { toNum } from '../lib/money';
-
-type CatFilter = 'all' | Category;
-type Sort = 'fresh' | 'cheap' | 'pricey';
-
-const sortLabels: Array<{ id: Sort; label: string }> = [
-  { id: 'fresh', label: 'Новые' },
-  { id: 'cheap', label: 'Дешевле' },
-  { id: 'pricey', label: 'Дороже' }
-];
 
 export function MarketView({ onExport }: { onExport: (item: Item) => void }) {
   const { seed, items, addQueue, toggleFavorite, isFavorite, showToast } = useStore();
   const [query, setQuery] = useState('');
-  const [cat, setCat] = useState<CatFilter>('all');
-  const [sort, setSort] = useState<Sort>('fresh');
   const [filters, setFilters] = useState<MarketFilters>(emptyFilters);
   const [filterOpen, setFilterOpen] = useState(false);
 
@@ -31,15 +20,18 @@ export function MarketView({ onExport }: { onExport: (item: Item) => void }) {
     [items, seed]
   );
 
-  const cats = useMemo(() => {
-    const present = new Set(lots.map(item => item.category));
-    return supportedCategories().filter(category => present.has(category));
+  const categoryOptions = useMemo<CategoryOption[]>(() => {
+    const present = supportedCategories().filter(category => lots.some(item => item.category === category));
+    return [
+      { id: 'all', label: 'Всё', count: lots.length },
+      ...present.map(category => ({ id: category, label: category, count: lots.filter(item => item.category === category).length }))
+    ];
   }, [lots]);
 
   const visible = useMemo(() => {
     const q = query.trim().toLowerCase();
     const matched = lots.filter(item => {
-      if (cat !== 'all' && item.category !== cat) return false;
+      if (filters.category !== 'all' && item.category !== filters.category) return false;
       if (filters.price !== 'any' && !inPriceBand(toNum(item.price), filters.price)) return false;
       if (filters.condition !== 'any' && item.condition !== filters.condition) return false;
       if (filters.delivery !== 'any' && !(item.delivery || []).includes(filters.delivery)) return false;
@@ -48,15 +40,15 @@ export function MarketView({ onExport }: { onExport: (item: Item) => void }) {
       return hay.includes(q);
     });
     return [...matched].sort((a, b) => {
-      if (sort === 'fresh') return b.createdAt - a.createdAt;
+      if (filters.sort === 'fresh') return b.createdAt - a.createdAt;
       const pa = toNum(a.price);
       const pb = toNum(b.price);
       // priceless ("договорная") always sinks to the bottom
       if (pa === 0) return 1;
       if (pb === 0) return -1;
-      return sort === 'cheap' ? pa - pb : pb - pa;
+      return filters.sort === 'cheap' ? pa - pb : pb - pa;
     });
-  }, [lots, query, cat, filters, sort]);
+  }, [lots, query, filters]);
 
   const activeCount = activeFilterCount(filters);
 
@@ -70,44 +62,17 @@ export function MarketView({ onExport }: { onExport: (item: Item) => void }) {
     }
   }
 
+  function resetAll() {
+    setFilters(emptyFilters);
+    setQuery('');
+  }
+
   return (
     <section className="view market-view">
-      <header className="view-head">
-        <p className="eyebrow">маркет</p>
-        <h1>Рынок</h1>
-        <span className="count-badge">{lots.length}</span>
-      </header>
-
       <div className="search-box">
         <SearchIcon size={18} />
         <input value={query} onChange={event => setQuery(event.target.value)} type="search" placeholder="Что ищешь — телефон, ноут…" />
-      </div>
-
-      <div className="chip-row" role="tablist" aria-label="Категории">
-        <button type="button" role="tab" aria-selected={cat === 'all'} className={`filter-chip ${cat === 'all' ? 'active' : ''}`} onClick={() => setCat('all')}>
-          Всё<i>{lots.length}</i>
-        </button>
-        {cats.map(category => (
-          <button
-            key={category}
-            type="button"
-            role="tab"
-            aria-selected={cat === category}
-            className={`filter-chip ${cat === category ? 'active' : ''}`}
-            onClick={() => setCat(category)}
-          >
-            {category}<i>{lots.filter(item => item.category === category).length}</i>
-          </button>
-        ))}
-      </div>
-
-      <div className="market-controls">
-        <div className="sort-chips">
-          {sortLabels.map(option => (
-            <button key={option.id} type="button" className={`pick-chip ${sort === option.id ? 'active' : ''}`} onClick={() => setSort(option.id)}>{option.label}</button>
-          ))}
-        </div>
-        <button type="button" className={`filter-btn ${activeCount ? 'on' : ''}`} onClick={() => setFilterOpen(true)}>
+        <button type="button" className={`search-filter ${activeCount ? 'on' : ''}`} onClick={() => setFilterOpen(true)} aria-label="Фильтр">
           Фильтр{activeCount > 0 && <i>{activeCount}</i>}
         </button>
       </div>
@@ -129,9 +94,9 @@ export function MarketView({ onExport }: { onExport: (item: Item) => void }) {
         {!visible.length && (
           <div className="empty-state">
             <p>Под фильтр ничего нет</p>
-            <small>{activeCount || query || cat !== 'all' ? 'Ослабь фильтр или поиск' : 'Рынок пока пуст'}</small>
-            {(activeCount || query || cat !== 'all') && (
-              <button type="button" className="ghost-btn" style={{ marginTop: 12 }} onClick={() => { setFilters(emptyFilters); setQuery(''); setCat('all'); }}>Сбросить всё</button>
+            <small>{activeCount || query ? 'Ослабь фильтр или поиск' : 'Рынок пока пуст'}</small>
+            {(activeCount || query) && (
+              <button type="button" className="ghost-btn" style={{ marginTop: 12 }} onClick={resetAll}>Сбросить всё</button>
             )}
           </div>
         )}
@@ -143,6 +108,7 @@ export function MarketView({ onExport }: { onExport: (item: Item) => void }) {
           onChange={setFilters}
           resultCount={visible.length}
           onClose={() => setFilterOpen(false)}
+          categories={categoryOptions}
         />
       )}
     </section>

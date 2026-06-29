@@ -259,6 +259,40 @@ button { font-family: inherit; }
   font-size: 16px;
   color: var(--ink);
 }
+/* «Фильтр» встроен прямо в строку поиска (справа). */
+.search-filter {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 38px;
+  margin-right: -6px;
+  padding: 0 15px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--solid);
+  color: var(--solid-fg);
+  font-size: 13.5px;
+  font-weight: 650;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: transform 0.12s, background 0.2s;
+}
+.search-filter:active { transform: scale(0.95); }
+.search-filter.on { background: var(--accent); }
+.search-filter i {
+  font-style: normal;
+  display: inline-grid;
+  place-items: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.26);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 800;
+}
 
 .chip-row { display: flex; gap: 8px; overflow-x: auto; padding: 2px 2px 4px; scrollbar-width: none; }
 .chip-row::-webkit-scrollbar { display: none; }
@@ -315,6 +349,8 @@ button { font-family: inherit; }
 }
 .pick-chip:active { transform: scale(0.95); }
 .pick-chip.active { background: var(--solid); border-color: var(--solid); color: var(--solid-fg); }
+.pick-chip i { font-style: normal; margin-left: 6px; font-size: 11px; font-weight: 700; color: var(--ink-3); }
+.pick-chip.active i { color: var(--solid-fg); opacity: 0.8; }
 .filter-btn {
   flex: none;
   display: inline-flex;

@@ -1562,6 +1562,9 @@ html[data-theme="emerald"] .grade-badge.g-B { background: rgba(216, 181, 106, 0.
     gap: 14px;
     flex: 1.5;
     min-width: 0;
+    /* Колонка-форма всегда не ниже превью — иначе контейнеру не хватает высоты */
+    /* «прилепить» карточку, и она убегает при прокрутке. */
+    min-height: max(740px, calc(100vh - 120px));
   }
   .create-side {
     display: flex;
@@ -1572,7 +1575,14 @@ html[data-theme="emerald"] .grade-badge.g-B { background: rgba(216, 181, 106, 0.
     max-width: 380px;
     position: sticky;
     top: 92px; /* под фиксированным верхним меню */
+    align-self: flex-start;
+    max-height: calc(100vh - 108px); /* помещается в экран, видно целиком */
+    overflow-y: auto;
+    scrollbar-width: none;
   }
+  .create-side::-webkit-scrollbar { display: none; }
+  /* Превью стоит ровно — без ховер-подъёма (он давал подёргивание при скролле). */
+  .create-side .card:hover { transform: none; box-shadow: var(--shadow-md); }
   .create-side .preview-wrap { margin: 0; }
   /* Статус в шапке улетал в правый край и дублировал пилюлю на карточке — */
   /* на десктопе прячем, статус виден в живом превью. */

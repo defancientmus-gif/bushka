@@ -7,6 +7,7 @@ import { CategoryGlyph, CopyIcon, HeartIcon, PencilIcon, PhoneIcon, SendIcon, Tr
 import { ClipMedia } from './ClipMedia';
 import { VideoMedia } from './VideoMedia';
 import { MediaViewer } from './MediaViewer';
+import { ItemDetail } from './ItemDetail';
 
 export function ItemCard({
   item,
@@ -43,10 +44,17 @@ export function ItemCard({
   const age = daysOld(item.createdAt);
   const [confirm, setConfirm] = useState(false);
   const [viewer, setViewer] = useState(false);
+  const [detail, setDetail] = useState(false);
   const timer = useRef(0);
-  const canOpen = !isPreview && item.media.length > 0;
+  // Рынок: тап открывает полную карточку товара. Свои (склад): тап — просмотр фото.
+  const canOpen = variant === 'market' || (variant === 'own' && item.media.length > 0);
 
   useEffect(() => () => window.clearTimeout(timer.current), []);
+
+  function openCard() {
+    if (variant === 'market') setDetail(true);
+    else if (item.media.length > 0) setViewer(true);
+  }
 
   function handleDelete() {
     if (!confirm) {
@@ -63,9 +71,9 @@ export function ItemCard({
     <article className={`card card-${variant} ${isPreview ? 'preview' : ''}`} style={{ animationDelay: `${Math.min(index, 12) * 40}ms` }}>
       <div
         className={`card-media status-${item.status} ${canOpen ? 'openable' : ''}`}
-        onClick={canOpen ? () => setViewer(true) : undefined}
+        onClick={canOpen ? openCard : undefined}
         role={canOpen ? 'button' : undefined}
-        aria-label={canOpen ? 'Открыть фото и видео' : undefined}
+        aria-label={canOpen ? 'Открыть товар' : undefined}
       >
         {media ? (
           media.kind === 'video' && !media.frames
@@ -91,6 +99,17 @@ export function ItemCard({
       </div>
       {viewer && (
         <MediaViewer media={item.media} category={item.category} onClose={() => setViewer(false)} />
+      )}
+      {detail && (
+        <ItemDetail
+          item={item}
+          favorite={favorite}
+          onFavorite={() => onFavorite?.()}
+          onBuy={() => onBuy?.()}
+          onQueue={() => onQueue?.()}
+          onExport={() => onExport?.()}
+          onClose={() => setDetail(false)}
+        />
       )}
 
       <div className="card-body">

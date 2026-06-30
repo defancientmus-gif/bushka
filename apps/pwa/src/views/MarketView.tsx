@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import type { Item } from '../types';
 import { useStore } from '../lib/store';
 import { ItemCard, contactHref } from '../components/ItemCard';
@@ -6,19 +6,31 @@ import { SearchIcon } from '../components/icons';
 import { FilterSheet, activeFilterCount, emptyFilters, inPriceBand, type CategoryOption, type MarketFilters } from '../components/FilterSheet';
 import { supportedCategories } from '../lib/importer';
 import { toNum } from '../lib/money';
+import { fetchMarket } from '../lib/cloud';
 
 export function MarketView({ onExport }: { onExport: (item: Item) => void }) {
   const { seed, items, addQueue, toggleFavorite, isFavorite, showToast } = useStore();
   const [query, setQuery] = useState('');
   const [filters, setFilters] = useState<MarketFilters>(emptyFilters);
   const [filterOpen, setFilterOpen] = useState(false);
+  const [cloud, setCloud] = useState<Item[]>([]);
 
-  // The market shows everyone's live lots (mock seed + my own that are for sale),
-  // never sold ones — a buyer shops what they can actually take home.
-  const lots = useMemo(
-    () => [...items, ...seed].filter(item => item.status !== 'sold'),
-    [items, seed]
-  );
+  // Витрина — общая: тянем чужие живые лоты из облака. Local-first: если двор не
+  // достали (офлайн/не готов), показываем своё + сид, приложение живо.
+  useEffect(() => {
+    let alive = true;
+    fetchMarket().then(list => { if (alive && list) setCloud(list); });
+    return () => { alive = false; };
+  }, []);
+
+  // Склеиваем: чужие из облака + мои локальные (свежее) + сид-моки. Без проданных.
+  const lots = useMemo(() => {
+    const byId = new Map<string, Item>();
+    for (const item of seed) byId.set(item.id, item);
+    for (const item of cloud) byId.set(item.id, item);
+    for (const item of items) byId.set(item.id, item);
+    return [...byId.values()].filter(item => item.status !== 'sold');
+  }, [cloud, items, seed]);
 
   const categoryOptions = useMemo<CategoryOption[]>(() => {
     const present = supportedCategories().filter(category => lots.some(item => item.category === category));

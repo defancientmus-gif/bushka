@@ -17,6 +17,7 @@ import { statusLabels } from './labels';
 import { reserveTimeFromNow } from './format';
 import { batteryLabel, formatMoney, normalizePrice, toNum } from './money';
 import { delVideo } from './videostore';
+import { pushListing, removeListing } from './cloud';
 
 type StoreValue = {
   profile: Profile;
@@ -102,6 +103,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       updatedAt: now
     };
     persist([item, ...items]);
+    void pushListing(item); // в общую витрину (фоном, local-first)
     showToast('Товар в складе');
     return true;
   }, [items, persist, showToast, cleanDraft]);
@@ -115,16 +117,19 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       showToast('Нужен контакт');
       return false;
     }
-    persist(items.map(item => (
+    const updated = items.map(item => (
       item.id === id ? { ...item, ...cleanDraft(draft), updatedAt: Date.now() } : item
-    )));
+    ));
+    persist(updated);
+    const changed = updated.find(item => item.id === id);
+    if (changed) void pushListing(changed);
     showToast('Изменения сохранены');
     return true;
   }, [items, persist, showToast, cleanDraft]);
 
   const updateStatus = useCallback((id: string, status: ItemStatus) => {
     const target = items.find(item => item.id === id);
-    persist(items.map(item => (
+    const updated = items.map(item => (
       item.id === id
         ? {
             ...item,
@@ -133,7 +138,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
             updatedAt: Date.now()
           }
         : item
-    )));
+    ));
+    persist(updated);
+    const changed = updated.find(item => item.id === id);
+    if (changed) void pushListing(changed); // витрина видит новый статус (sold уходит)
     if (status === 'sold' && target && toNum(target.costPrice) > 0) {
       const margin = toNum(target.price) - toNum(target.costPrice);
       showToast(margin >= 0 ? `Продано · +${formatMoney(margin)} в карман` : `Продано · ${formatMoney(margin)}`);
@@ -158,6 +166,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const deleteItem = useCallback((id: string) => {
     const gone = items.find(item => item.id === id);
     gone?.media.forEach(asset => { if (asset.kind === 'video') void delVideo(asset.id); });
+    void removeListing(id); // убрать из общей витрины
     persist(items.filter(item => item.id !== id));
     showToast('Удалено');
   }, [items, persist, showToast]);

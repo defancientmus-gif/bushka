@@ -32,6 +32,9 @@ export function MarketView({ onExport }: { onExport: (item: Item) => void }) {
     return [...byId.values()].filter(item => item.status !== 'sold');
   }, [cloud, items, seed]);
 
+  // Свои товары в общей витрине — чтобы в карточке не показывать «Вы» как продавца.
+  const myIds = useMemo(() => new Set(items.map(item => item.id)), [items]);
+
   const categoryOptions = useMemo<CategoryOption[]>(() => {
     const present = supportedCategories().filter(category => lots.some(item => item.category === category));
     return [
@@ -96,6 +99,7 @@ export function MarketView({ onExport }: { onExport: (item: Item) => void }) {
             item={item}
             index={index}
             variant="market"
+            isOwn={myIds.has(item.id)}
             favorite={isFavorite(item.id)}
             onBuy={() => buy(item)}
             onQueue={() => addQueue(item)}

@@ -89,7 +89,7 @@ export function createTelegramText(item: Item) {
     `Состояние: ${item.condition} · грейд ${item.grade}`,
     item.battery ? `Батарея: ${item.battery}` : '',
     item.kit ? `Комплект: ${item.kit}` : '',
-    item.defects ? `Честно о минусах: ${item.defects}` : '',
+    `Честно о минусах: ${item.defects || 'нет'}`,
     item.description ? `\n${item.description}` : '',
     item.city ? `\nГород: ${item.city}` : '',
     item.contact ? `Связь: ${item.contact}` : '',
@@ -197,12 +197,15 @@ function detectCondition(value: string): Condition {
 }
 
 function detectGrade(value: string, condition: Condition): Grade {
-  const lower = value.toLowerCase();
-  if (/(грейд|grade)\s*a\b|\ba\+?\b/i.test(lower) || condition === 'Идеальное') return 'A';
-  if (/(грейд|grade)\s*c\b|\bc\b/i.test(lower)) return 'C';
-  if (/(грейд|grade)\s*d\b|\bd\b/i.test(lower)) return 'D';
-  if (/(repair|запчаст|восстанов|под ремонт)/i.test(lower) || condition === 'На запчасти') return 'Repair';
-  return 'B';
+  // 1) Явный грейд от продавца перебивает всё: «грейд A», «grade B».
+  //    (Раньше ловили одинокие буквы a/c/d по всему тексту — и грейд скакал от случайных слов.)
+  const explicit = value.match(/(?:грейд|grade)\s*([a-dA-D])(?![a-zа-яё])/i);
+  if (explicit) return explicit[1].toUpperCase() as Grade;
+  // 2) Иначе грейд — честная проекция состояния. Единый принцип, без магии букв.
+  if (/(repair|запчаст|восстанов|под ремонт)/i.test(value) || condition === 'На запчасти') return 'Repair';
+  if (condition === 'Идеальное') return 'A';
+  if (condition === 'Есть следы') return 'C';
+  return 'B'; // Хорошее
 }
 
 function detectCity(value: string) {
@@ -232,13 +235,17 @@ function parseKit(lines: string[]) {
 }
 
 function buildDescription(lines: string[], titleLine: string, contact: string) {
+  // Ведущие эмодзи/символы снимаем только для проверки — в самом тексте они остаются.
+  const bare = (line: string) => line.replace(/^[^\p{L}\d]+/u, '').trim();
   return lines
     .filter(line => line !== titleLine)
     .filter(line => !contact || !line.includes(contact))
     .filter(line => !/(цена|₽|руб\.?)/i.test(line))
-    .filter(line => !/^(?:батаре|акб|аккумулятор|комплект|в комплекте|комплектация)/i.test(line.trim()))
-    .join('. ')
-    .replace(/\.\s*\./g, '.')
+    .filter(line => !/^(?:батаре|акб|аккумулятор|комплект|в комплекте|комплектация)/i.test(bare(line)))
+    .filter(line => !/^[^:]{1,24}:\s*$/.test(bare(line))) // «Память:» без значения — выкидываем
+    .join('\n') // каждое поле — с новой строки: структурно, а не в кашу через точку
+    .replace(/\n{2,}/g, '\n')
+    .trim()
     .slice(0, 700);
 }
 

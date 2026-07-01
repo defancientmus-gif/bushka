@@ -104,6 +104,7 @@ export function ItemCard({
         <ItemDetail
           item={item}
           favorite={favorite}
+          own={isOwn}
           onFavorite={() => onFavorite?.()}
           onBuy={() => onBuy?.()}
           onQueue={() => onQueue?.()}

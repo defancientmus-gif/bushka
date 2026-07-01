@@ -9,9 +9,10 @@ import { dealModeLabels, deliveryLabels, statusLabels } from '../lib/labels';
 
 /** Полная карточка товара: фото/видео листаются, ниже — вся информация по полочкам,
  *  внизу — действия. Открывается на весь экран (портал в body). */
-export function ItemDetail({ item, favorite, onFavorite, onBuy, onQueue, onExport, onClose }: {
+export function ItemDetail({ item, favorite, own = false, onFavorite, onBuy, onQueue, onExport, onClose }: {
   item: Item;
   favorite: boolean;
+  own?: boolean;
   onFavorite: () => void;
   onBuy: () => void;
   onQueue: () => void;
@@ -68,7 +69,9 @@ export function ItemDetail({ item, favorite, onFavorite, onBuy, onQueue, onExpor
               {item.dealMode !== 'free' && <span className="quality-sub">· {dealModeLabels[item.dealMode]}</span>}
             </div>
 
-            {item.defects && <p className="defect-line">Нюансы: {item.defects}</p>}
+            <p className={`defect-line ${item.defects?.trim() ? '' : 'clean'}`}>
+              Нюансы: {item.defects?.trim() || 'нет'}
+            </p>
 
             {item.status === 'reserved' && item.reservedUntil && (
               <p className="reserve-note">Бронь до {item.reservedUntil}</p>
@@ -84,30 +87,39 @@ export function ItemDetail({ item, favorite, onFavorite, onBuy, onQueue, onExpor
               {item.city && <div><dt>Город</dt><dd>{item.city}</dd></div>}
             </dl>
 
-            <div className="detail-seller">
-              <div className="avatar sm">{(item.sellerName || 'Б').trim().charAt(0).toUpperCase()}</div>
-              <div className="detail-seller-id">
-                <strong>{item.sellerName || 'Продавец'}</strong>
-                <span>
-                  {item.sellerRating != null && <b className="star">★ {item.sellerRating.toFixed(1)}</b>}
-                  {item.city || 'Город не указан'}
-                </span>
+            {!own && (
+              <div className="detail-seller">
+                <div className="avatar sm">{(item.sellerName || 'Б').trim().charAt(0).toUpperCase()}</div>
+                <div className="detail-seller-id">
+                  <strong>{item.sellerName || 'Продавец'}</strong>
+                  <span>
+                    {item.sellerRating != null && <b className="star">★ {item.sellerRating.toFixed(1)}</b>}
+                    {item.city || 'Город не указан'}
+                  </span>
+                </div>
+                {item.queueCount > 0 && (
+                  <span className="detail-queue">{item.queueCount} в очереди</span>
+                )}
               </div>
-              {item.queueCount > 0 && (
-                <span className="detail-queue">{item.queueCount} в очереди</span>
-              )}
-            </div>
+            )}
           </div>
         </div>
 
-        <div className="detail-actions">
-          <button type="button" className={`heart-btn-lg ${favorite ? 'on' : ''}`} onClick={onFavorite} aria-pressed={favorite} aria-label={favorite ? 'Убрать из избранного' : 'В избранное'}>
-            <HeartIcon size={20} filled={favorite} />
-          </button>
-          <button type="button" className="ghost-btn" onClick={onExport} aria-label="Текст репоста"><SendIcon size={16} /></button>
-          <button type="button" className="ghost-btn grow" onClick={onQueue}>Запрос</button>
-          <button type="button" className="solid-btn accent grow big" onClick={onBuy}>Беру</button>
-        </div>
+        {own ? (
+          <div className="detail-actions own">
+            <span className="own-note">Ваш товар — так его видит покупатель</span>
+            <button type="button" className="ghost-btn grow" onClick={onExport}><SendIcon size={16} />Текст репоста</button>
+          </div>
+        ) : (
+          <div className="detail-actions">
+            <button type="button" className={`heart-btn-lg ${favorite ? 'on' : ''}`} onClick={onFavorite} aria-pressed={favorite} aria-label={favorite ? 'Убрать из избранного' : 'В избранное'}>
+              <HeartIcon size={20} filled={favorite} />
+            </button>
+            <button type="button" className="ghost-btn" onClick={onExport} aria-label="Текст репоста"><SendIcon size={16} /></button>
+            <button type="button" className="ghost-btn grow" onClick={onQueue}>Запрос</button>
+            <button type="button" className="solid-btn accent grow big" onClick={onBuy}>Беру</button>
+          </div>
+        )}
 
         {viewerIndex != null && (
           <MediaViewer media={media} category={item.category} startIndex={viewerIndex} onClose={() => setViewerIndex(null)} />

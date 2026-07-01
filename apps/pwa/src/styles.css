@@ -90,6 +90,7 @@ html[data-theme="emerald"] .tag.deal { background: rgba(216, 181, 106, 0.12); co
 html[data-theme="emerald"] .tag.delivery { background: rgba(31, 143, 95, 0.16); color: #6fd6a0; }
 html[data-theme="emerald"] .money-hero .pos { color: #6fd6a0; }
 html[data-theme="emerald"] .money-hero .neg { color: #e98c86; }
+html[data-theme="emerald"] .hero-big.pos { color: oklch(0.82 0.13 162); }
 html[data-theme="emerald"] .card-media { background: #0e1a14; }
 html[data-theme="emerald"] .card-media.status-available { background: linear-gradient(135deg, #14281d, #0f1e16); }
 html[data-theme="emerald"] .card-media.status-reserved { background: linear-gradient(135deg, #2a2113, #1b150d); }
@@ -1047,6 +1048,116 @@ html[data-theme="emerald"] .grade-badge.g-B { background: rgba(216, 181, 106, 0.
 .net-dot.on { color: var(--ok-fg); background: var(--ok-bg); }
 .net-dot.off { color: var(--warn-fg); background: var(--warn-bg); }
 
+/* ---------- Профиль за один вдох ---------- */
+/* По умолчанию виден только спокойный минимум: лицо + одно число + одна фраза. */
+/* Всё остальное — за тихими дверями, раскрытие пером. */
+.breath { gap: 16px; }
+
+/* ТЫ — лицо. Карточка-кнопка: тап раскрывает правку. */
+.you-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 16px;
+  text-align: left;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+  transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.28s ease;
+}
+.you-card:active { transform: scale(0.99); }
+.you-card.is-open { border-color: var(--accent); }
+.profile-id .you-meta { display: flex; align-items: center; gap: 6px; }
+.live-dot { display: inline-block; width: 7px; height: 7px; border-radius: 999px; flex: none; }
+.live-dot.on { background: var(--ok-fg); box-shadow: 0 0 0 3px var(--ok-bg); }
+.live-dot.off { background: var(--warn-fg); box-shadow: 0 0 0 3px var(--warn-bg); }
+.you-edit { flex: none; display: inline-flex; color: var(--ink-3); transition: color 0.28s ease, transform 0.28s cubic-bezier(0.22, 1, 0.36, 1); }
+.you-card.is-open .you-edit { color: var(--accent); transform: rotate(-9deg); }
+
+/* ОДНО ЖИВОЕ ЧИСЛО */
+.hero-num {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  text-align: center;
+  padding: 14px 0 4px;
+}
+.hero-label { font-size: 13px; font-weight: 600; color: var(--ink-3); }
+.hero-big {
+  font-size: clamp(40px, 13vw, 56px);
+  font-weight: 850;
+  line-height: 1.02;
+  letter-spacing: -1.5px;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+.hero-big.pos { color: oklch(0.64 0.16 152); }
+.hero-sub { font-size: 13px; color: var(--ink-3); }
+
+/* ОДНА ЖИВАЯ ФРАЗА — голос продукта, не сводка */
+.live-phrase {
+  margin: 0;
+  text-align: center;
+  font-size: 15px;
+  font-weight: 650;
+  line-height: 1.45;
+  color: var(--accent);
+  padding: 0 10px;
+  animation: phrasein 0.4s both cubic-bezier(0.22, 1, 0.36, 1);
+}
+@keyframes phrasein { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+
+/* Тихие двери — всё остальное в один тап */
+.door-row { display: flex; gap: 10px; }
+.door-row.end { justify-content: flex-end; }
+.door {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 12px 15px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 15px;
+  box-shadow: var(--shadow-sm);
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 650;
+  cursor: pointer;
+  transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.24s ease, color 0.24s ease;
+}
+.door:active { transform: scale(0.97); }
+.door.grow { flex: 1; }
+.door.cog { padding: 12px; }
+.door.is-open { border-color: var(--accent); color: var(--accent); }
+.door-n {
+  margin-left: auto;
+  min-width: 22px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: var(--surface-2);
+  color: var(--ink-3);
+  font-size: 12px;
+  font-weight: 700;
+  font-style: normal;
+  text-align: center;
+}
+.door.is-open .door-n { background: var(--accent); color: #fff; }
+.door-chev { color: var(--ink-3); transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1); }
+.door.is-open .door-chev { transform: rotate(180deg); color: var(--accent); }
+
+/* Раскрытие пером — мягкий въезд содержимого */
+.reveal {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  animation: reveal 0.3s both cubic-bezier(0.22, 1, 0.36, 1);
+}
+@keyframes reveal { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
+
 .rings {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -1263,6 +1374,11 @@ html[data-theme="emerald"] .grade-badge.g-B { background: rgba(216, 181, 106, 0.
 .heart-btn-lg.on { color: #e5484d; border-color: rgba(229, 72, 77, 0.4); }
 .detail-actions .ghost-btn { flex: none; }
 .detail-actions .ghost-btn.grow { flex: 1; }
+/* Свой товар: вместо «Беру/Запрос» — спокойная подпись + текст репоста. */
+.detail-actions.own { justify-content: space-between; }
+.own-note { font-size: 13px; font-weight: 600; color: var(--ink-3); }
+/* «Нюансы: нет» — не тревожный янтарь, а спокойное подтверждение. */
+.defect-line.clean { color: var(--ok-fg); }
 
 /* ---------- Export sheet ---------- */
 .sheet-backdrop {
@@ -1551,7 +1667,7 @@ html[data-theme="emerald"] .grade-badge.g-B { background: rgba(216, 181, 106, 0.
   }
   .topbar { display: none; }
   .create-view  { max-width: 1080px; margin-inline: auto; }
-  .profile-view { max-width: 1180px; margin-inline: auto; }
+  .profile-view { max-width: 640px; margin-inline: auto; } /* профиль за один вдох — спокойная колонка, не дашборд */
   .market-view  { max-width: 1080px; margin-inline: auto; }
 
   /* «Создать»: слева работа, справа липкое превью — видишь лот на витрине. */
@@ -1588,25 +1704,6 @@ html[data-theme="emerald"] .grade-badge.g-B { background: rgba(216, 181, 106, 0.
   /* на десктопе прячем, статус виден в живом превью. */
   .create-view > .view-head .status-pill { display: none; }
 
-  /* Дашборд: слева рабочее (пульс, деньги, склад), справа тихое */
-  /* (рейтинг, профиль продавца, оформление, данные). Меньше прокрутки. */
-  .sell-dash { flex-direction: row; align-items: flex-start; gap: 26px; }
-  .col-main {
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-    flex: 1.7;
-    min-width: 0;
-  }
-  .col-side {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    flex: 1;
-    min-width: 290px;
-    max-width: 360px;
-  }
-  .col-side .form-grid { grid-template-columns: 1fr; } /* узкая колонка — поля в столбик */
   /* Переключатель Покупаю/Продаю — компактной пилюлей по центру, не во всю ширь. */
   .profile-view > .segmented.two { max-width: 460px; margin-inline: auto; width: 100%; }
 

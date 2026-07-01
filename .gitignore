@@ -11,3 +11,6 @@ __pycache__/
 
 # Supabase CLI local state
 supabase/.temp/
+
+# Скачанный бэкап склада (данные пользователя)
+bushka-sklad.json

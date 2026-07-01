@@ -1,29 +1,38 @@
 import { useMemo, useState, type ChangeEvent } from 'react';
 import type { Item, TxnKind } from '../types';
 import { useStore } from '../lib/store';
-import { StatRing } from '../components/StatRing';
 import { Field } from '../components/Field';
 import { ItemCard, contactHref } from '../components/ItemCard';
 import { OwnItemsTable } from '../components/OwnItemsTable';
-import { CloseIcon, DownloadIcon, SendIcon, UploadIcon } from '../components/icons';
+import { ChevronIcon, CloseIcon, DownloadIcon, GearIcon, PencilIcon, PlusIcon, SendIcon, UploadIcon } from '../components/icons';
 import { downloadBackup, importBackup } from '../lib/backup';
 import { useCountUp, useOnline } from '../lib/hooks';
 import { pluralize } from '../lib/format';
-import { DayPulse } from '../components/DayPulse';
 import { formatMoney, isStale, isToday, marginLight, saleStreak, toNum } from '../lib/money';
 import { applyTheme, loadTheme, saveTheme, type Theme } from '../lib/theme';
 import { APP_CHANNEL, APP_TAG, APP_VERSION } from '../lib/version';
 
 type Side = 'buy' | 'sell';
+type Panel = 'edit' | 'goods' | 'ops' | 'settings';
 
 export function ProfileView({ onExport, onEdit }: { onExport: (item: Item) => void; onEdit: (item: Item) => void }) {
   const { profile, items, seed, favorites, txns, updateProfile, saveProfile, updateStatus, deleteItem, toggleFavorite, isFavorite, addTxn, deleteTxn, showToast } = useStore();
   const online = useOnline();
   const [side, setSide] = useState<Side>(() => (items.length ? 'sell' : 'buy'));
+  const [open, setOpen] = useState<Panel | null>(null);
   const [addKind, setAddKind] = useState<TxnKind | null>(null);
   const [amount, setAmount] = useState('');
   const [note, setNote] = useState('');
   const [theme, setThemeState] = useState<Theme>(() => loadTheme());
+
+  function switchSide(next: Side) {
+    setSide(next);
+    setOpen(null);
+  }
+
+  function toggle(panel: Panel) {
+    setOpen(current => (current === panel ? null : panel));
+  }
 
   function pickTheme(next: Theme) {
     setThemeState(next);
@@ -80,13 +89,12 @@ export function ProfileView({ onExport, onEdit }: { onExport: (item: Item) => vo
     const profit = (salesRevenue + manualIncome) - (salesCost + manualExpense);
     const soldToday = soldItems.filter(item => isToday(item.updatedAt));
     const todayMargin = soldToday.reduce((sum, item) => sum + (toNum(item.price) - toNum(item.costPrice)), 0);
-    const bestMargin = soldItems.reduce((best, item) => Math.max(best, toNum(item.price) - toNum(item.costPrice)), 0);
     const inStock = items.filter(item => item.status !== 'sold').reduce((sum, item) => sum + toNum(item.costPrice), 0);
     const staleItems = items.filter(isStale);
     const sleeping = staleItems.reduce((sum, item) => sum + toNum(item.costPrice), 0);
     const streak = saleStreak(soldItems.map(item => item.updatedAt));
     const greenCount = items.filter(item => item.status !== 'sold' && marginLight(item.price, item.costPrice) === 'green').length;
-    return { profit, todayMargin, todayCount: soldToday.length, bestMargin, inStock, sleeping, staleCount: staleItems.length, streak, greenCount };
+    return { profit, todayMargin, todayCount: soldToday.length, inStock, sleeping, staleCount: staleItems.length, streak, greenCount };
   }, [items, txns]);
 
   const liveToday = useCountUp(money.todayMargin);
@@ -94,6 +102,20 @@ export function ProfileView({ onExport, onEdit }: { onExport: (item: Item) => vo
   const liveStock = useCountUp(money.inStock);
 
   const sold = items.filter(item => item.status === 'sold').length;
+  const forSale = items.length - sold;
+
+  // Одна живая фраза — продукт выбирает по приоритету. Не сводка, а голос.
+  function sellPhrase() {
+    if (money.sleeping > 0) return `В висяках спит ${formatMoney(money.sleeping)} (${money.staleCount}) — подвинь цену, освободи кэш`;
+    if (money.streak >= 2) return `Серия ${money.streak} ${pluralize(money.streak, 'день', 'дня', 'дней')} · сегодня ${money.todayCount} ${pluralize(money.todayCount, 'сделка', 'сделки', 'сделок')}`;
+    if (money.todayCount > 0) return `Сегодня ${money.todayCount} · навар ${formatMoney(money.todayMargin)}`;
+    if (forSale > 0) return `${forSale} в продаже — жди покупателя или выстави ещё`;
+    return 'Выставь первый товар — это минута';
+  }
+  function buyPhrase() {
+    if (favItems.length > 0) return `${favItems.length} ${pluralize(favItems.length, 'лот', 'лота', 'лотов')} на примете — не прозевай`;
+    return 'Лайкай лоты на Рынке — соберутся здесь';
+  }
 
   function buy(item: Item) {
     const href = contactHref(item.contact);
@@ -148,36 +170,157 @@ export function ProfileView({ onExport, onEdit }: { onExport: (item: Item) => vo
   );
 
   return (
-    <section className="view profile-view">
-      <header className="view-head">
-        <p className="eyebrow">кабинет</p>
-        <h1>Профиль</h1>
-      </header>
-
-      <div className="profile-card">
+    <section className="view profile-view breath">
+      {/* ТЫ — лицо. Тап раскрывает правку. */}
+      <button type="button" className={`you-card ${open === 'edit' ? 'is-open' : ''}`} onClick={() => toggle('edit')}>
         <div className="avatar">{(profile.name || 'Б').trim().charAt(0).toUpperCase()}</div>
         <div className="profile-id">
           <strong>{profile.name || 'Без имени'}</strong>
-          <span>{profile.city || 'Город не указан'}</span>
+          <span className="you-meta">
+            {profile.city || 'Город не указан'}
+            <i className={`live-dot ${online ? 'on' : 'off'}`} aria-hidden="true" />
+            {online ? 'в сети' : 'не в сети'}
+          </span>
         </div>
-        <span className={`net-dot ${online ? 'on' : 'off'}`}>{online ? 'online' : 'офлайн'}</span>
-      </div>
+        <span className="you-edit" aria-hidden="true"><PencilIcon size={15} /></span>
+      </button>
+
+      {open === 'edit' && (
+        <div className="reveal">
+          <div className="form-grid">
+            <Field label="Имя или магазин" wide>
+              <input value={profile.name} onChange={event => updateProfile({ name: event.target.value })} placeholder="Как тебя зовут покупателю" />
+            </Field>
+            <Field label="Город">
+              <input value={profile.city} onChange={event => updateProfile({ city: event.target.value })} placeholder="Симферополь" />
+            </Field>
+            <Field label="Контакт">
+              <input value={profile.contact} onChange={event => updateProfile({ contact: event.target.value })} placeholder="@username" />
+            </Field>
+          </div>
+          <button type="button" className="solid-btn wide big" onClick={() => { saveProfile(); setOpen(null); }}>Сохранить</button>
+        </div>
+      )}
 
       <div className="segmented two" role="tablist" aria-label="Сторона">
         <span className="seg-indicator" style={{ transform: `translateX(${side === 'buy' ? 0 : 100}%)` }} aria-hidden="true" />
-        <button type="button" role="tab" aria-selected={side === 'buy'} className={side === 'buy' ? 'active' : ''} onClick={() => setSide('buy')}>Покупаю</button>
-        <button type="button" role="tab" aria-selected={side === 'sell'} className={side === 'sell' ? 'active' : ''} onClick={() => setSide('sell')}>Продаю</button>
+        <button type="button" role="tab" aria-selected={side === 'buy'} className={side === 'buy' ? 'active' : ''} onClick={() => switchSide('buy')}>Покупаю</button>
+        <button type="button" role="tab" aria-selected={side === 'sell'} className={side === 'sell' ? 'active' : ''} onClick={() => switchSide('sell')}>Продаю</button>
       </div>
 
-      {side === 'buy' ? (
+      {side === 'sell' ? (
         <>
-          <div className="rings">
-            <StatRing value={favItems.length} max={Math.max(6, favItems.length)} display={String(favItems.length)} label="в избранном" />
-            <StatRing value={profile.rating} max={5} display={profile.rating.toFixed(1)} label="рейтинг" />
-            <StatRing value={0} max={3} display="0" label="заданий" />
+          {/* ОДНО ЖИВОЕ ЧИСЛО */}
+          <div className="hero-num">
+            <span className="hero-label">Навар сегодня</span>
+            <strong className={`hero-big ${money.todayMargin > 0 ? 'pos' : ''}`}>{formatMoney(liveToday)}</strong>
+            <span className="hero-sub">всего {formatMoney(liveProfit)} · в товаре {formatMoney(liveStock)}</span>
           </div>
 
-          <p className="section-label">Избранное</p>
+          {/* ОДНА ЖИВАЯ ФРАЗА */}
+          <p className="live-phrase">{sellPhrase()}</p>
+
+          {/* Тихие двери — всё остальное в один тап */}
+          <div className="door-row">
+            <button type="button" className={`door grow ${open === 'goods' ? 'is-open' : ''}`} onClick={() => toggle('goods')}>
+              <span>Мои товары</span>
+              <i className="door-n">{items.length}</i>
+              <ChevronIcon size={16} className="door-chev" />
+            </button>
+            <button type="button" className={`door ${open === 'ops' ? 'is-open' : ''}`} onClick={() => toggle('ops')}>
+              <PlusIcon size={15} />операция
+            </button>
+            <button type="button" className={`door cog ${open === 'settings' ? 'is-open' : ''}`} onClick={() => toggle('settings')} aria-label="Настройки">
+              <GearIcon size={18} />
+            </button>
+          </div>
+
+          {open === 'ops' && (
+            <div className="reveal">
+              <div className="money-add">
+                <button type="button" className={`ghost-btn grow ${addKind === 'income' ? 'on' : ''}`} onClick={() => openAdd('income')}>+ Доход</button>
+                <button type="button" className={`ghost-btn grow ${addKind === 'expense' ? 'on' : ''}`} onClick={() => openAdd('expense')}>− Расход</button>
+              </div>
+              {addKind && (
+                <div className="txn-form">
+                  <input inputMode="numeric" placeholder="Сумма ₽" value={amount} onChange={event => setAmount(event.target.value)} autoFocus />
+                  <input placeholder="За что (необяз.)" value={note} onChange={event => setNote(event.target.value)} />
+                  <button type="button" className="solid-btn" onClick={submitTxn}>OK</button>
+                </div>
+              )}
+              {txns.length > 0 && (
+                <ul className="txn-list">
+                  {txns.slice(0, 8).map(txn => (
+                    <li key={txn.id} className={`txn ${txn.kind}`}>
+                      <span className="txn-amount">{txn.kind === 'income' ? '+' : '−'} {formatMoney(txn.amount)}</span>
+                      <span className="txn-note">{txn.note || (txn.kind === 'income' ? 'доход' : 'расход')}</span>
+                      <button type="button" className="txn-del" onClick={() => deleteTxn(txn.id)} aria-label="Удалить операцию"><CloseIcon size={14} /></button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          )}
+
+          {open === 'goods' && (
+            <div className="reveal">
+              {items.length ? (
+                <>
+                  <p className="section-label">в наличии {forSale} · продано {sold}</p>
+                  <div className="own-cards">
+                    <div className="feed-grid">
+                      {items.map((item, index) => (
+                        <ItemCard
+                          key={item.id}
+                          item={item}
+                          index={index}
+                          variant="own"
+                          onStatusChange={status => updateStatus(item.id, status)}
+                          onEdit={() => onEdit(item)}
+                          onDelete={() => deleteItem(item.id)}
+                          onExport={() => onExport(item)}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                  <OwnItemsTable
+                    items={items}
+                    onStatusChange={updateStatus}
+                    onEdit={onEdit}
+                    onExport={onExport}
+                    onDelete={deleteItem}
+                  />
+                </>
+              ) : (
+                <div className="empty-state">
+                  <p>Склад пуст</p>
+                  <small>Во вкладке «Создать» выставишь первый товар за минуту</small>
+                </div>
+              )}
+            </div>
+          )}
+
+          {open === 'settings' && <div className="reveal">{settings}</div>}
+        </>
+      ) : (
+        <>
+          {/* ОДНО ЖИВОЕ ЧИСЛО — покупателю */}
+          <div className="hero-num">
+            <span className="hero-label">В избранном</span>
+            <strong className="hero-big">{favItems.length}</strong>
+            <span className="hero-sub">{favItems.length ? `${pluralize(favItems.length, 'лот', 'лота', 'лотов')} на примете` : 'пока пусто'}</span>
+          </div>
+
+          <p className="live-phrase">{buyPhrase()}</p>
+
+          <div className="door-row end">
+            <button type="button" className={`door cog ${open === 'settings' ? 'is-open' : ''}`} onClick={() => toggle('settings')} aria-label="Настройки">
+              <GearIcon size={18} />
+            </button>
+          </div>
+
+          {open === 'settings' && <div className="reveal">{settings}</div>}
+
           <div className="feed-grid">
             {favItems.map((item, index) => (
               <ItemCard
@@ -198,123 +341,7 @@ export function ProfileView({ onExport, onEdit }: { onExport: (item: Item) => vo
               </div>
             )}
           </div>
-          {settings}
         </>
-      ) : (
-        <div className="sell-dash">
-          <div className="col-main">
-            <DayPulse
-              name={profile.name}
-              todayMargin={money.todayMargin}
-              todayCount={money.todayCount}
-              streak={money.streak}
-              staleCount={money.staleCount}
-              greenCount={money.greenCount}
-              inStock={money.inStock}
-            />
-
-            <p className="section-label">Деньги</p>
-            <div className="money-card">
-              <div className="money-hero">
-                <span>Навар сегодня</span>
-                <strong className={money.todayMargin > 0 ? 'pos' : ''}>{formatMoney(liveToday)}</strong>
-              </div>
-              <div className="money-split">
-                <div><span>Навар всего</span><b>{formatMoney(liveProfit)}</b></div>
-                <div><span>В товаре</span><b>{formatMoney(liveStock)}</b></div>
-              </div>
-              <p className="money-pot">
-                {money.streak >= 2 ? `Серия ${money.streak} дн · ` : ''}
-                {money.todayCount > 0 ? `сегодня сделок: ${money.todayCount}` : 'сегодня сделок ещё нет — давай первую'}
-                {money.bestMargin > 0 ? ` · рекорд ${formatMoney(money.bestMargin)}` : ''}
-              </p>
-              {money.sleeping > 0 && (
-                <p className="money-sleep">В висяках спит {formatMoney(money.sleeping)} ({money.staleCount}) — подвинь цену, освободи кэш</p>
-              )}
-            </div>
-
-            <div className="money-add">
-              <button type="button" className={`ghost-btn grow ${addKind === 'income' ? 'on' : ''}`} onClick={() => openAdd('income')}>+ Доход</button>
-              <button type="button" className={`ghost-btn grow ${addKind === 'expense' ? 'on' : ''}`} onClick={() => openAdd('expense')}>− Расход</button>
-            </div>
-            {addKind && (
-              <div className="txn-form">
-                <input inputMode="numeric" placeholder="Сумма ₽" value={amount} onChange={event => setAmount(event.target.value)} autoFocus />
-                <input placeholder="За что (необяз.)" value={note} onChange={event => setNote(event.target.value)} />
-                <button type="button" className="solid-btn" onClick={submitTxn}>OK</button>
-              </div>
-            )}
-            {txns.length > 0 && (
-              <ul className="txn-list">
-                {txns.slice(0, 8).map(txn => (
-                  <li key={txn.id} className={`txn ${txn.kind}`}>
-                    <span className="txn-amount">{txn.kind === 'income' ? '+' : '−'} {formatMoney(txn.amount)}</span>
-                    <span className="txn-note">{txn.note || (txn.kind === 'income' ? 'доход' : 'расход')}</span>
-                    <button type="button" className="txn-del" onClick={() => deleteTxn(txn.id)} aria-label="Удалить операцию"><CloseIcon size={14} /></button>
-                  </li>
-                ))}
-              </ul>
-            )}
-
-            <p className="section-label">Мои товары · в наличии {items.length - sold}, продано {sold}</p>
-            {items.length ? (
-              <>
-                <div className="own-cards">
-                  <div className="feed-grid">
-                    {items.map((item, index) => (
-                      <ItemCard
-                        key={item.id}
-                        item={item}
-                        index={index}
-                        variant="own"
-                        onStatusChange={status => updateStatus(item.id, status)}
-                        onEdit={() => onEdit(item)}
-                        onDelete={() => deleteItem(item.id)}
-                        onExport={() => onExport(item)}
-                      />
-                    ))}
-                  </div>
-                </div>
-                <OwnItemsTable
-                  items={items}
-                  onStatusChange={updateStatus}
-                  onEdit={onEdit}
-                  onExport={onExport}
-                  onDelete={deleteItem}
-                />
-              </>
-            ) : (
-              <div className="empty-state">
-                <p>Склад пуст</p>
-                <small>Во вкладке «Создать» выставишь первый товар за минуту</small>
-              </div>
-            )}
-          </div>
-
-          <aside className="col-side">
-            <div className="rings">
-              <StatRing value={items.length} max={Math.max(10, items.length)} display={String(items.length)} label={pluralize(items.length, 'товар', 'товара', 'товаров')} />
-              <StatRing value={profile.rating} max={5} display={profile.rating.toFixed(1)} label="рейтинг" />
-              <StatRing value={profile.deals} max={Math.max(10, profile.deals)} display={String(profile.deals)} label={pluralize(profile.deals, 'сделка', 'сделки', 'сделок')} />
-            </div>
-
-            <p className="section-label">Профиль продавца</p>
-            <div className="form-grid">
-              <Field label="Имя или магазин" wide>
-                <input value={profile.name} onChange={event => updateProfile({ name: event.target.value })} placeholder="Как тебя зовут покупателю" />
-              </Field>
-              <Field label="Город">
-                <input value={profile.city} onChange={event => updateProfile({ city: event.target.value })} placeholder="Симферополь" />
-              </Field>
-              <Field label="Контакт">
-                <input value={profile.contact} onChange={event => updateProfile({ contact: event.target.value })} placeholder="@username" />
-              </Field>
-            </div>
-            <button type="button" className="solid-btn wide big" onClick={saveProfile}>Сохранить профиль</button>
-
-            {settings}
-          </aside>
-        </div>
       )}
 
       <div className="profile-foot">

@@ -1,0 +1,7 @@
+# Supabase-конфиг БУ.шки. Главное здесь — публичность функции переноса:
+# tg-import тянет ТОЛЬКО публичные посты Телеграма, вход/JWT ей не нужен,
+# поэтому verify_jwt = false (иначе клиент упрётся в 401 у шлюза).
+project_id = "vnylpvmhelzlxusvydab"
+
+[functions.tg-import]
+verify_jwt = false

@@ -31,7 +31,7 @@ export function parseImport(rawValue: string): Partial<DraftItem> {
   const text = sourceUrl ? raw.replace(sourceUrl, ' ') : raw;
   const lines = text
     .split('\n')
-    .map(line => normalizeSpace(line.replace(/[•●▪️✅🔥⭐️]/g, '')))
+    .map(line => normalizeSpace(line.replace(/[•●▪️✅🔥⭐️]/gu, '')))
     .filter(Boolean);
 
   const titleLine = findTitleLine(lines, sourceUrl);
@@ -192,7 +192,7 @@ function detectCondition(value: string): Condition {
   const lower = value.toLowerCase().replace(/(?:без|нет|ни одной?)\s+(?:единой\s+)?[а-яё]+/g, ' ');
   if (/(запчаст|не включ|разбит|утоплен|repair|под восстанов)/.test(lower)) return 'На запчасти';
   if (/(скол|трещ|царап|коц|дефект|потерт|следы)/.test(lower)) return 'Есть следы';
-  if (/(новый|новая|новое|идеал|отличн|как новый|like new)/.test(lower)) return 'Идеальное';
+  if (/(нов(?:ый|ая|ое|ые|ье)|идеал|отличн|как новый|like new)/.test(lower)) return 'Идеальное';
   return 'Хорошее';
 }
 

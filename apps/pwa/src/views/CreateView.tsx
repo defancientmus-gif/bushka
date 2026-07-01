@@ -3,6 +3,7 @@ import type { DraftItem, Item, ItemStatus, MediaAsset } from '../types';
 import { useStore } from '../lib/store';
 import { emptyDraft, parseImport, supportedCategories, supportedConditions, supportedGrades } from '../lib/importer';
 import { extractImageUrls, filesToMedia, urlToMedia, videoToAsset } from '../lib/media';
+import { fetchTelegramPost, findTelegramLink, tgProxy } from '../lib/tgimport';
 import { delVideo } from '../lib/videostore';
 import { dealModeLabels, dealModeOrder, statusLabels, statusOrder } from '../lib/labels';
 import { batteryLabel, normalizePrice } from '../lib/money';
@@ -57,6 +58,11 @@ export function CreateView({ editItem, onExport, onCreated }: { editItem?: Item 
       showToast('Нечего разбирать');
       return;
     }
+    const tgLink = findTelegramLink(importValue);
+    if (tgLink) {
+      await importFromTelegram(tgLink);
+      return;
+    }
     const parsed = parseImport(importValue);
     const status: ItemStatus = /(^|\s)(лот|опт|партия)(\s|$)/i.test(importValue) ? 'lot' : draft.status;
     setDraft(current => ({
@@ -80,6 +86,69 @@ export function CreateView({ editItem, onExport, onCreated }: { editItem?: Item 
       }
     }
     showToast(parsed.sourceUrl ? 'Текст готов · фото вставь или добавь' : 'Разобрал текст');
+  }
+
+  // «Нажал — перенёс»: из ссылки на пост Телеграма тянем описание, цену, фото и видео.
+  async function importFromTelegram(link: string) {
+    setBusyPhoto(true);
+    showToast('Тяну из Телеграма…');
+    const result = await fetchTelegramPost(link);
+
+    if (!result.ok) {
+      // Пост удалён/закрыт или функция молчит — не бросаем человека: разбираем что есть.
+      setBusyPhoto(false);
+      const parsed = parseImport(importValue);
+      setDraft(current => ({ ...current, ...parsed, sourceUrl: link, city: parsed.city || current.city || profile.city }));
+      showToast(result.reason === 'unavailable'
+        ? 'Пост удалён или закрыт в Телеграме — вставь фото/видео вручную'
+        : 'Телеграм-перенос пока недоступен — вставь фото/видео вручную');
+      return;
+    }
+    const post = result.post;
+
+    const parsed = parseImport(post.text || importValue);
+    const status: ItemStatus = /(^|\s)(лот|опт|партия)(\s|$)/i.test(post.text) ? 'lot' : draft.status;
+    setDraft(current => ({
+      ...current,
+      ...parsed,
+      status,
+      sourceUrl: link,
+      city: parsed.city || current.city || profile.city,
+      contact: parsed.contact || (post.channel ? `@${post.channel}` : '') || current.contact || profile.contact
+    }));
+    if (parsed.grade && parsed.grade !== 'B') setShowDetails(true);
+
+    // Медиа тянем через прокси функции (у неё есть CORS) — дальше нашим обычным конвейером.
+    const collected: MediaAsset[] = [];
+    try {
+      if (post.images.length) {
+        const loaded = await Promise.all(post.images.slice(0, 8).map(url => urlToMedia(tgProxy(url))));
+        collected.push(...loaded.filter((asset): asset is MediaAsset => asset != null));
+      }
+      if (post.video) {
+        const response = await fetch(tgProxy(post.video));
+        if (response.ok) {
+          const blob = await response.blob();
+          const clip = await videoToAsset(new File([blob], 'tg.mp4', { type: blob.type || 'video/mp4' }));
+          if (clip) collected.push(clip);
+        }
+      }
+    } catch {
+      // медиа не долетело — не страшно, текст уже разобран
+    }
+    // Видео не вышло, но есть кадр-постер — берём хотя бы его картинкой.
+    if (post.video && post.poster && !collected.some(asset => asset.kind === 'video')) {
+      const posterAsset = await urlToMedia(tgProxy(post.poster));
+      if (posterAsset) collected.push(posterAsset);
+    }
+
+    setBusyPhoto(false);
+    if (collected.length) appendMedia(collected);
+
+    const clips = collected.filter(asset => asset.kind === 'video').length;
+    const photos = collected.length - clips;
+    const media = [photos ? `${photos} фото` : '', clips ? 'видео' : ''].filter(Boolean).join(' · ');
+    showToast(media ? `Перенёс из Телеграма · ${media}` : 'Перенёс описание · медиа добавь вручную');
   }
 
   async function loadClipboardMedia(): Promise<boolean> {
@@ -215,7 +284,7 @@ export function CreateView({ editItem, onExport, onCreated }: { editItem?: Item 
           <span className="hero-icon"><BoltIcon size={18} /></span>
           <div>
             <strong>Перенос с площадки</strong>
-            <small>Ссылка или текст — соберу описание и цену. Скрин, фото или короткое видео — вставь прямо сюда, подхвачу.</small>
+            <small>Ссылка из Телеграма — перенесу фото, видео, описание и цену одним нажатием. Или вставь текст, скрин, фото, видео — подхвачу.</small>
           </div>
         </div>
         <textarea

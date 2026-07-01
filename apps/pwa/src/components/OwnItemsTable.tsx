@@ -60,7 +60,7 @@ export function OwnItemsTable({
                 </td>
                 <td className="t-actions">
                   <button type="button" className="icon-btn" onClick={() => onEdit(item)} aria-label="Изменить"><PencilIcon size={15} /></button>
-                  <button type="button" className="icon-btn" onClick={() => onExport(item)} aria-label="Репост"><SendIcon size={15} /></button>
+                  <button type="button" className="icon-btn" onClick={() => onExport(item)} aria-label="Поделиться"><SendIcon size={15} /></button>
                   <button type="button" className="icon-btn danger" onClick={() => { if (window.confirm('Удалить товар?')) onDelete(item.id); }} aria-label="Удалить"><TrashIcon size={15} /></button>
                 </td>
               </tr>

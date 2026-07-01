@@ -89,7 +89,7 @@ export function createTelegramText(item: Item) {
     `Состояние: ${item.condition} · грейд ${item.grade}`,
     item.battery ? `Батарея: ${item.battery}` : '',
     item.kit ? `Комплект: ${item.kit}` : '',
-    `Честно о минусах: ${item.defects || 'нет'}`,
+    `Недостатки: ${item.defects || 'нет'}`,
     item.description ? `\n${item.description}` : '',
     item.city ? `\nГород: ${item.city}` : '',
     item.contact ? `Связь: ${item.contact}` : '',
@@ -107,7 +107,7 @@ export function createAvitoText(item: Item) {
     `Состояние: ${item.condition} (грейд ${item.grade})`,
     item.battery ? `Батарея: ${item.battery}` : '',
     item.kit ? `Комплект: ${item.kit}` : '',
-    item.defects ? `Нюансы: ${item.defects}` : ''
+    item.defects ? `Недостатки: ${item.defects}` : ''
   ].filter(line => line !== '').join('\n').replace(/\n{3,}/g, '\n\n').trim();
 }
 

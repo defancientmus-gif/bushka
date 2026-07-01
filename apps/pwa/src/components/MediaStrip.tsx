@@ -136,7 +136,7 @@ export function MediaStrip({ media, onReorder, onRemove }: {
       {drag && (
         <div className={`strip-trash ${drag.del ? 'armed' : ''}`} ref={trashRef}>
           <TrashIcon size={17} />
-          {drag.del ? 'Отпусти — убрать' : 'Перетащи сюда, чтобы убрать'}
+          {drag.del ? 'Отпустите, чтобы удалить' : 'Перетащите сюда, чтобы удалить'}
         </div>
       )}
     </div>

@@ -144,7 +144,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     if (changed) void pushListing(changed); // витрина видит новый статус (sold уходит)
     if (status === 'sold' && target && toNum(target.costPrice) > 0) {
       const margin = toNum(target.price) - toNum(target.costPrice);
-      showToast(margin >= 0 ? `Продано · +${formatMoney(margin)} в карман` : `Продано · ${formatMoney(margin)}`);
+      showToast(margin >= 0 ? `Продано · прибыль +${formatMoney(margin)}` : `Продано · ${formatMoney(margin)}`);
     } else {
       showToast(statusLabels[status]);
     }
@@ -183,7 +183,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   const addTxn = useCallback((kind: TxnKind, amount: number, note: string) => {
     if (!amount || amount <= 0) {
-      showToast('Введи сумму');
+      showToast('Введите сумму');
       return;
     }
     setTxns(current => {

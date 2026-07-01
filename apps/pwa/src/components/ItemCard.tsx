@@ -129,11 +129,11 @@ export function ItemCard({
         {variant === 'own' && light && (
           <p className={`navar-line ${light}`}>
             <span className="light-dot" aria-hidden="true" />
-            Навар {margin >= 0 ? `+${formatMoney(margin)}` : formatMoney(margin)} · {lightLabel[light]}
+            Прибыль {margin >= 0 ? `+${formatMoney(margin)}` : formatMoney(margin)} · {lightLabel[light]}
           </p>
         )}
 
-        {stale && <p className="stale-line">Висит {age} {pluralize(age, 'день', 'дня', 'дней')} · подвинь цену, освободи кэш</p>}
+        {stale && <p className="stale-line">На площадке {age} {pluralize(age, 'день', 'дня', 'дней')} · пересмотрите цену</p>}
 
         {item.defects && <p className="defect-line">Нюансы: {item.defects}</p>}
 
@@ -157,7 +157,7 @@ export function ItemCard({
 
         {variant === 'market' && (
           <div className="card-actions">
-            <button type="button" className="solid-btn accent grow" onClick={onBuy}>Беру</button>
+            <button type="button" className="solid-btn accent grow" onClick={onBuy}>Купить</button>
             <button type="button" className="ghost-btn" onClick={onQueue}>Запрос</button>
           </div>
         )}
@@ -170,16 +170,16 @@ export function ItemCard({
               </select>
             </span>
             <button type="button" className="icon-btn" onClick={onEdit} aria-label="Изменить"><PencilIcon size={16} /></button>
-            <button type="button" className="icon-btn" onClick={onExport} aria-label="Репост"><SendIcon size={16} /></button>
+            <button type="button" className="icon-btn" onClick={onExport} aria-label="Поделиться"><SendIcon size={16} /></button>
             <button type="button" className={`icon-btn danger ${confirm ? 'confirm' : ''}`} onClick={handleDelete} aria-label="Удалить">
-              {confirm ? 'Точно?' : <TrashIcon size={16} />}
+              {confirm ? 'Удалить?' : <TrashIcon size={16} />}
             </button>
           </div>
         )}
 
         {isPreview && (
           <div className="card-actions">
-            <button type="button" className="ghost-btn wide" onClick={onExport}><SendIcon size={16} />Текст репоста</button>
+            <button type="button" className="ghost-btn wide" onClick={onExport}><SendIcon size={16} />Поделиться</button>
           </div>
         )}
       </div>

@@ -50,7 +50,7 @@ export function ProfileView({ onExport, onEdit }: { onExport: (item: Item) => vo
     event.target.value = '';
     if (!file) return;
     if (await importBackup(file)) {
-      showToast('Загружено — обновляю');
+      showToast('Загружено, обновляем');
       window.setTimeout(() => window.location.reload(), 600);
     } else {
       showToast('Не удалось прочитать файл');
@@ -69,9 +69,9 @@ export function ProfileView({ onExport, onEdit }: { onExport: (item: Item) => vo
     }
     try {
       await navigator.clipboard.writeText(text);
-      showToast('Шаблон скопирован — черкни создателю');
+      showToast('Шаблон скопирован — напишите нам');
     } catch {
-      showToast('Расскажи создателю, что улучшить');
+      showToast('Напишите нам, что улучшить');
     }
   }
 
@@ -106,22 +106,22 @@ export function ProfileView({ onExport, onEdit }: { onExport: (item: Item) => vo
 
   // Одна живая фраза — продукт выбирает по приоритету. Не сводка, а голос.
   function sellPhrase() {
-    if (money.sleeping > 0) return `В висяках спит ${formatMoney(money.sleeping)} (${money.staleCount}) — подвинь цену, освободи кэш`;
+    if (money.sleeping > 0) return `${formatMoney(money.sleeping)} в товарах, которые долго не продаются (${money.staleCount}) — пересмотрите цену`;
     if (money.streak >= 2) return `Серия ${money.streak} ${pluralize(money.streak, 'день', 'дня', 'дней')} · сегодня ${money.todayCount} ${pluralize(money.todayCount, 'сделка', 'сделки', 'сделок')}`;
-    if (money.todayCount > 0) return `Сегодня ${money.todayCount} · навар ${formatMoney(money.todayMargin)}`;
-    if (forSale > 0) return `${forSale} в продаже — жди покупателя или выстави ещё`;
-    return 'Выставь первый товар — это минута';
+    if (money.todayCount > 0) return `Сегодня ${money.todayCount} · прибыль ${formatMoney(money.todayMargin)}`;
+    if (forSale > 0) return `${forSale} в продаже — ожидайте покупателя или добавьте товар`;
+    return 'Добавьте первый товар — это займёт минуту';
   }
   function buyPhrase() {
-    if (favItems.length > 0) return `${favItems.length} ${pluralize(favItems.length, 'лот', 'лота', 'лотов')} на примете — не прозевай`;
-    return 'Лайкай лоты на Рынке — соберутся здесь';
+    if (favItems.length > 0) return `${favItems.length} ${pluralize(favItems.length, 'лот', 'лота', 'лотов')} в избранном`;
+    return 'Добавляйте товары в избранное на Рынке';
   }
 
   function buy(item: Item) {
     const href = contactHref(item.contact);
     if (href) {
       window.open(href, '_blank', 'noopener');
-      showToast('Открываю продавца — скажи «беру»');
+      showToast('Открываю контакт продавца');
     } else {
       showToast('Продавец не оставил контакт');
     }
@@ -137,7 +137,7 @@ export function ProfileView({ onExport, onEdit }: { onExport: (item: Item) => vo
     if (!addKind) return;
     const value = toNum(amount);
     if (value <= 0) {
-      showToast('Введи сумму');
+      showToast('Введите сумму');
       return;
     }
     addTxn(addKind, value, note);
@@ -163,7 +163,7 @@ export function ProfileView({ onExport, onEdit }: { onExport: (item: Item) => vo
           <input type="file" accept="application/json" onChange={loadCopy} />
         </label>
       </div>
-      <p className="export-note" style={{ textAlign: 'left' }}>Склад хранится в браузере. Сохрани копию — не потеряешь товары при чистке и перенесёшь на другой телефон. Это рабочий файл для самого приложения, открывать его не нужно — вернуть всё назад можно кнопкой «Загрузить».</p>
+      <p className="export-note" style={{ textAlign: 'left' }}>Склад хранится в браузере. Сохраняйте копию — так вы не потеряете товары при очистке браузера и перенесёте их на другой телефон. Это рабочий файл приложения, открывать его не нужно — восстановить всё можно кнопкой «Загрузить».</p>
 
       <button type="button" className="ghost-btn wide" onClick={feedback}><SendIcon size={16} />Поделиться отзывом</button>
     </>
@@ -189,7 +189,7 @@ export function ProfileView({ onExport, onEdit }: { onExport: (item: Item) => vo
         <div className="reveal">
           <div className="form-grid">
             <Field label="Имя или магазин" wide>
-              <input value={profile.name} onChange={event => updateProfile({ name: event.target.value })} placeholder="Как тебя зовут покупателю" />
+              <input value={profile.name} onChange={event => updateProfile({ name: event.target.value })} placeholder="Ваше имя или магазин" />
             </Field>
             <Field label="Город">
               <input value={profile.city} onChange={event => updateProfile({ city: event.target.value })} placeholder="Симферополь" />
@@ -212,7 +212,7 @@ export function ProfileView({ onExport, onEdit }: { onExport: (item: Item) => vo
         <>
           {/* ОДНО ЖИВОЕ ЧИСЛО */}
           <div className="hero-num">
-            <span className="hero-label">Навар сегодня</span>
+            <span className="hero-label">Прибыль за сегодня</span>
             <strong className={`hero-big ${money.todayMargin > 0 ? 'pos' : ''}`}>{formatMoney(liveToday)}</strong>
             <span className="hero-sub">всего {formatMoney(liveProfit)} · в товаре {formatMoney(liveStock)}</span>
           </div>
@@ -294,7 +294,7 @@ export function ProfileView({ onExport, onEdit }: { onExport: (item: Item) => vo
               ) : (
                 <div className="empty-state">
                   <p>Склад пуст</p>
-                  <small>Во вкладке «Создать» выставишь первый товар за минуту</small>
+                  <small>Добавьте первый товар во вкладке «Создать» — это займёт минуту</small>
                 </div>
               )}
             </div>
@@ -308,7 +308,7 @@ export function ProfileView({ onExport, onEdit }: { onExport: (item: Item) => vo
           <div className="hero-num">
             <span className="hero-label">В избранном</span>
             <strong className="hero-big">{favItems.length}</strong>
-            <span className="hero-sub">{favItems.length ? `${pluralize(favItems.length, 'лот', 'лота', 'лотов')} на примете` : 'пока пусто'}</span>
+            <span className="hero-sub">{favItems.length ? `${pluralize(favItems.length, 'лот', 'лота', 'лотов')} в избранном` : 'пока пусто'}</span>
           </div>
 
           <p className="live-phrase">{buyPhrase()}</p>
@@ -337,7 +337,7 @@ export function ProfileView({ onExport, onEdit }: { onExport: (item: Item) => vo
             {!favItems.length && (
               <div className="empty-state">
                 <p>Пока пусто</p>
-                <small>Лайкай лоты на Рынке — они соберутся здесь</small>
+                <small>Добавляйте товары в избранное на Рынке</small>
               </div>
             )}
           </div>

@@ -70,7 +70,7 @@ export function ItemDetail({ item, favorite, own = false, onFavorite, onBuy, onQ
             </div>
 
             <p className={`defect-line ${item.defects?.trim() ? '' : 'clean'}`}>
-              Нюансы: {item.defects?.trim() || 'нет'}
+              Недостатки: {item.defects?.trim() || 'нет'}
             </p>
 
             {item.status === 'reserved' && item.reservedUntil && (
@@ -108,16 +108,16 @@ export function ItemDetail({ item, favorite, own = false, onFavorite, onBuy, onQ
         {own ? (
           <div className="detail-actions own">
             <span className="own-note">Ваш товар — так его видит покупатель</span>
-            <button type="button" className="ghost-btn grow" onClick={onExport}><SendIcon size={16} />Текст репоста</button>
+            <button type="button" className="ghost-btn grow" onClick={onExport}><SendIcon size={16} />Поделиться</button>
           </div>
         ) : (
           <div className="detail-actions">
             <button type="button" className={`heart-btn-lg ${favorite ? 'on' : ''}`} onClick={onFavorite} aria-pressed={favorite} aria-label={favorite ? 'Убрать из избранного' : 'В избранное'}>
               <HeartIcon size={20} filled={favorite} />
             </button>
-            <button type="button" className="ghost-btn" onClick={onExport} aria-label="Текст репоста"><SendIcon size={16} /></button>
+            <button type="button" className="ghost-btn" onClick={onExport} aria-label="Поделиться"><SendIcon size={16} /></button>
             <button type="button" className="ghost-btn grow" onClick={onQueue}>Запрос</button>
-            <button type="button" className="solid-btn accent grow big" onClick={onBuy}>Беру</button>
+            <button type="button" className="solid-btn accent grow big" onClick={onBuy}>Купить</button>
           </div>
         )}
 

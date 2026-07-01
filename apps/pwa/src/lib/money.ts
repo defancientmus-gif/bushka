@@ -45,7 +45,7 @@ export function marginLight(price?: string, cost?: string): Light | null {
   return margin / c >= 0.12 ? 'green' : 'yellow';
 }
 
-export const lightLabel: Record<Light, string> = { green: 'жирный', yellow: 'тонко', red: 'минус' };
+export const lightLabel: Record<Light, string> = { green: 'высокая', yellow: 'низкая', red: 'убыток' };
 
 export function isToday(ts: number): boolean {
   const d = new Date(ts);

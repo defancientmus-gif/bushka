@@ -34,8 +34,8 @@ export function InstallHint() {
   return (
     <div className="install-hint">
       <div className="install-text">
-        <strong>Поставь на телефон</strong>
-        <small>{isIOS ? 'Поделиться → «На экран „Домой"» — откроется как приложение' : 'Будет как обычное приложение, работает офлайн'}</small>
+        <strong>Установить на телефон</strong>
+        <small>{isIOS ? 'Кнопка «Поделиться» → «На экран Домой» — появится как приложение' : 'Будет как обычное приложение, работает офлайн'}</small>
       </div>
       {canInstall && <button type="button" className="solid-btn" onClick={install}>Установить</button>}
       <button type="button" className="icon-btn" onClick={close} aria-label="Скрыть"><CloseIcon size={16} /></button>

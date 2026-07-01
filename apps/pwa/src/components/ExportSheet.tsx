@@ -43,7 +43,7 @@ export function ExportSheet({ item, onClose }: { item: Item; onClose: () => void
       item.description,
       item.battery ? `Батарея: ${item.battery}` : '',
       item.kit ? `Комплект: ${item.kit}` : '',
-      item.defects ? `Нюансы: ${item.defects}` : '',
+      item.defects ? `Недостатки: ${item.defects}` : '',
       `Состояние: ${item.condition}${item.grade ? ` · грейд ${item.grade}` : ''}`
     ].filter(Boolean).join('\n');
     return [
@@ -66,11 +66,11 @@ export function ExportSheet({ item, onClose }: { item: Item; onClose: () => void
     if (busy) return;
     setBusy(true);
     try {
-      showToast(hasPhotos ? 'Готовлю фото…' : 'Открываю «Поделиться»…');
+      showToast(hasPhotos ? 'Подготовка фото…' : 'Открываю «Поделиться»…');
       const files = hasPhotos ? await mediaToFiles(photos) : [];
       const result = await shareItem({ title: item.title || 'Товар на БУ.шке', text, files });
-      if (result === 'shared-files') showToast('Фото и текст ушли — выбери канал');
-      else if (result === 'shared-text') showToast(hasPhotos ? 'Текст ушёл, фото добавь вручную' : 'Текст ушёл — выбери канал');
+      if (result === 'shared-files') showToast('Фото и текст готовы — выберите канал');
+      else if (result === 'shared-text') showToast(hasPhotos ? 'Текст готов, добавьте фото вручную' : 'Текст готов — выберите канал');
       else if (result === 'cancelled') { /* user closed the share sheet */ }
       else { await copyText(text, 'Текст скопирован'); }
     } finally {
@@ -95,7 +95,7 @@ export function ExportSheet({ item, onClose }: { item: Item; onClose: () => void
         <div className="sheet-grip" aria-hidden="true" />
         <div className="sheet-head">
           <div>
-            <p className="eyebrow">репост</p>
+            <p className="eyebrow">поделиться</p>
             <h2 id="exportTitle">{item.title || 'Товар'}</h2>
           </div>
           <button type="button" className="icon-btn" onClick={onClose} aria-label="Закрыть">
@@ -108,10 +108,10 @@ export function ExportSheet({ item, onClose }: { item: Item; onClose: () => void
             {photos.map(asset => <img key={asset.id} src={asset.src} alt="" />)}
           </div>
         ) : (
-          <p className="export-note">У лота нет фото — уйдёт только текст.</p>
+          <p className="export-note">У товара нет фото — отправится только текст.</p>
         )}
 
-        <div className="segmented" role="tablist" aria-label="Куда репостим">
+        <div className="segmented" role="tablist" aria-label="Куда отправить">
           <span className="seg-indicator" style={{ transform: `translateX(${index * 100}%)` }} aria-hidden="true" />
           {targets.map(value => (
             <button
@@ -143,15 +143,15 @@ export function ExportSheet({ item, onClose }: { item: Item; onClose: () => void
                 <DownloadIcon size={18} />Скачать фото для Avito
               </button>
             )}
-            <p className="export-note">Жми поле — копируется. Вставь в форму Avito, фото загрузи там же.</p>
+            <p className="export-note">Нажмите на поле, чтобы скопировать. Вставьте в форму Avito, фото загрузите там же.</p>
           </>
         ) : (
           <>
-            <textarea className="export-text" value={text} readOnly rows={7} aria-label="Текст репоста" />
+            <textarea className="export-text" value={text} readOnly rows={7} aria-label="Текст объявления" />
             {canShare ? (
               <>
                 <button type="button" className="solid-btn wide big" onClick={share} disabled={busy}>
-                  <SendIcon size={18} />{busy ? 'Готовлю…' : hasPhotos ? 'Поделиться (фото + текст)' : 'Поделиться'}
+                  <SendIcon size={18} />{busy ? 'Подготовка…' : hasPhotos ? 'Поделиться (фото + текст)' : 'Поделиться'}
                 </button>
                 <div className="sheet-actions">
                   <button type="button" className="ghost-btn grow" onClick={() => copyText(text, 'Текст скопирован')}><CopyIcon size={16} />Текст</button>
@@ -159,8 +159,8 @@ export function ExportSheet({ item, onClose }: { item: Item; onClose: () => void
                 </div>
                 <p className="export-note">
                   {target === 'tg'
-                    ? 'В окне «Поделиться» выбери свой канал или чат — фото и подпись уйдут вместе.'
-                    : 'Выбери, кому отправить — фото и текст уйдут вместе.'}
+                    ? 'В окне «Поделиться» выберите канал или чат — фото и подпись отправятся вместе.'
+                    : 'Выберите, кому отправить — фото и текст отправятся вместе.'}
                 </p>
               </>
             ) : (
@@ -173,7 +173,7 @@ export function ExportSheet({ item, onClose }: { item: Item; onClose: () => void
                     <DownloadIcon size={16} />Скачать фото
                   </button>
                 )}
-                <p className="export-note">Открой БУ.шку на телефоне — там фото уйдут в Telegram одним тапом.</p>
+                <p className="export-note">Откройте БУ.шку на телефоне — фото отправятся в Telegram одним нажатием.</p>
               </>
             )}
           </>

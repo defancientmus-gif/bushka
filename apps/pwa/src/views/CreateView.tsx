@@ -77,21 +77,21 @@ export function CreateView({ editItem, onExport, onCreated }: { editItem?: Item 
     // Best-effort: pull any direct image links from the pasted text.
     const urls = extractImageUrls(importValue);
     if (urls.length) {
-      showToast('Разобрал · тяну фото…');
+      showToast('Готово · загружаю фото…');
       const loaded = (await Promise.all(urls.map(urlToMedia))).filter((asset): asset is MediaAsset => asset != null);
       if (loaded.length) {
         appendMedia(loaded);
-        showToast(`Разобрал · ${loaded.length} фото`);
+        showToast(`Готово · ${loaded.length} фото`);
         return;
       }
     }
-    showToast(parsed.sourceUrl ? 'Текст готов · фото вставь или добавь' : 'Разобрал текст');
+    showToast(parsed.sourceUrl ? 'Текст готов · добавьте фото или видео' : 'Текст готов');
   }
 
   // «Нажал — перенёс»: из ссылки на пост Телеграма тянем описание, цену, фото и видео.
   async function importFromTelegram(link: string) {
     setBusyPhoto(true);
-    showToast('Тяну из Телеграма…');
+    showToast('Загружаю из Телеграма…');
     const result = await fetchTelegramPost(link);
 
     if (!result.ok) {
@@ -100,8 +100,8 @@ export function CreateView({ editItem, onExport, onCreated }: { editItem?: Item 
       const parsed = parseImport(importValue);
       setDraft(current => ({ ...current, ...parsed, sourceUrl: link, city: parsed.city || current.city || profile.city }));
       showToast(result.reason === 'unavailable'
-        ? 'Пост удалён или закрыт в Телеграме — вставь фото/видео вручную'
-        : 'Телеграм-перенос пока недоступен — вставь фото/видео вручную');
+        ? 'Пост удалён или закрыт в Телеграме — добавьте фото или видео вручную'
+        : 'Перенос из Телеграма пока недоступен — добавьте фото или видео вручную');
       return;
     }
     const post = result.post;
@@ -148,7 +148,7 @@ export function CreateView({ editItem, onExport, onCreated }: { editItem?: Item 
     const clips = collected.filter(asset => asset.kind === 'video').length;
     const photos = collected.length - clips;
     const media = [photos ? `${photos} фото` : '', clips ? 'видео' : ''].filter(Boolean).join(' · ');
-    showToast(media ? `Перенёс из Телеграма · ${media}` : 'Перенёс описание · медиа добавь вручную');
+    showToast(media ? `Перенесено из Телеграма · ${media}` : 'Описание перенесено · добавьте медиа вручную');
   }
 
   async function loadClipboardMedia(): Promise<boolean> {
@@ -194,7 +194,7 @@ export function CreateView({ editItem, onExport, onCreated }: { editItem?: Item 
       setImportValue(text);
       showToast('Текст вставлен');
     } catch {
-      showToast('Разреши доступ к буферу или вставь вручную');
+      showToast('Разрешите доступ к буферу или вставьте вручную');
     }
   }
 
@@ -219,7 +219,7 @@ export function CreateView({ editItem, onExport, onCreated }: { editItem?: Item 
     const videos = list.filter(file => file.type.startsWith('video/'));
     const images = list.filter(file => file.type.startsWith('image/'));
     setBusyPhoto(true);
-    showToast(videos.length ? 'Собираю петлю из видео…' : 'Обрабатываю фото');
+    showToast(videos.length ? 'Обрабатываю видео…' : 'Обрабатываю фото');
 
     const collected: MediaAsset[] = [];
     let failed = 0;
@@ -239,9 +239,9 @@ export function CreateView({ editItem, onExport, onCreated }: { editItem?: Item 
 
     const clips = collected.filter(asset => asset.kind === 'video').length;
     const photos = collected.length - clips;
-    if (clips) showToast(`Петля готова${photos ? ` · ${photos} фото` : ''}`);
+    if (clips) showToast(`Видео обработано${photos ? ` · ${photos} фото` : ''}`);
     else if (photos) showToast(`${photos} фото готово`);
-    else if (failed) showToast('Видео не отдало кадры — в камере iPhone поставь «Наиболее совместимый»');
+    else if (failed) showToast('Видео не обработалось — в камере iPhone включите формат «Наиболее совместимый»');
   }
 
   const preview = useMemo<Item>(() => ({
@@ -284,7 +284,7 @@ export function CreateView({ editItem, onExport, onCreated }: { editItem?: Item 
           <span className="hero-icon"><BoltIcon size={18} /></span>
           <div>
             <strong>Перенос с площадки</strong>
-            <small>Ссылка из Телеграма — перенесу фото, видео, описание и цену одним нажатием. Или вставь текст, скрин, фото, видео — подхвачу.</small>
+            <small>Ссылка из Телеграма — перенесу фото, видео, описание и цену одним нажатием. Или вставьте текст, скриншот, фото или видео.</small>
           </div>
         </div>
         <textarea
@@ -292,7 +292,7 @@ export function CreateView({ editItem, onExport, onCreated }: { editItem?: Item 
           onChange={event => setImportValue(event.target.value)}
           onPaste={handleTextareaPaste}
           rows={3}
-          placeholder="Вставь ссылку, текст или скрин объявления…"
+          placeholder="Вставьте ссылку, текст или скриншот объявления…"
         />
         <div className="import-hero-actions">
           <button type="button" className="ghost-btn" onClick={handlePaste}><ClipboardIcon size={16} />Вставить</button>
@@ -307,9 +307,9 @@ export function CreateView({ editItem, onExport, onCreated }: { editItem?: Item 
         )}
         <label className="upload-btn" htmlFor="media">
           <CameraIcon size={18} />
-          {busyPhoto ? 'Собираю…' : `Фото / видео · ${draft.media.length}/8`}
+          {busyPhoto ? 'Обработка…' : `Фото / видео · ${draft.media.length}/8`}
         </label>
-        {draft.media.length > 1 && <p className="strip-hint">Листай — посмотреть; зажми и тащи — поменять порядок или убрать. Первое фото — обложка.</p>}
+        {draft.media.length > 1 && <p className="strip-hint">Листайте, чтобы посмотреть; зажмите и перетащите, чтобы изменить порядок или удалить. Первое фото — обложка.</p>}
       </div>
 
       <div className="form-grid">
@@ -349,8 +349,8 @@ export function CreateView({ editItem, onExport, onCreated }: { editItem?: Item 
       <div className={`details ${showDetails ? 'open' : ''}`}>
         <div className="details-inner">
           <div className="form-grid">
-            <Field label="Закупка" hint="для себя">
-              <input value={draft.costPrice ?? ''} onChange={event => update('costPrice', event.target.value)} inputMode="numeric" placeholder="за сколько взял" />
+            <Field label="Закупка" hint="только для вас">
+              <input value={draft.costPrice ?? ''} onChange={event => update('costPrice', event.target.value)} inputMode="numeric" placeholder="цена закупки" />
             </Field>
             <Field label="Грейд">
               <select value={draft.grade} onChange={event => update('grade', event.target.value as DraftItem['grade'])}>
@@ -395,7 +395,7 @@ export function CreateView({ editItem, onExport, onCreated }: { editItem?: Item 
         <ItemCard item={preview} variant="preview" onExport={() => onExport(preview)} />
       </div>
 
-      <button type="button" className="solid-btn wide big" onClick={save}>{editing ? 'Сохранить изменения' : 'Сохранить в склад'}</button>
+      <button type="button" className="solid-btn wide big" onClick={save}>{editing ? 'Сохранить изменения' : 'Сохранить'}</button>
         </aside>
       </div>
     </section>

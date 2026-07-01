@@ -71,7 +71,7 @@ export function MarketView({ onExport }: { onExport: (item: Item) => void }) {
     const href = contactHref(item.contact);
     if (href) {
       window.open(href, '_blank', 'noopener');
-      showToast('Открываю продавца — скажи «беру»');
+      showToast('Открываю контакт продавца');
     } else {
       showToast('Продавец не оставил контакт');
     }
@@ -86,7 +86,7 @@ export function MarketView({ onExport }: { onExport: (item: Item) => void }) {
     <section className="view market-view">
       <div className="search-box">
         <SearchIcon size={18} />
-        <input value={query} onChange={event => setQuery(event.target.value)} type="search" placeholder="Что ищешь — телефон, ноут…" />
+        <input value={query} onChange={event => setQuery(event.target.value)} type="search" placeholder="Что ищете — телефон, ноутбук…" />
         <button type="button" className={`search-filter ${activeCount ? 'on' : ''}`} onClick={() => setFilterOpen(true)} aria-label="Фильтр">
           Фильтр{activeCount > 0 && <i>{activeCount}</i>}
         </button>
@@ -110,7 +110,7 @@ export function MarketView({ onExport }: { onExport: (item: Item) => void }) {
         {!visible.length && (
           <div className="empty-state">
             <p>Под фильтр ничего нет</p>
-            <small>{activeCount || query ? 'Ослабь фильтр или поиск' : 'Рынок пока пуст'}</small>
+            <small>{activeCount || query ? 'Смягчите фильтр или поиск' : 'Рынок пока пуст'}</small>
             {(activeCount || query) && (
               <button type="button" className="ghost-btn" style={{ marginTop: 12 }} onClick={resetAll}>Сбросить всё</button>
             )}

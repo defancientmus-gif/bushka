@@ -1,102 +1,120 @@
 :root {
-  --bg: #eef1f5;
-  --surface: #ffffff;
-  --surface-2: #f3f5f9;
-  --ink: #14161c;
-  --ink-2: #565d70;
-  --ink-3: #99a0b2;
-  --line: rgba(20, 22, 32, 0.09);
+  /* Apple Store: зал залит тёплым белым светом (~3500K), интерьер почти без цвета —
+     цвет дают сами товары на столах. Тепло живёт в свете, не в краске. */
+  --bg: oklch(0.962 0.007 85);
+  --surface: oklch(0.99 0.004 90);
+  --surface-2: oklch(0.945 0.008 85);
+  --ink: oklch(0.19 0.008 75);
+  --ink-2: oklch(0.45 0.01 78);
+  --ink-3: oklch(0.62 0.01 80);
+  --line: oklch(0.19 0.008 75 / 0.09);
 
-  --accent: #4f5bf2;
-  --grad-1: #6d5cf6;
-  --grad-2: #4f7ff2;
-  --grad-3: #22d3ee;
-  --grad: linear-gradient(115deg, var(--grad-1), var(--grad-2) 55%, var(--grad-3));
+  /* Акцент — space black: анодированный тёмный алюминий. Премиум несёт материал, не краска. */
+  --accent: oklch(0.27 0.012 75);
 
-  --flow-a: rgba(109, 92, 246, 0.55);
-  --flow-b: rgba(79, 127, 242, 0.5);
-  --flow-c: rgba(34, 211, 238, 0.45);
+  /* Статусы — спокойные системные, единственный цвет в «зале». */
+  --ok-fg: oklch(0.58 0.14 150);
+  --ok-bg: oklch(0.58 0.14 150 / 0.12);
+  --warn-fg: oklch(0.66 0.13 70);
+  --warn-bg: oklch(0.66 0.13 70 / 0.14);
+  --danger-fg: oklch(0.58 0.19 27);
+  --danger-bg: oklch(0.58 0.19 27 / 0.12);
+  --info-fg: oklch(0.58 0.11 240);
+  --lot-fg: oklch(0.5 0.1 290);
+  --lot-bg: oklch(0.5 0.1 290 / 0.11);
 
-  --st-available: #16b364;
-  --st-reserved: #f59e0b;
-  --st-sold: #64748b;
-  --st-exchange: #3b82f6;
-  --st-lot: #8b5cf6;
+  --st-available: var(--ok-fg);
+  --st-reserved: var(--warn-fg);
+  --st-sold: oklch(0.55 0.01 80);
+  --st-exchange: var(--info-fg);
+  --st-lot: var(--lot-fg);
 
-  --r-lg: 24px;
+  --r-lg: 22px;
   --r-md: 16px;
   --r-sm: 12px;
 
-  --shadow-sm: 0 1px 2px rgba(20, 22, 40, 0.04), 0 4px 14px rgba(20, 22, 40, 0.05);
-  --shadow-md: 0 8px 28px rgba(28, 30, 60, 0.12);
-  --shadow-lg: 0 20px 54px rgba(24, 26, 52, 0.22);
+  /* Тёплый свет сверху → тёплая, мягкая тень. */
+  --shadow-sm: 0 1px 2px oklch(0.3 0.02 70 / 0.06), 0 4px 14px oklch(0.3 0.02 70 / 0.05);
+  --shadow-md: 0 8px 26px oklch(0.3 0.02 70 / 0.12);
+  --shadow-lg: 0 18px 46px oklch(0.3 0.02 70 / 0.2);
+
+  /* Стеклянно-керамическая карточка (рецепт GLASS_STYLE_PROMPT, уровень 1) в тёплом свете:
+     градиент + внутренний блик (толщина стекла) + тёплая внешняя тень (отрыв от фона).
+     Без backdrop-filter — карточек на экране много разом, это дорого по GPU. */
+  --card-glass-bg: linear-gradient(158deg, oklch(1 0 0 / .84) 0%, oklch(0.965 0.012 88 / .72) 100%);
+  --card-glass-border: oklch(1 0 0 / .70);
+  --card-glass-shadow: inset 0 1px 0 oklch(1 0 0 / .94), 0 4px 13px -3px oklch(0.35 0.03 70 / .12);
+  --card-glass-shadow-hover: inset 0 1px 0 oklch(1 0 0 / .94), 0 10px 26px -6px oklch(0.35 0.03 70 / .17);
+  --card-glass-shadow-active: inset 0 1px 0 oklch(1 0 0 / .94), 0 2px 8px -3px oklch(0.35 0.03 70 / .09);
 
   --solid: var(--ink);
   --solid-fg: #ffffff;
-  --page-grad: linear-gradient(180deg, #f1f3f8 0%, #e7eaf1 100%);
-  --topbar-fade: linear-gradient(180deg, rgba(238, 241, 245, 0.92) 40%, rgba(238, 241, 245, 0));
-  --glass: rgba(255, 255, 255, 0.82);
-  --cta-shadow: rgba(79, 91, 242, 0.3);
-  --focus-ring: rgba(79, 91, 242, 0.12);
-  --warn-fg: #b45309;
-  --warn-bg: #fff7ed;
-  --ok-fg: #16a34a;
-  --ok-bg: #e9fbf1;
+  /* Свет из потолка: сверху зал чуть светлее и теплее, книзу спокойнее. Статично, дёшево. */
+  --page-grad: linear-gradient(180deg, oklch(0.978 0.009 88) 0%, oklch(0.952 0.007 82) 100%);
+  --topbar-fade: linear-gradient(180deg, oklch(0.975 0.008 87 / 0.92) 40%, oklch(0.975 0.008 87 / 0));
+  --glass: oklch(0.99 0.004 90 / 0.82);
+  --cta-shadow: oklch(0.27 0.012 75 / 0.24);
+  --focus-ring: oklch(0.27 0.012 75 / 0.12);
 
   color-scheme: light;
 }
 
-/* ---------- Theme: Изумруд · золото (premium dark) ---------- */
+/* ---------- Theme: Изумруд · золото (тот же плоский язык, в тёмном) ---------- */
 html[data-theme="emerald"] {
-  --bg: #08120e;
-  --surface: #122019;
-  --surface-2: #0e1a14;
-  --ink: #eef2ec;
-  --ink-2: #b6c5bb;
-  --ink-3: #7c9388;
-  --line: rgba(216, 181, 106, 0.16);
+  --bg: oklch(0.11 0.015 155);
+  --surface: oklch(0.19 0.025 155);
+  --surface-2: oklch(0.16 0.022 155);
+  --ink: oklch(0.95 0.01 145);
+  --ink-2: oklch(0.8 0.02 145);
+  --ink-3: oklch(0.63 0.02 150);
+  --line: oklch(0.75 0.06 80 / 0.16);
 
-  --accent: #d8b56a;
-  --grad-1: #e6cd8b;
-  --grad-2: #d8b56a;
-  --grad-3: #c79a4f;
-  --grad: linear-gradient(120deg, var(--grad-1), var(--grad-2) 55%, var(--grad-3));
+  /* Один плоский акцент — золото, без блика и без блендов. */
+  --accent: oklch(0.78 0.1 80);
 
-  --flow-a: rgba(216, 181, 106, 0.5);
-  --flow-b: rgba(31, 143, 95, 0.4);
-  --flow-c: rgba(216, 181, 106, 0.38);
+  --ok-fg: oklch(0.78 0.14 162);
+  --ok-bg: oklch(0.5 0.1 155 / 0.18);
+  --warn-fg: oklch(0.78 0.1 70);
+  --warn-bg: oklch(0.7 0.12 65 / 0.16);
+  --danger-fg: oklch(0.72 0.12 25);
+  --danger-bg: oklch(0.5 0.15 25 / 0.16);
+  --info-fg: oklch(0.72 0.09 200);
+  --lot-fg: oklch(0.72 0.1 300);
+  --lot-bg: oklch(0.72 0.1 300 / 0.16);
 
   --solid: var(--accent);
-  --solid-fg: #26200e;
-  --page-grad: linear-gradient(180deg, #08120e 0%, #0a1712 100%);
-  --topbar-fade: linear-gradient(180deg, rgba(8, 18, 14, 0.92) 40%, rgba(8, 18, 14, 0));
-  --glass: rgba(14, 26, 20, 0.82);
-  --cta-shadow: rgba(216, 181, 106, 0.26);
-  --focus-ring: rgba(216, 181, 106, 0.22);
-  --warn-fg: #e8b06a;
-  --warn-bg: rgba(232, 161, 75, 0.14);
-  --ok-fg: #6fd6a0;
-  --ok-bg: rgba(31, 143, 95, 0.18);
+  --solid-fg: oklch(0.2 0.03 80);
+  --page-grad: var(--bg);
+  --topbar-fade: linear-gradient(180deg, oklch(0.11 0.015 155 / 0.92) 40%, oklch(0.11 0.015 155 / 0));
+  --glass: oklch(0.16 0.022 155 / 0.82);
+  --cta-shadow: oklch(0.78 0.1 80 / 0.26);
+  --focus-ring: oklch(0.78 0.1 80 / 0.22);
 
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3), 0 4px 14px rgba(0, 0, 0, 0.3);
-  --shadow-md: 0 8px 28px rgba(0, 0, 0, 0.45);
-  --shadow-lg: 0 20px 54px rgba(0, 0, 0, 0.6);
+  --shadow-sm: 0 1px 2px oklch(0 0 0 / 0.32), 0 4px 14px oklch(0 0 0 / 0.28);
+  --shadow-md: 0 8px 24px oklch(0 0 0 / 0.42);
+  --shadow-lg: 0 18px 48px oklch(0 0 0 / 0.56);
+
+  /* Тёмное стекло — не инверсия светлого, другой материал (см. GLASS_STYLE_PROMPT):
+     однородное полупрозрачное на backdrop-blur, блик тонирован золотом — «Изумруд·золото». */
+  /* Стекло без backdrop-blur (лаг на ленте): чуть плотнее заливка + двухслойная тень = тот же отрыв. */
+  --card-glass-bg: oklch(1 0 0 / 0.1);
+  --card-glass-border: oklch(1 0 0 / 0.13);
+  --card-glass-shadow: inset 0 1px 0 oklch(0.85 0.05 80 / 0.22), 0 2px 6px oklch(0 0 0 / 0.28), 0 10px 26px oklch(0 0 0 / 0.22);
+  --card-glass-shadow-hover: inset 0 1px 0 oklch(0.85 0.05 80 / 0.26), 0 6px 18px oklch(0 0 0 / 0.4), 0 16px 36px oklch(0 0 0 / 0.26);
+  --card-glass-shadow-active: inset 0 1px 0 oklch(0.85 0.05 80 / 0.2), 0 1px 6px oklch(0 0 0 / 0.24);
 
   color-scheme: dark;
 }
-html[data-theme="emerald"] .hero-icon { background: linear-gradient(135deg, rgba(216, 181, 106, 0.18), rgba(31, 143, 95, 0.16)); }
-html[data-theme="emerald"] .tag.grade { background: rgba(216, 181, 106, 0.14); color: var(--accent); }
-html[data-theme="emerald"] .tag.deal { background: rgba(216, 181, 106, 0.12); color: #e2c07d; }
-html[data-theme="emerald"] .tag.delivery { background: rgba(31, 143, 95, 0.16); color: #6fd6a0; }
-html[data-theme="emerald"] .money-hero .pos { color: #6fd6a0; }
-html[data-theme="emerald"] .money-hero .neg { color: #e98c86; }
-html[data-theme="emerald"] .hero-big.pos { color: oklch(0.82 0.13 162); }
-html[data-theme="emerald"] .card-media { background: #0e1a14; }
-html[data-theme="emerald"] .card-media.status-available { background: linear-gradient(135deg, #14281d, #0f1e16); }
-html[data-theme="emerald"] .card-media.status-reserved { background: linear-gradient(135deg, #2a2113, #1b150d); }
-html[data-theme="emerald"] .card-media.status-sold { background: linear-gradient(135deg, #1b2420, #121a16); }
-html[data-theme="emerald"] .card-media.status-exchange { background: linear-gradient(135deg, #15243a, #101a2a); }
-html[data-theme="emerald"] .card-media.status-lot { background: linear-gradient(135deg, #221a33, #150f24); }
+html[data-theme="emerald"] .hero-icon { background: oklch(0.78 0.1 80 / 0.14); }
+html[data-theme="emerald"] .tag.grade { background: oklch(0.78 0.1 80 / 0.14); color: var(--accent); }
+html[data-theme="emerald"] .tag.deal { background: oklch(0.78 0.1 80 / 0.12); color: var(--accent); }
+html[data-theme="emerald"] .tag.delivery { background: var(--ok-bg); color: var(--ok-fg); }
+html[data-theme="emerald"] .card-media { background: var(--surface-2); }
+html[data-theme="emerald"] .card-media.status-available { background: oklch(0.24 0.045 155); }
+html[data-theme="emerald"] .card-media.status-reserved { background: oklch(0.24 0.045 65); }
+html[data-theme="emerald"] .card-media.status-sold { background: oklch(0.24 0.01 155); }
+html[data-theme="emerald"] .card-media.status-exchange { background: oklch(0.24 0.045 220); }
+html[data-theme="emerald"] .card-media.status-lot { background: oklch(0.24 0.045 300); }
 
 * { box-sizing: border-box; }
 
@@ -108,50 +126,23 @@ body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Inter, system-ui, sans-serif;
   color: var(--ink);
-  background: var(--page-grad);
-  background-attachment: fixed;
+  background: var(--bg);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
   overflow-y: scroll;
 }
-
-button { font-family: inherit; }
-
-/* ---------- Animated background ----------
-   Soft drifting lines — "карточки дрейфуют в облачной памяти".
-   Only transform/opacity animate, no moving blur → phone stays cool. */
-.flow-lines {
+/* Градиент — фиксированным слоем-подложкой, НЕ background-attachment:fixed на body:
+   тот на мобиле перерисовывает градиент каждый кадр скролла (дёргает ленту). */
+body::before {
+  content: '';
   position: fixed;
-  inset: -12%;
-  z-index: 0;
-  overflow: hidden;
+  inset: 0;
+  z-index: -1;
+  background: var(--page-grad);
   pointer-events: none;
 }
-.flow-lines svg { width: 100%; height: 100%; }
-.flow-lines svg g { animation: flowdrift 22s ease-in-out infinite alternate; }
-.flow-line { stroke-width: 2.2; stroke-linecap: round; }
-.f1 { opacity: 0.45; animation: linepulse 9s ease-in-out infinite; }
-.f2 { opacity: 0.36; animation: linepulse 12s ease-in-out infinite reverse; }
-.f3 { opacity: 0.42; animation: linepulse 14s ease-in-out infinite; }
-.f4 { opacity: 0.3; animation: linepulse 11s ease-in-out infinite reverse; }
-.flow-glow {
-  position: absolute;
-  width: 72vmax;
-  height: 72vmax;
-  left: 50%;
-  top: -22%;
-  transform: translateX(-50%);
-  background: radial-gradient(circle at center, rgba(99, 102, 241, 0.18), transparent 60%);
-  animation: glowpulse 12s ease-in-out infinite alternate;
-}
-@keyframes flowdrift { from { transform: translate3d(-10px, -14px, 0); } to { transform: translate3d(12px, 16px, 0); } }
-@keyframes linepulse { 0%, 100% { opacity: 0.26; } 50% { opacity: 0.5; } }
-@keyframes glowpulse { from { opacity: 0.6; } to { opacity: 1; } }
 
-/* Pause background motion while a sheet is open (no work under an overlay) */
-.app:has(.sheet-backdrop) .flow-lines svg g,
-.app:has(.sheet-backdrop) .flow-line,
-.app:has(.sheet-backdrop) .flow-glow { animation-play-state: paused; }
+button { font-family: inherit; }
 
 /* ---------- Shell ---------- */
 .app {
@@ -180,7 +171,7 @@ button { font-family: inherit; }
   width: 34px;
   height: 34px;
   border-radius: 11px;
-  background: var(--grad);
+  background: var(--accent);
   color: #fff;
   font-size: 13px;
   font-weight: 800;
@@ -389,28 +380,44 @@ button { font-family: inherit; }
 /* ---------- Feed + cards ---------- */
 /* Вертикальные карточки — плотная сетка, колонки на 1fr заполняют всю ширину */
 /* (без пустых зон справа). Растёт с шириной: 2 → 3 → 4. */
-.feed-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
-@media (min-width: 560px) { .feed-grid { grid-template-columns: repeat(3, 1fr); gap: 14px; } }
-@media (min-width: 900px) { .feed-grid { grid-template-columns: repeat(4, 1fr); } }
+/* Плотность Авито без шума: 2 колонки на телефоне (2×2 — все четыре в глаза),
+   карточки шире за счёт лёгкого выезда в поля (-5px) и зазора 14px. */
+/* Карточки пошире (слово Жени: 2×2 на телефоне, «крайние не раскладывать»): 2 колонки,
+   лёгкий вылет в поля даёт +пространство; квадрат-превью делает их ниже и щедрее.
+   Дальше не мельчат — максимум 3 крупные колонки. */
+.feed-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-inline: -6px; }
+@media (min-width: 560px) { .feed-grid { grid-template-columns: repeat(3, 1fr); gap: 16px; margin-inline: 0; } }
 
+/* Стеклянно-керамическое облачко: градиент + внутренний блик + тонированная тень —
+   не плоская плашка с тенью, а тонкое стекло, чуть приподнятое над фоном. */
 .card {
   display: flex;
   flex-direction: column;
-  background: var(--surface);
-  border: 1px solid var(--line);
+  background: var(--card-glass-bg);
+  border: 1px solid var(--card-glass-border);
   border-radius: var(--r-lg);
   overflow: hidden;
-  box-shadow: var(--shadow-sm);
-  animation: cardin 0.5s both cubic-bezier(0.2, 0.8, 0.2, 1);
-  transition: transform 0.25s, box-shadow 0.25s;
+  box-shadow: var(--card-glass-shadow);
+  /* БЕЗ backdrop-filter на карточках ленты: их много разом, блюр на каждой = лаг.
+     «Парение» держит тень+отрыв (hover/active ниже), не блюр. */
+  /* Производительность при сотнях товаров: браузер пропускает вёрстку/отрисовку
+     карточек за пределами экрана. contain-intrinsic-size — оценка высоты, чтобы
+     скролл-бар не прыгал; ключевое слово auto запоминает реальный размер. */
+  content-visibility: auto;
+  contain-intrinsic-size: auto 232px;
+  animation: cardin 0.34s both cubic-bezier(0.22, 1, 0.36, 1);
+  transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.24s cubic-bezier(0.22, 1, 0.36, 1);
 }
-.card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
-.card.preview { box-shadow: var(--shadow-md); }
-@keyframes cardin { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+@media (hover: hover) {
+  .card.openable:hover { transform: translateY(-3px); box-shadow: var(--card-glass-shadow-hover); }
+}
+.card.openable:active { transform: scale(0.985) translateY(0); box-shadow: var(--card-glass-shadow-active); }
+.card.preview { box-shadow: var(--card-glass-shadow-hover); content-visibility: visible; } /* превью одно, отрыв заметнее */
+@keyframes cardin { from { opacity: 0; transform: translateY(12px) scale(0.98); } to { opacity: 1; transform: none; } }
 
 .card-media {
   position: relative;
-  aspect-ratio: 4 / 5; /* вертикально — под телефонные фото/видео, плотнее ложится */
+  aspect-ratio: 1 / 1; /* квадрат-превью: карточка ниже и «шире» на вид, как на витринах Avito/Ozon */
   display: grid;
   place-items: center;
   background: var(--surface-2);
@@ -427,11 +434,11 @@ button { font-family: inherit; }
   object-fit: cover;
   display: block;
 }
-.card-media.status-available { background: linear-gradient(135deg, #e9fbf1, #d3f3e1); }
-.card-media.status-reserved { background: linear-gradient(135deg, #fff5e4, #ffe7c6); }
-.card-media.status-sold { background: linear-gradient(135deg, #eef1f5, #dfe5ee); }
-.card-media.status-exchange { background: linear-gradient(135deg, #e8f1ff, #d2e3ff); }
-.card-media.status-lot { background: linear-gradient(135deg, #f1ebff, #e3d6ff); }
+.card-media.status-available { background: var(--ok-bg); }
+.card-media.status-reserved { background: var(--warn-bg); }
+.card-media.status-sold { background: var(--surface-2); }
+.card-media.status-exchange { background: oklch(0.58 0.11 240 / 0.12); }
+.card-media.status-lot { background: var(--lot-bg); }
 .media-glyph { color: var(--ink-2); opacity: 0.45; }
 .media-count {
   position: absolute;
@@ -477,13 +484,27 @@ button { font-family: inherit; }
   background: var(--ink);
 }
 .card-media .status-pill { position: absolute; top: 10px; left: 10px; }
-.status-pill.available { background: rgba(16, 179, 100, 0.94); }
-.status-pill.reserved { background: rgba(245, 158, 11, 0.96); }
-.status-pill.sold { background: rgba(100, 116, 139, 0.95); }
-.status-pill.exchange { background: rgba(59, 130, 246, 0.95); }
-.status-pill.lot { background: rgba(139, 92, 246, 0.95); }
+.status-pill.available { background: var(--st-available); }
+.status-pill.reserved { background: var(--st-reserved); }
+.status-pill.sold { background: var(--st-sold); }
+.status-pill.exchange { background: var(--st-exchange); }
+.status-pill.lot { background: var(--st-lot); }
 
 .card-body { display: flex; flex-direction: column; flex: 1; gap: 8px; padding: 12px; }
+/* Витрина и живое превью: минимум на глаз — цена крупно, название тихо под ней.
+   Подробности (грейд, состояние, продавец) — только внутри полной карточки. */
+.card-market .card-body,
+.card.preview .card-body { gap: 1px; padding: 9px 11px 11px; }
+.card-price { margin: 0; font-size: 16.5px; font-weight: 800; letter-spacing: -0.2px; color: var(--ink); }
+.card-title {
+  margin: 0;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--ink-2);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 /* Вертикальная карточка: цена крупно под названием (как на Авито), без кривых переносов. */
 .card-head { display: flex; flex-direction: column; align-items: flex-start; gap: 3px; }
 .card-head h3 {
@@ -509,9 +530,9 @@ button { font-family: inherit; }
   padding: 4px 9px;
   border-radius: 999px;
 }
-.tag.grade { background: rgba(79, 91, 242, 0.1); color: var(--accent); font-weight: 700; }
-.tag.deal { background: rgba(139, 92, 246, 0.12); color: #7c3aed; font-weight: 700; }
-.tag.delivery { background: rgba(16, 179, 100, 0.12); color: #0f9b6c; font-weight: 600; }
+.tag.grade { background: oklch(0.27 0.012 75 / 0.1); color: var(--accent); font-weight: 700; }
+.tag.deal { background: var(--lot-bg); color: var(--lot-fg); font-weight: 700; }
+.tag.delivery { background: var(--ok-bg); color: var(--ok-fg); font-weight: 600; }
 
 /* Quality-first row: grade badge + condition + battery read at a glance */
 .quality { display: flex; align-items: center; flex-wrap: wrap; gap: 5px 7px; }
@@ -526,11 +547,11 @@ button { font-family: inherit; }
   font-weight: 800;
   letter-spacing: 0.3px;
 }
-.grade-badge.g-A { background: rgba(16, 179, 100, 0.16); color: #0f9b6c; }
-.grade-badge.g-B { background: rgba(79, 91, 242, 0.14); color: var(--accent); }
-.grade-badge.g-C { background: rgba(245, 158, 11, 0.18); color: #b06f08; }
-.grade-badge.g-D { background: rgba(229, 72, 77, 0.15); color: #cf3b3f; }
-.grade-badge.g-Repair { background: rgba(229, 72, 77, 0.15); color: #cf3b3f; font-size: 11px; font-weight: 700; }
+.grade-badge.g-A { background: var(--ok-bg); color: var(--ok-fg); }
+.grade-badge.g-B { background: oklch(0.27 0.012 75 / 0.14); color: var(--accent); }
+.grade-badge.g-C { background: var(--warn-bg); color: var(--warn-fg); }
+.grade-badge.g-D { background: var(--danger-bg); color: var(--danger-fg); }
+.grade-badge.g-Repair { background: var(--danger-bg); color: var(--danger-fg); font-size: 11px; font-weight: 700; }
 html[data-theme="emerald"] .grade-badge.g-B { background: rgba(216, 181, 106, 0.16); }
 .quality-word { font-size: 13px; font-weight: 700; color: var(--ink); }
 .quality-sub { font-size: 12px; font-weight: 600; color: var(--ink-2); }
@@ -538,21 +559,21 @@ html[data-theme="emerald"] .grade-badge.g-B { background: rgba(216, 181, 106, 0.
 
 /* Светофор лота + навар (private seller signal) */
 .light-dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; vertical-align: middle; background: var(--ink-3); margin-right: 7px; }
-.light-dot.green { background: #16b364; }
-.light-dot.yellow { background: #f5a623; }
-.light-dot.red { background: #e5484d; }
+.light-dot.green { background: var(--ok-fg); }
+.light-dot.yellow { background: var(--warn-fg); }
+.light-dot.red { background: var(--danger-fg); }
 .navar-line { margin: 0; display: flex; align-items: center; font-size: 13px; font-weight: 700; }
-.navar-line.green { color: #0f9b6c; }
-.navar-line.yellow { color: #b06f08; }
-.navar-line.red { color: #cf3b3f; }
+.navar-line.green { color: var(--ok-fg); }
+.navar-line.yellow { color: var(--warn-fg); }
+.navar-line.red { color: var(--danger-fg); }
 .navar-line .light-dot.green { animation: dotpulse 2.6s ease-in-out infinite; }
 @keyframes dotpulse { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.2); opacity: 0.8; } }
 
 /* Радар висяков */
-.stale-line { margin: 0; font-size: 12.5px; font-weight: 600; color: #b06f08; }
-.money-sleep { margin: 4px 0 0; font-size: 12.5px; color: #b06f08; }
-.stale-tag { font-size: 11px; font-weight: 700; color: #b06f08; background: rgba(245, 158, 11, 0.16); padding: 2px 7px; border-radius: 999px; margin-left: 8px; white-space: nowrap; }
-.own-table tr.stale td { background: rgba(245, 158, 11, 0.06); }
+.stale-line { margin: 0; font-size: 12.5px; font-weight: 600; color: var(--warn-fg); }
+.money-sleep { margin: 4px 0 0; font-size: 12.5px; color: var(--warn-fg); }
+.stale-tag { font-size: 11px; font-weight: 700; color: var(--warn-fg); background: var(--warn-bg); padding: 2px 7px; border-radius: 999px; margin-left: 8px; white-space: nowrap; }
+.own-table tr.stale td { background: oklch(0.64 0.17 55 / 0.06); }
 .defect-line {
   margin: 0;
   font-size: 12.5px;
@@ -591,12 +612,8 @@ html[data-theme="emerald"] .grade-badge.g-B { background: rgba(216, 181, 106, 0.
 
 .card-meta { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 12px; color: var(--ink-3); }
 .card-meta .seller { display: inline-flex; align-items: center; gap: 6px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.card-meta .star { color: #f5a623; font-weight: 700; white-space: nowrap; }
+.card-meta .star { color: var(--warn-fg); font-weight: 700; white-space: nowrap; }
 .card-meta .queue { color: var(--accent); font-weight: 600; white-space: nowrap; }
-
-/* Витрина: компактные карточки — доставку прячем, описание в одну строку-тизер. */
-.card-market .delivery-line { display: none; }
-.card-market .card-desc { -webkit-line-clamp: 1; }
 
 .card-actions { display: flex; align-items: center; gap: 7px; margin-top: auto; padding-top: 2px; }
 /* В узкой карточке кнопки компактнее и не вылезают. */
@@ -620,7 +637,7 @@ html[data-theme="emerald"] .grade-badge.g-B { background: rgba(216, 181, 106, 0.
   transition: transform 0.14s, color 0.2s;
 }
 .heart-btn:active { transform: scale(0.86); }
-.heart-btn.on { color: #ef4444; }
+.heart-btn.on { color: var(--danger-fg); }
 
 .section-label { margin: 8px 2px -2px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--ink-3); }
 
@@ -643,7 +660,7 @@ html[data-theme="emerald"] .grade-badge.g-B { background: rgba(216, 181, 106, 0.
 .solid-btn.accent { background: var(--accent); color: var(--solid-fg); }
 .solid-btn.grow { flex: 1; }
 .solid-btn.big {
-  background: var(--grad);
+  background: var(--accent);
   padding: 15px 18px;
   font-size: 15.5px;
   border-radius: var(--r-md);
@@ -664,8 +681,8 @@ html[data-theme="emerald"] .grade-badge.g-B { background: rgba(216, 181, 106, 0.
   transition: transform 0.12s, background 0.2s, color 0.2s;
 }
 .icon-btn:active { transform: scale(0.92); }
-.icon-btn.danger { color: #e5484d; }
-.icon-btn.danger.confirm { width: auto; padding: 0 12px; background: #fde8e8; color: #dc2626; font-weight: 700; font-size: 13px; }
+.icon-btn.danger { color: var(--danger-fg); }
+.icon-btn.danger.confirm { width: auto; padding: 0 12px; background: var(--danger-bg); color: var(--danger-fg); font-weight: 700; font-size: 13px; }
 
 .status-select { position: relative; flex: 1; min-width: 0; }
 .status-select select {
@@ -731,7 +748,7 @@ html[data-theme="emerald"] .grade-badge.g-B { background: rgba(216, 181, 106, 0.
   height: 38px;
   flex: none;
   border-radius: 12px;
-  background: linear-gradient(135deg, rgba(109, 92, 246, 0.16), rgba(34, 211, 238, 0.16));
+  background: oklch(0.27 0.012 75 / 0.12);
   color: var(--accent);
 }
 .import-hero-top strong { display: block; font-size: 14.5px; font-weight: 700; }
@@ -752,7 +769,7 @@ html[data-theme="emerald"] .grade-badge.g-B { background: rgba(216, 181, 106, 0.
 .import-hero textarea:focus { border-color: var(--accent); background: var(--surface); }
 .import-hero-actions { display: flex; gap: 8px; }
 .import-hero-actions .ghost-btn { flex: 1; }
-.import-hero-actions .solid-btn { flex: 1; background: var(--grad); box-shadow: 0 6px 16px var(--cta-shadow); }
+.import-hero-actions .solid-btn { flex: 1; background: var(--accent); box-shadow: 0 6px 16px var(--cta-shadow); }
 
 .photo-loader { position: relative; }
 .photo-loader input { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
@@ -780,16 +797,16 @@ html[data-theme="emerald"] .grade-badge.g-B { background: rgba(216, 181, 106, 0.
   gap: 8px;
   height: 50px;
   border-radius: var(--r-md);
-  border: 1.5px dashed rgba(214, 60, 60, 0.5);
-  background: rgba(214, 60, 60, 0.08);
-  color: #d63c3c;
+  border: 1.5px dashed oklch(0.6 0.21 25 / 0.5);
+  background: var(--danger-bg);
+  color: var(--danger-fg);
   font-size: 13px;
   font-weight: 700;
   transition: background 0.18s, border-color 0.18s, transform 0.18s;
 }
 .strip-trash.armed {
-  background: rgba(214, 60, 60, 0.92);
-  border-color: rgba(214, 60, 60, 0.92);
+  background: var(--danger-fg);
+  border-color: var(--danger-fg);
   border-style: solid;
   color: #fff;
   transform: scale(1.02);
@@ -822,7 +839,7 @@ html[data-theme="emerald"] .grade-badge.g-B { background: rgba(216, 181, 106, 0.
   outline-offset: 2px;
   border-radius: var(--r-sm);
 }
-.photo-thumb.del { outline-color: #e5484d; }
+.photo-thumb.del { outline-color: var(--danger-fg); }
 .photo-thumb.del img { filter: brightness(0.55) saturate(1.1); }
 .thumb-trash {
   position: absolute;
@@ -830,7 +847,7 @@ html[data-theme="emerald"] .grade-badge.g-B { background: rgba(216, 181, 106, 0.
   display: grid;
   place-items: center;
   border-radius: var(--r-sm);
-  background: rgba(214, 60, 60, 0.4);
+  background: oklch(0.6 0.21 25 / 0.55);
   color: #fff;
   font-size: 12px;
   font-weight: 800;
@@ -864,7 +881,7 @@ html[data-theme="emerald"] .grade-badge.g-B { background: rgba(216, 181, 106, 0.
 }
 
 /* ---------- Просмотр вложений (галерея) ---------- */
-.card-media.openable { cursor: pointer; }
+.card-media.openable, .card.openable { cursor: pointer; }
 .viewer-backdrop {
   position: fixed;
   inset: 0;
@@ -1035,7 +1052,7 @@ html[data-theme="emerald"] .grade-badge.g-B { background: rgba(216, 181, 106, 0.
   height: 54px;
   flex: none;
   border-radius: 18px;
-  background: var(--grad);
+  background: var(--accent);
   color: #fff;
   font-size: 22px;
   font-weight: 800;
@@ -1095,7 +1112,7 @@ html[data-theme="emerald"] .grade-badge.g-B { background: rgba(216, 181, 106, 0.
   color: var(--ink);
   font-variant-numeric: tabular-nums;
 }
-.hero-big.pos { color: oklch(0.64 0.16 152); }
+.hero-big.pos { color: var(--ok-fg); }
 .hero-sub { font-size: 13px; color: var(--ink-3); }
 
 /* ОДНА ЖИВАЯ ФРАЗА — голос продукта, не сводка */
@@ -1338,7 +1355,7 @@ html[data-theme="emerald"] .grade-badge.g-B { background: rgba(216, 181, 106, 0.
   border-radius: 12px;
   display: grid;
   place-items: center;
-  background: var(--grad);
+  background: var(--accent);
   color: #fff;
   font-weight: 800;
   font-size: 16px;
@@ -1346,7 +1363,7 @@ html[data-theme="emerald"] .grade-badge.g-B { background: rgba(216, 181, 106, 0.
 .detail-seller-id { display: flex; flex-direction: column; min-width: 0; }
 .detail-seller-id strong { font-size: 15px; font-weight: 700; }
 .detail-seller-id span { font-size: 13px; color: var(--ink-3); display: inline-flex; gap: 7px; align-items: center; }
-.detail-seller-id .star { color: #f5a623; font-weight: 700; }
+.detail-seller-id .star { color: var(--warn-fg); font-weight: 700; }
 .detail-queue { margin-left: auto; font-size: 13px; font-weight: 600; color: var(--accent); white-space: nowrap; }
 
 .detail-actions {
@@ -1371,7 +1388,7 @@ html[data-theme="emerald"] .grade-badge.g-B { background: rgba(216, 181, 106, 0.
   transition: transform 0.12s, color 0.2s, border-color 0.2s;
 }
 .heart-btn-lg:active { transform: scale(0.94); }
-.heart-btn-lg.on { color: #e5484d; border-color: rgba(229, 72, 77, 0.4); }
+.heart-btn-lg.on { color: var(--danger-fg); border-color: oklch(0.6 0.21 25 / 0.4); }
 .detail-actions .ghost-btn { flex: none; }
 .detail-actions .ghost-btn.grow { flex: 1; }
 /* Свой товар: вместо «Беру/Запрос» — спокойная подпись + текст репоста. */
@@ -1494,8 +1511,8 @@ html[data-theme="emerald"] .grade-badge.g-B { background: rgba(216, 181, 106, 0.
 .money-hero { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
 .money-hero span { font-size: 13px; font-weight: 600; color: var(--ink-3); }
 .money-hero strong { font-size: 26px; font-weight: 820; letter-spacing: -0.5px; }
-.money-hero .pos { color: #16a34a; }
-.money-hero .neg { color: #e5484d; }
+.money-hero .pos { color: var(--ok-fg); }
+.money-hero .neg { color: var(--danger-fg); }
 .money-split { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .money-split > div { display: flex; flex-direction: column; gap: 2px; padding: 10px 12px; background: var(--surface-2); border-radius: var(--r-sm); }
 .money-split span { font-size: 11px; font-weight: 600; color: var(--ink-3); }
@@ -1524,8 +1541,8 @@ html[data-theme="emerald"] .grade-badge.g-B { background: rgba(216, 181, 106, 0.
 .txn-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
 .txn { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border: 1px solid var(--line); border-radius: var(--r-sm); background: var(--surface); }
 .txn-amount { flex: none; font-size: 14px; font-weight: 750; white-space: nowrap; }
-.txn.income .txn-amount { color: #16a34a; }
-.txn.expense .txn-amount { color: #e5484d; }
+.txn.income .txn-amount { color: var(--ok-fg); }
+.txn.expense .txn-amount { color: var(--danger-fg); }
 .txn-note { flex: 1; min-width: 0; font-size: 13px; color: var(--ink-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .txn-del { flex: none; display: grid; place-items: center; width: 28px; height: 28px; border: 0; background: transparent; color: var(--ink-3); cursor: pointer; border-radius: 8px; }
 .txn-del:active { background: var(--surface-2); }
@@ -1593,8 +1610,8 @@ html[data-theme="emerald"] .grade-badge.g-B { background: rgba(216, 181, 106, 0.
 .own-table .t-title { font-weight: 650; color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 240px; }
 .own-table th.t-num, .own-table td.t-num { text-align: right; white-space: nowrap; }
 .own-table td.t-num { font-weight: 650; color: var(--ink); }
-.own-table td.t-num.pos { color: #16a34a; }
-.own-table td.t-num.neg { color: #e5484d; }
+.own-table td.t-num.pos { color: var(--ok-fg); }
+.own-table td.t-num.neg { color: var(--danger-fg); }
 .own-table .status-select { flex: none; width: auto; }
 .own-table .status-select select { font-size: 12.5px; padding: 7px 28px 7px 10px; }
 .own-table .t-actions { display: flex; gap: 6px; justify-content: flex-end; }
@@ -1697,8 +1714,6 @@ html[data-theme="emerald"] .grade-badge.g-B { background: rgba(216, 181, 106, 0.
     scrollbar-width: none;
   }
   .create-side::-webkit-scrollbar { display: none; }
-  /* Превью стоит ровно — без ховер-подъёма (он давал подёргивание при скролле). */
-  .create-side .card:hover { transform: none; box-shadow: var(--shadow-md); }
   .create-side .preview-wrap { margin: 0; }
   /* Статус в шапке улетал в правый край и дублировал пилюлю на карточке — */
   /* на десктопе прячем, статус виден в живом превью. */
@@ -1716,5 +1731,4 @@ html[data-theme="emerald"] .grade-badge.g-B { background: rgba(216, 181, 106, 0.
     animation-iteration-count: 1 !important;
     transition-duration: 0.001ms !important;
   }
-  .flow-lines { display: none; }
 }

@@ -46,7 +46,7 @@ export function VideoMedia({ asset, category }: { asset: MediaAsset; category: C
   if (failed) return <span className="media-glyph"><CategoryGlyph category={category} size={38} /></span>;
 
   if (!url) {
-    if (asset.src) return <img src={asset.src} alt="" loading="lazy" onError={() => setFailed(true)} />;
+    if (asset.src) return <img src={asset.src} alt="" loading="lazy" decoding="async" onError={() => setFailed(true)} />;
     return <span className="media-glyph"><CategoryGlyph category={category} size={38} /></span>;
   }
 

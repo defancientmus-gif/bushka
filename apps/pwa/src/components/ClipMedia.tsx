@@ -30,5 +30,5 @@ export function ClipMedia({ asset, category }: { asset: MediaAsset; category: Ca
   }, [frames]);
   const src = frames && frames.length ? frames[idx] : asset.src;
   if (failed || !src) return <span className="media-glyph"><CategoryGlyph category={category} size={38} /></span>;
-  return <img src={src} alt="" loading="lazy" onError={() => setFailed(true)} />;
+  return <img src={src} alt="" loading="lazy" decoding="async" onError={() => setFailed(true)} />;
 }

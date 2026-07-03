@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import type { Item, ItemStatus } from '../types';
-import { dealModeLabels, deliveryLabels, statusLabels, statusOrder } from '../lib/labels';
+import { dealModeLabels, statusLabels, statusOrder } from '../lib/labels';
 import { daysOld, formatMoney, isStale, lightLabel, marginLight, toNum } from '../lib/money';
 import { pluralize } from '../lib/format';
 import { CategoryGlyph, CopyIcon, HeartIcon, PencilIcon, PhoneIcon, SendIcon, TrashIcon } from './icons';
@@ -38,6 +38,8 @@ export function ItemCard({
 }) {
   const media = item.media[0];
   const isPreview = variant === 'preview';
+  // Рынок и живое превью — минимум на глаз (цена + название), подробности только внутри.
+  const minimal = variant === 'market' || isPreview;
   const light = marginLight(item.price, item.costPrice);
   const margin = toNum(item.price) - toNum(item.costPrice);
   const stale = variant === 'own' && isStale(item);
@@ -46,14 +48,16 @@ export function ItemCard({
   const [viewer, setViewer] = useState(false);
   const [detail, setDetail] = useState(false);
   const timer = useRef(0);
-  // Рынок: тап открывает полную карточку товара. Свои (склад): тап — просмотр фото.
-  const canOpen = variant === 'market' || (variant === 'own' && item.media.length > 0);
+  // Рынок: тап по всей карточке открывает полную карточку товара (кнопок на превью больше нет).
+  // Свои (склад): тап по фото — просмотр.
+  const canOpenDetail = variant === 'market';
+  const canOpenMedia = variant === 'own' && item.media.length > 0;
 
   useEffect(() => () => window.clearTimeout(timer.current), []);
 
   function openCard() {
-    if (variant === 'market') setDetail(true);
-    else if (item.media.length > 0) setViewer(true);
+    if (canOpenDetail) setDetail(true);
+    else if (canOpenMedia) setViewer(true);
   }
 
   function handleDelete() {
@@ -68,12 +72,18 @@ export function ItemCard({
   }
 
   return (
-    <article className={`card card-${variant} ${isPreview ? 'preview' : ''}`} style={{ animationDelay: `${Math.min(index, 12) * 40}ms` }}>
+    <article
+      className={`card card-${variant} ${isPreview ? 'preview' : ''} ${canOpenDetail ? 'openable' : ''}`}
+      style={{ animationDelay: `${Math.min(index, 12) * 40}ms` }}
+      onClick={canOpenDetail ? openCard : undefined}
+      role={canOpenDetail ? 'button' : undefined}
+      aria-label={canOpenDetail ? 'Открыть товар' : undefined}
+    >
       <div
-        className={`card-media status-${item.status} ${canOpen ? 'openable' : ''}`}
-        onClick={canOpen ? openCard : undefined}
-        role={canOpen ? 'button' : undefined}
-        aria-label={canOpen ? 'Открыть товар' : undefined}
+        className={`card-media status-${item.status} ${canOpenMedia ? 'openable' : ''}`}
+        onClick={canOpenMedia ? openCard : undefined}
+        role={canOpenMedia ? 'button' : undefined}
+        aria-label={canOpenMedia ? 'Открыть фото' : undefined}
       >
         {media ? (
           media.kind === 'video' && !media.frames
@@ -114,52 +124,50 @@ export function ItemCard({
       )}
 
       <div className="card-body">
-        <div className="card-head">
-          <h3>{item.title || 'Без названия'}</h3>
-          <strong>{item.price || 'договорная'}</strong>
-        </div>
+        {minimal ? (
+          <>
+            <strong className="card-price">{item.price || 'Цена договорная'}</strong>
+            <p className="card-title">{item.title || 'Без названия'}</p>
+          </>
+        ) : (
+          <>
+            <div className="card-head">
+              <h3>{item.title || 'Без названия'}</h3>
+              <strong>{item.price || 'договорная'}</strong>
+            </div>
 
-        <div className="quality">
-          <span className={`grade-badge g-${item.grade}`}>{item.grade}</span>
-          <span className="quality-word">{item.condition}</span>
-          {item.battery && <span className="quality-sub">· АКБ {item.battery}</span>}
-          {item.dealMode !== 'free' && <span className="quality-sub">· {dealModeLabels[item.dealMode]}</span>}
-        </div>
+            <div className="quality">
+              <span className={`grade-badge g-${item.grade}`}>{item.grade}</span>
+              <span className="quality-word">{item.condition}</span>
+              {item.battery && <span className="quality-sub">· АКБ {item.battery}</span>}
+              {item.dealMode !== 'free' && <span className="quality-sub">· {dealModeLabels[item.dealMode]}</span>}
+            </div>
 
-        {variant === 'own' && light && (
-          <p className={`navar-line ${light}`}>
-            <span className="light-dot" aria-hidden="true" />
-            Прибыль {margin >= 0 ? `+${formatMoney(margin)}` : formatMoney(margin)} · {lightLabel[light]}
-          </p>
-        )}
+            {light && (
+              <p className={`navar-line ${light}`}>
+                <span className={`light-dot ${light}`} aria-hidden="true" />
+                Прибыль {margin >= 0 ? `+${formatMoney(margin)}` : formatMoney(margin)} · {lightLabel[light]}
+              </p>
+            )}
 
-        {stale && <p className="stale-line">На площадке {age} {pluralize(age, 'день', 'дня', 'дней')} · пересмотрите цену</p>}
+            {stale && <p className="stale-line">На площадке {age} {pluralize(age, 'день', 'дня', 'дней')} · пересмотрите цену</p>}
 
-        {item.defects && <p className="defect-line">Нюансы: {item.defects}</p>}
+            {item.defects && <p className="defect-line">Нюансы: {item.defects}</p>}
 
-        {variant === 'market' && item.delivery && item.delivery.length > 0 && (
-          <p className="delivery-line">{item.delivery.map(kind => deliveryLabels[kind]).join(' · ')}</p>
-        )}
+            {item.description && <p className="card-desc">{item.description}</p>}
 
-        {item.description && <p className="card-desc">{item.description}</p>}
+            {item.status === 'reserved' && item.reservedUntil && (
+              <p className="reserve-note">Бронь до {item.reservedUntil}</p>
+            )}
 
-        {item.status === 'reserved' && item.reservedUntil && (
-          <p className="reserve-note">Бронь до {item.reservedUntil}</p>
-        )}
-
-        <div className="card-meta">
-          <span className="seller">
-            {item.sellerRating != null && <b className="star">★ {item.sellerRating.toFixed(1)}</b>}
-            {[item.sellerName, item.city].filter(Boolean).join(' · ')}
-          </span>
-          {item.queueCount > 0 && <span className="queue">{item.queueCount} в очереди</span>}
-        </div>
-
-        {variant === 'market' && (
-          <div className="card-actions">
-            <button type="button" className="solid-btn accent grow" onClick={onBuy}>Купить</button>
-            <button type="button" className="ghost-btn" onClick={onQueue}>Запрос</button>
-          </div>
+            <div className="card-meta">
+              <span className="seller">
+                {item.sellerRating != null && <b className="star">★ {item.sellerRating.toFixed(1)}</b>}
+                {[item.sellerName, item.city].filter(Boolean).join(' · ')}
+              </span>
+              {item.queueCount > 0 && <span className="queue">{item.queueCount} в очереди</span>}
+            </div>
+          </>
         )}
 
         {variant === 'own' && (

@@ -2,7 +2,6 @@ import { useCallback, useEffect, useState } from 'react';
 import type { Item, View } from './types';
 import { StoreProvider } from './lib/store';
 import { useOnline } from './lib/hooks';
-import { FlowLines } from './components/FlowLines';
 import { TabBar } from './components/TabBar';
 import { Toast } from './components/Toast';
 import { ExportSheet } from './components/ExportSheet';
@@ -49,8 +48,6 @@ function Shell() {
 
   return (
     <div className="app">
-      <FlowLines />
-
       <header className="topbar">
         <div className="brand">
           <span className="brand-mark">бу</span>

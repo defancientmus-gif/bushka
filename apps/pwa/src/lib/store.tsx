@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import type { DraftItem, Item, ItemStatus, Profile, Txn, TxnKind } from '../types';
 import { defaultProfile, seedItems } from '../data/seed';
 import {
@@ -17,7 +17,7 @@ import { statusLabels } from './labels';
 import { reserveTimeFromNow } from './format';
 import { batteryLabel, formatMoney, normalizePrice, toNum } from './money';
 import { delVideo } from './videostore';
-import { pushListing, removeListing } from './cloud';
+import { pushListing, removeListing, resyncOwnListings } from './cloud';
 
 type StoreValue = {
   profile: Profile;
@@ -55,6 +55,19 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     setToast(message);
     window.clearTimeout(toastTimer);
     toastTimer = window.setTimeout(() => setToast(''), 1900);
+  }, []);
+
+  // Одноразовая зачистка приватности: перезалить свои товары уже без закупки/источника,
+  // перетереть строки, что улетели в облако до защиты. Раз на устройство, фоном.
+  useEffect(() => {
+    const KEY = 'bushka:pwa:privacy-resync:v1';
+    try {
+      if (localStorage.getItem(KEY) || !items.length) return;
+      void resyncOwnListings(items).finally(() => {
+        try { localStorage.setItem(KEY, '1'); } catch { /* ignore */ }
+      });
+    } catch { /* ignore */ }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const persist = useCallback((next: Item[]) => {

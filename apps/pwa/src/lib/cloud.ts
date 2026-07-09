@@ -24,7 +24,18 @@ export function ensureSession(): Promise<string | null> {
   return session;
 }
 
-/** Выставить/обновить товар в общей витрине (весь item как jsonb). */
+// ЗАЩИТА ПРИВАТНОСТИ: общая витрина `listings` читается кем угодно. Поэтому в облако
+// уходит ТОЛЬКО то, что видит покупатель. Приватные поля учёта (за сколько взял,
+// откуда пригнал) остаются на устройстве владельца и в облако не попадают никогда.
+const PRIVATE_FIELDS = ['costPrice', 'sourceUrl'] as const;
+
+function toPublicItem(item: Item): Item {
+  const pub: Record<string, unknown> = { ...item };
+  for (const field of PRIVATE_FIELDS) delete pub[field];
+  return pub as Item;
+}
+
+/** Выставить/обновить товар в общей витрине (только публичные поля как jsonb). */
 export async function pushListing(item: Item): Promise<void> {
   try {
     const uid = await ensureSession();
@@ -33,12 +44,18 @@ export async function pushListing(item: Item): Promise<void> {
       id: item.id,
       owner: uid,
       status: item.status,
-      data: item,
+      data: toPublicItem(item),
       updated_at: new Date().toISOString()
     });
   } catch {
     // двор не готов / нет сети — не падаем, товар уже сохранён локально
   }
+}
+
+/** Одноразовая зачистка приватности: перезалить свои товары уже без приватных полей —
+ *  перетирает строки, что улетели в облако ДО защиты (со старой закупкой внутри). */
+export async function resyncOwnListings(items: Item[]): Promise<void> {
+  for (const item of items) await pushListing(item);
 }
 
 /** Убрать товар из общей витрины. */

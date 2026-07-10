@@ -1692,6 +1692,12 @@ html[data-theme="emerald"] .grade-badge.g-B { background: rgba(216, 181, 106, 0.
   .profile-view > .you-card,
   .profile-view > .hero-num,
   .profile-view > .live-phrase { max-width: 720px; margin-inline: auto; }
+  /* Плотнее: это рабочий дашборд, не зен-экран телефона — убираем воздух вокруг «взгляда». */
+  .profile-view.breath { gap: 8px; }
+  .profile-view > .you-card { padding: 12px 16px; }
+  .profile-view > .hero-num { padding: 2px 0 0; }
+  .profile-view > .live-phrase { font-size: 14px; }
+  .profile-view > .door-row { margin-top: 4px; }
 
   /* «Создать»: слева работа, справа липкое превью — видишь лот на витрине. */
   .create-dash { display: flex; flex-direction: row; align-items: flex-start; gap: 26px; }

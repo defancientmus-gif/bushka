@@ -4,16 +4,16 @@ import { useStore } from '../lib/store';
 import { Field } from '../components/Field';
 import { ItemCard, contactHref } from '../components/ItemCard';
 import { OwnItemsTable } from '../components/OwnItemsTable';
-import { ChevronIcon, CloseIcon, DownloadIcon, GearIcon, PencilIcon, PlusIcon, SendIcon, UploadIcon } from '../components/icons';
+import { CloseIcon, DownloadIcon, GearIcon, PencilIcon, PlusIcon, SendIcon, UploadIcon } from '../components/icons';
 import { downloadBackup, importBackup } from '../lib/backup';
 import { useCountUp, useOnline } from '../lib/hooks';
 import { pluralize } from '../lib/format';
-import { formatMoney, isStale, isToday, marginLight, saleStreak, toNum } from '../lib/money';
+import { formatMoney, isStale, isToday, marginLight, qtyOf, saleStreak, toNum } from '../lib/money';
 import { applyTheme, loadTheme, saveTheme, type Theme } from '../lib/theme';
 import { APP_CHANNEL, APP_TAG, APP_VERSION } from '../lib/version';
 
 type Side = 'buy' | 'sell';
-type Panel = 'edit' | 'goods' | 'ops' | 'settings';
+type Panel = 'edit' | 'ops' | 'settings';
 
 export function ProfileView({ onExport, onEdit }: { onExport: (item: Item) => void; onEdit: (item: Item) => void }) {
   const { profile, items, seed, favorites, txns, updateProfile, saveProfile, updateStatus, deleteItem, toggleFavorite, isFavorite, addTxn, deleteTxn, showToast } = useStore();
@@ -89,12 +89,14 @@ export function ProfileView({ onExport, onEdit }: { onExport: (item: Item) => vo
     const profit = (salesRevenue + manualIncome) - (salesCost + manualExpense);
     const soldToday = soldItems.filter(item => isToday(item.updatedAt));
     const todayMargin = soldToday.reduce((sum, item) => sum + (toNum(item.price) - toNum(item.costPrice)), 0);
-    const inStock = items.filter(item => item.status !== 'sold').reduce((sum, item) => sum + toNum(item.costPrice), 0);
+    const liveItems = items.filter(item => item.status !== 'sold');
+    const inStock = liveItems.reduce((sum, item) => sum + toNum(item.costPrice) * qtyOf(item), 0);
+    const units = liveItems.reduce((sum, item) => sum + qtyOf(item), 0);
     const staleItems = items.filter(isStale);
-    const sleeping = staleItems.reduce((sum, item) => sum + toNum(item.costPrice), 0);
+    const sleeping = staleItems.reduce((sum, item) => sum + toNum(item.costPrice) * qtyOf(item), 0);
     const streak = saleStreak(soldItems.map(item => item.updatedAt));
     const greenCount = items.filter(item => item.status !== 'sold' && marginLight(item.price, item.costPrice) === 'green').length;
-    return { profit, todayMargin, todayCount: soldToday.length, inStock, sleeping, staleCount: staleItems.length, streak, greenCount };
+    return { profit, todayMargin, todayCount: soldToday.length, inStock, units, positions: liveItems.length, sleeping, staleCount: staleItems.length, streak, greenCount };
   }, [items, txns]);
 
   const liveToday = useCountUp(money.todayMargin);
@@ -102,20 +104,6 @@ export function ProfileView({ onExport, onEdit }: { onExport: (item: Item) => vo
   const liveStock = useCountUp(money.inStock);
 
   const sold = items.filter(item => item.status === 'sold').length;
-  const forSale = items.length - sold;
-
-  // Одна живая фраза — продукт выбирает по приоритету. Не сводка, а голос.
-  function sellPhrase() {
-    if (money.sleeping > 0) return `${formatMoney(money.sleeping)} в товарах, которые долго не продаются (${money.staleCount}) — пересмотрите цену`;
-    if (money.streak >= 2) return `Серия ${money.streak} ${pluralize(money.streak, 'день', 'дня', 'дней')} · сегодня ${money.todayCount} ${pluralize(money.todayCount, 'сделка', 'сделки', 'сделок')}`;
-    if (money.todayCount > 0) return `Сегодня ${money.todayCount} · прибыль ${formatMoney(money.todayMargin)}`;
-    if (forSale > 0) return `${forSale} в продаже — ожидайте покупателя или добавьте товар`;
-    return 'Добавьте первый товар — это займёт минуту';
-  }
-  function buyPhrase() {
-    if (favItems.length > 0) return `${favItems.length} ${pluralize(favItems.length, 'лот', 'лота', 'лотов')} в избранном`;
-    return 'Добавляйте товары в избранное на Рынке';
-  }
 
   function buy(item: Item) {
     const href = contactHref(item.contact);
@@ -210,29 +198,37 @@ export function ProfileView({ onExport, onEdit }: { onExport: (item: Item) => vo
 
       {side === 'sell' ? (
         <>
-          {/* ОДНО ЖИВОЕ ЧИСЛО */}
-          <div className="hero-num">
-            <span className="hero-label">Прибыль за сегодня</span>
-            <strong className={`hero-big ${money.todayMargin > 0 ? 'pos' : ''}`}>{formatMoney(liveToday)}</strong>
-            <span className="hero-sub">всего {formatMoney(liveProfit)} · в товаре {formatMoney(liveStock)}</span>
+          {/* Сводка CRM — компактные показатели, без гигантской цифры по центру */}
+          <div className="kpi-row">
+            <div className="kpi">
+              <span className="kpi-label">Прибыль сегодня</span>
+              <strong className={`kpi-val ${money.todayMargin > 0 ? 'pos' : ''}`}>{formatMoney(liveToday)}</strong>
+            </div>
+            <div className="kpi">
+              <span className="kpi-label">Прибыль всего</span>
+              <strong className="kpi-val">{formatMoney(liveProfit)}</strong>
+            </div>
+            <div className="kpi">
+              <span className="kpi-label">В товаре</span>
+              <strong className="kpi-val">{formatMoney(liveStock)}</strong>
+            </div>
+            <div className="kpi">
+              <span className="kpi-label">В наличии</span>
+              <strong className="kpi-val">{money.units} <em>шт</em></strong>
+            </div>
           </div>
 
-          {/* ОДНА ЖИВАЯ ФРАЗА */}
-          <p className="live-phrase">{sellPhrase()}</p>
+          {money.sleeping > 0 && (
+            <p className="crm-hint">{formatMoney(money.sleeping)} зависло в {money.staleCount} {pluralize(money.staleCount, 'товаре', 'товарах', 'товарах')} — пересмотрите цену</p>
+          )}
 
-          {/* Тихие двери — всё остальное в один тап */}
-          <div className="door-row">
-            <button type="button" className={`door grow ${open === 'goods' ? 'is-open' : ''}`} onClick={() => toggle('goods')}>
-              <span>Мои товары</span>
-              <i className="door-n">{items.length}</i>
-              <ChevronIcon size={16} className="door-chev" />
-            </button>
-            <button type="button" className={`door ${open === 'ops' ? 'is-open' : ''}`} onClick={() => toggle('ops')}>
-              <PlusIcon size={15} />операция
-            </button>
-            <button type="button" className={`door cog ${open === 'settings' ? 'is-open' : ''}`} onClick={() => toggle('settings')} aria-label="Настройки">
-              <GearIcon size={18} />
-            </button>
+          {/* Панель склада: заголовок + действия учёта */}
+          <div className="crm-bar">
+            <p className="crm-title">Склад · <b>{money.positions}</b> в наличии{sold > 0 && <span className="crm-muted"> · {sold} продано</span>}</p>
+            <div className="crm-actions">
+              <button type="button" className={`door ${open === 'ops' ? 'is-open' : ''}`} onClick={() => toggle('ops')}><PlusIcon size={15} />операция</button>
+              <button type="button" className={`door cog ${open === 'settings' ? 'is-open' : ''}`} onClick={() => toggle('settings')} aria-label="Настройки"><GearIcon size={18} /></button>
+            </div>
           </div>
 
           {open === 'ops' && (
@@ -262,61 +258,50 @@ export function ProfileView({ onExport, onEdit }: { onExport: (item: Item) => vo
             </div>
           )}
 
-          {open === 'goods' && (
-            <div className="reveal">
-              {items.length ? (
-                <>
-                  <p className="section-label">в наличии {forSale} · продано {sold}</p>
-                  <div className="own-cards">
-                    <div className="feed-grid">
-                      {items.map((item, index) => (
-                        <ItemCard
-                          key={item.id}
-                          item={item}
-                          index={index}
-                          variant="own"
-                          onStatusChange={status => updateStatus(item.id, status)}
-                          onEdit={() => onEdit(item)}
-                          onDelete={() => deleteItem(item.id)}
-                          onExport={() => onExport(item)}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                  <OwnItemsTable
-                    items={items}
-                    onStatusChange={updateStatus}
-                    onEdit={onEdit}
-                    onExport={onExport}
-                    onDelete={deleteItem}
-                  />
-                </>
-              ) : (
-                <div className="empty-state">
-                  <p>Склад пуст</p>
-                  <small>Добавьте первый товар во вкладке «Создать» — это займёт минуту</small>
+          {open === 'settings' && <div className="reveal">{settings}</div>}
+
+          {/* Склад — главная рабочая поверхность, видна всегда */}
+          {items.length ? (
+            <div className="crm-stock">
+              <div className="own-cards">
+                <div className="feed-grid">
+                  {items.map((item, index) => (
+                    <ItemCard
+                      key={item.id}
+                      item={item}
+                      index={index}
+                      variant="own"
+                      onStatusChange={status => updateStatus(item.id, status)}
+                      onEdit={() => onEdit(item)}
+                      onDelete={() => deleteItem(item.id)}
+                      onExport={() => onExport(item)}
+                    />
+                  ))}
                 </div>
-              )}
+              </div>
+              <OwnItemsTable
+                items={items}
+                onStatusChange={updateStatus}
+                onEdit={onEdit}
+                onExport={onExport}
+                onDelete={deleteItem}
+              />
+            </div>
+          ) : (
+            <div className="empty-state">
+              <p>Склад пуст</p>
+              <small>Добавьте первый товар во вкладке «Создать» — это займёт минуту</small>
             </div>
           )}
-
-          {open === 'settings' && <div className="reveal">{settings}</div>}
         </>
       ) : (
         <>
-          {/* ОДНО ЖИВОЕ ЧИСЛО — покупателю */}
-          <div className="hero-num">
-            <span className="hero-label">В избранном</span>
-            <strong className="hero-big">{favItems.length}</strong>
-            <span className="hero-sub">{favItems.length ? `${pluralize(favItems.length, 'лот', 'лота', 'лотов')} в избранном` : 'пока пусто'}</span>
-          </div>
-
-          <p className="live-phrase">{buyPhrase()}</p>
-
-          <div className="door-row end">
-            <button type="button" className={`door cog ${open === 'settings' ? 'is-open' : ''}`} onClick={() => toggle('settings')} aria-label="Настройки">
-              <GearIcon size={18} />
-            </button>
+          {/* Покупаю — компактно, без гигантской цифры */}
+          <div className="crm-bar">
+            <p className="crm-title">В избранном · <b>{favItems.length}</b></p>
+            <div className="crm-actions">
+              <button type="button" className={`door cog ${open === 'settings' ? 'is-open' : ''}`} onClick={() => toggle('settings')} aria-label="Настройки"><GearIcon size={18} /></button>
+            </div>
           </div>
 
           {open === 'settings' && <div className="reveal">{settings}</div>}

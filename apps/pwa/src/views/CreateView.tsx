@@ -352,6 +352,9 @@ export function CreateView({ editItem, onExport, onCreated }: { editItem?: Item 
             <Field label="Закупка" hint="только для вас">
               <input value={draft.costPrice ?? ''} onChange={event => update('costPrice', event.target.value)} inputMode="numeric" placeholder="цена закупки" />
             </Field>
+            <Field label="Остаток" hint="шт на складе">
+              <input value={draft.quantity ?? 1} onChange={event => update('quantity', Math.max(1, parseInt(event.target.value.replace(/[^\d]/g, ''), 10) || 1))} inputMode="numeric" placeholder="1" />
+            </Field>
             <Field label="Грейд">
               <select value={draft.grade} onChange={event => update('grade', event.target.value as DraftItem['grade'])}>
                 {supportedGrades().map(grade => <option key={grade}>{grade}</option>)}

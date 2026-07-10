@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import type { Item, ItemStatus } from '../types';
 import { dealModeLabels, statusLabels, statusOrder } from '../lib/labels';
-import { daysOld, formatMoney, isStale, lightLabel, marginLight, toNum } from '../lib/money';
+import { daysOld, formatMoney, isStale, lightLabel, marginLight, qtyOf, toNum } from '../lib/money';
 import { pluralize } from '../lib/format';
 import { CategoryGlyph, CopyIcon, HeartIcon, PencilIcon, PhoneIcon, SendIcon, TrashIcon } from './icons';
 import { ClipMedia } from './ClipMedia';
@@ -140,6 +140,7 @@ export function ItemCard({
               <span className={`grade-badge g-${item.grade}`}>{item.grade}</span>
               <span className="quality-word">{item.condition}</span>
               {item.battery && <span className="quality-sub">· АКБ {item.battery}</span>}
+              {qtyOf(item) > 1 && <span className="quality-sub qty">· {qtyOf(item)} шт</span>}
               {item.dealMode !== 'free' && <span className="quality-sub">· {dealModeLabels[item.dealMode]}</span>}
             </div>
 

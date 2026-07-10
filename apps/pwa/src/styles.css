@@ -556,6 +556,7 @@ button { font-family: inherit; }
 html[data-theme="emerald"] .grade-badge.g-B { background: rgba(216, 181, 106, 0.16); }
 .quality-word { font-size: 13px; font-weight: 700; color: var(--ink); }
 .quality-sub { font-size: 12px; font-weight: 600; color: var(--ink-2); }
+.quality-sub.qty { font-weight: 800; color: var(--ink); }
 .delivery-line { margin: 0; font-size: 12px; color: var(--ink-3); }
 
 /* Светофор лота + навар (private seller signal) */
@@ -1129,6 +1130,41 @@ html[data-theme="emerald"] .grade-badge.g-B { background: rgba(216, 181, 106, 0.
 }
 @keyframes phrasein { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
 
+/* ---------- Мини-CRM: сводка + панель склада ---------- */
+/* Компактные показатели вместо гигантской цифры — классический CRM-дашборд. */
+.kpi-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+.kpi {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 12px 14px;
+  background: var(--card-glass-bg);
+  border: 1px solid var(--card-glass-border);
+  border-radius: var(--r-md);
+  box-shadow: var(--card-glass-shadow);
+}
+.kpi-label { font-size: 12px; font-weight: 600; color: var(--ink-3); }
+.kpi-val { font-size: 21px; font-weight: 800; letter-spacing: -0.5px; color: var(--ink); font-variant-numeric: tabular-nums; }
+.kpi-val.pos { color: var(--ok-fg); }
+.kpi-val em { font-style: normal; font-size: 13px; font-weight: 600; color: var(--ink-3); }
+
+.crm-hint {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--warn-fg);
+  background: var(--warn-bg);
+  padding: 9px 12px;
+  border-radius: var(--r-sm);
+}
+
+.crm-bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.crm-title { margin: 0; font-size: 14px; font-weight: 650; color: var(--ink); }
+.crm-title b { font-weight: 800; }
+.crm-muted { color: var(--ink-3); font-weight: 500; }
+.crm-actions { display: flex; gap: 8px; flex: none; }
+.crm-stock { display: flex; flex-direction: column; gap: 12px; }
+
 /* Тихие двери — всё остальное в один тап */
 .door-row { display: flex; gap: 10px; }
 .door-row.end { justify-content: flex-end; }
@@ -1604,8 +1640,11 @@ html[data-theme="emerald"] .grade-badge.g-B { background: rgba(216, 181, 106, 0.
 .own-table table { width: 100%; border-collapse: collapse; }
 .own-table th { text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink-3); font-weight: 700; padding: 12px 12px; border-bottom: 1px solid var(--line); }
 .own-table td { padding: 10px 12px; border-bottom: 1px solid var(--line); font-size: 13.5px; color: var(--ink-2); vertical-align: middle; }
-.own-table tr:last-child td { border-bottom: 0; }
+.own-table tbody tr:last-child td { border-bottom: 0; }
 .own-table tbody tr:hover { background: var(--surface-2); }
+/* Строка итогов учёта — жирнее, отделена сверху. */
+.own-table tfoot .t-total td { border-top: 2px solid var(--line); border-bottom: 0; padding-top: 12px; padding-bottom: 12px; font-weight: 700; color: var(--ink); background: var(--surface-2); }
+.own-table tfoot .t-total .t-name { font-weight: 700; }
 .own-table .t-name { min-width: 0; }
 .own-table td.t-name { display: flex; align-items: center; gap: 9px; }
 .own-table .t-title { font-weight: 650; color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 240px; }
@@ -1687,17 +1726,12 @@ html[data-theme="emerald"] .grade-badge.g-B { background: rgba(216, 181, 106, 0.
   /* Полномасштабно: единая широкая рабочая ширина, никаких узких колонок по центру пустого экрана. */
   .create-view  { max-width: 1240px; margin-inline: auto; }
   .market-view  { max-width: 1240px; margin-inline: auto; }
-  /* Профиль = дашборд: спокойный «взгляд» (лицо/число/фраза) по центру, рабочая зона (склад, операции) во всю ширину. */
+  /* Профиль = классический CRM-дашборд во всю ширину: сводка-KPI, панель, таблица склада. */
   .profile-view { max-width: 1240px; margin-inline: auto; }
-  .profile-view > .you-card,
-  .profile-view > .hero-num,
-  .profile-view > .live-phrase { max-width: 720px; margin-inline: auto; }
-  /* Плотнее: это рабочий дашборд, не зен-экран телефона — убираем воздух вокруг «взгляда». */
-  .profile-view.breath { gap: 8px; }
-  .profile-view > .you-card { padding: 12px 16px; }
-  .profile-view > .hero-num { padding: 2px 0 0; }
-  .profile-view > .live-phrase { font-size: 14px; }
-  .profile-view > .door-row { margin-top: 4px; }
+  .profile-view.breath { gap: 12px; }
+  .profile-view > .you-card { padding: 13px 16px; }
+  /* Сводка — 4 показателя в ряд. */
+  .profile-view .kpi-row { grid-template-columns: repeat(4, 1fr); }
 
   /* «Создать»: слева работа, справа липкое превью — видишь лот на витрине. */
   .create-dash { display: flex; flex-direction: row; align-items: flex-start; gap: 26px; }

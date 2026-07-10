@@ -12,6 +12,7 @@ export function emptyDraft(): DraftItem {
     condition: 'Хорошее',
     grade: 'B',
     status: 'available',
+    quantity: 1,
     dealMode: 'free',
     description: '',
     defects: '',

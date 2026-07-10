@@ -28,6 +28,7 @@ export type Item = {
   condition: Condition;
   grade: Grade;
   status: ItemStatus;
+  quantity?: number; // остаток на складе (партии/аксессуары); отсутствует = 1 единица
   dealMode: DealMode;
   description: string;
   defects: string;

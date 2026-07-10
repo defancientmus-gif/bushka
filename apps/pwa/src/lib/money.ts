@@ -30,6 +30,12 @@ export function toNum(value?: string): number {
   return Number.isNaN(parsed) ? 0 : parsed;
 }
 
+/** Остаток на складе: явное количество (партии/аксессуары) либо 1 единица по умолчанию. */
+export function qtyOf(item: Item): number {
+  const q = Math.round(Number(item.quantity));
+  return Number.isFinite(q) && q > 0 ? q : 1;
+}
+
 export function formatMoney(value: number): string {
   return `${Math.round(value).toLocaleString('ru-RU')} ₽`;
 }

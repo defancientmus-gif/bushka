@@ -387,6 +387,7 @@ button { font-family: inherit; }
    Дальше не мельчат — максимум 3 крупные колонки. */
 .feed-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-inline: -6px; }
 @media (min-width: 560px) { .feed-grid { grid-template-columns: repeat(3, 1fr); gap: 16px; margin-inline: 0; } }
+@media (min-width: 1040px) { .feed-grid { grid-template-columns: repeat(4, 1fr); } } /* широкий десктоп — заполняем ширину */
 
 /* Стеклянно-керамическое облачко: градиент + внутренний блик + тонированная тень —
    не плоская плашка с тенью, а тонкое стекло, чуть приподнятое над фоном. */
@@ -1683,9 +1684,14 @@ html[data-theme="emerald"] .grade-badge.g-B { background: rgba(216, 181, 106, 0.
     padding: 92px 28px 40px; /* верхний отступ под фиксированное меню */
   }
   .topbar { display: none; }
-  .create-view  { max-width: 1080px; margin-inline: auto; }
-  .profile-view { max-width: 640px; margin-inline: auto; } /* профиль за один вдох — спокойная колонка, не дашборд */
-  .market-view  { max-width: 1080px; margin-inline: auto; }
+  /* Полномасштабно: единая широкая рабочая ширина, никаких узких колонок по центру пустого экрана. */
+  .create-view  { max-width: 1240px; margin-inline: auto; }
+  .market-view  { max-width: 1240px; margin-inline: auto; }
+  /* Профиль = дашборд: спокойный «взгляд» (лицо/число/фраза) по центру, рабочая зона (склад, операции) во всю ширину. */
+  .profile-view { max-width: 1240px; margin-inline: auto; }
+  .profile-view > .you-card,
+  .profile-view > .hero-num,
+  .profile-view > .live-phrase { max-width: 720px; margin-inline: auto; }
 
   /* «Создать»: слева работа, справа липкое превью — видишь лот на витрине. */
   .create-dash { display: flex; flex-direction: row; align-items: flex-start; gap: 26px; }

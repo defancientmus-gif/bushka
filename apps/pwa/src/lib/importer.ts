@@ -240,7 +240,11 @@ function parseKit(lines: string[]) {
   for (const line of lines) {
     const match = line.match(/(?:комплект|в комплекте|комплектация)\s*[:\-—]?\s*(.{3,80})/i);
     if (match && !/^(полный|весь)\s*$/i.test(match[1].trim())) {
-      return match[1].trim().replace(/[.;]+$/, '');
+      const value = match[1].trim().replace(/[.;]+$/, '');
+      // «Комплект:» бывает пустым, а следом идёт целое предложение продавца
+      // («Телефон полностью проверен…») — это не комплект, а описание.
+      if (/[.!?]/.test(value) || value.split(/\s+/).length > 8) continue;
+      return value;
     }
     if (/полный комплект/i.test(line)) return 'Полный комплект';
   }

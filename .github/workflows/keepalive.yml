@@ -1,0 +1,31 @@
+name: Не давать Supabase уснуть
+
+# Бесплатный Supabase усыпляет проект после ~недели без запросов.
+# Спящий проект = мёртвый перенос из Телеграма и общая витрина (ловили это вживую:
+# HTTP 540 «Project paused», приложение показывало «Цена договорная»).
+# Поэтому раз в двое суток дёргаем и базу, и Edge Function — этого хватает, чтобы не заснул.
+
+on:
+  schedule:
+    - cron: '17 6 */2 * *'   # каждые двое суток, 06:17 UTC (не на круглой минуте — меньше очередь у GitHub)
+  workflow_dispatch:          # можно разбудить руками кнопкой Run workflow
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Дёрнуть базу (общая витрина)
+        run: |
+          code=$(curl -sS -o /dev/null -w '%{http_code}' --max-time 30 \
+            -H "apikey: ${{ secrets.SUPABASE_ANON_KEY || 'sb_publishable_mMoc0qtDgEURev1yF2ieFg_78QmwOq0' }}" \
+            "https://vnylpvmhelzlxusvydab.supabase.co/rest/v1/listings?select=id&limit=1")
+          echo "listings → HTTP $code"
+          # 200 — живо. Прочее не валим: проект мог как раз просыпаться, следующий пинг добудит.
+          [ "$code" = "200" ] || echo "::warning::база ответила $code (возможно, просыпается)"
+
+      - name: Дёрнуть перенос из Телеграма (Edge Function)
+        run: |
+          code=$(curl -sS -o /dev/null -w '%{http_code}' --max-time 40 \
+            "https://vnylpvmhelzlxusvydab.functions.supabase.co/tg-import?url=https://t.me/ABogatiy/1768")
+          echo "tg-import → HTTP $code"
+          [ "$code" = "200" ] || echo "::warning::функция ответила $code"

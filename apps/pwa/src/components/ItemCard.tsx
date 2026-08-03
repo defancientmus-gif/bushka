@@ -47,6 +47,7 @@ export function ItemCard({
   const [confirm, setConfirm] = useState(false);
   const [viewer, setViewer] = useState(false);
   const [detail, setDetail] = useState(false);
+  const [live, setLive] = useState(false); // петля играет, пока смотрят на эту карточку
   const timer = useRef(0);
   // Рынок: тап по всей карточке открывает полную карточку товара (кнопок на превью больше нет).
   // Свои (склад): тап по фото — просмотр.
@@ -73,7 +74,7 @@ export function ItemCard({
 
   return (
     <article
-      className={`card card-${variant} ${isPreview ? 'preview' : ''} ${canOpenDetail ? 'openable' : ''}`}
+      className={`card card-${variant} ${isPreview ? 'preview' : ''} ${canOpenDetail ? 'openable' : ''} ${live ? 'live' : ''}`}
       style={{ animationDelay: `${Math.min(index, 12) * 40}ms` }}
       onClick={canOpenDetail ? openCard : undefined}
       role={canOpenDetail ? 'button' : undefined}
@@ -84,11 +85,16 @@ export function ItemCard({
         onClick={canOpenMedia ? openCard : undefined}
         role={canOpenMedia ? 'button' : undefined}
         aria-label={canOpenMedia ? 'Открыть фото' : undefined}
+        /* Наведение/касание ловим на всей плитке: поверх картинки лежат значок видео,
+           сердечко и статус — до самой картинки мышь и палец не доходят. */
+        onMouseEnter={() => setLive(true)}
+        onMouseLeave={() => setLive(false)}
+        onTouchStart={() => setLive(true)}
       >
         {media ? (
           media.kind === 'video' && !media.frames
             ? <VideoMedia asset={media} category={item.category} />
-            : <ClipMedia asset={media} category={item.category} />
+            : <ClipMedia asset={media} category={item.category} play={live} />
         ) : (
           <span className="media-glyph"><CategoryGlyph category={item.category} size={38} /></span>
         )}

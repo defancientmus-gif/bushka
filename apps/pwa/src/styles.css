@@ -411,7 +411,12 @@ button { font-family: inherit; }
 }
 @media (hover: hover) {
   .card.openable:hover { transform: translateY(-3px); box-shadow: var(--card-glass-shadow-hover); }
+  /* Пока смотрим на карточку — снимаем пропуск отрисовки, иначе браузер «замораживает»
+     содержимое и кадры видео-петли меняются только в памяти, а на экране стоит первый. */
+  .card:hover { content-visibility: visible; }
 }
+/* То же для пальца: карточка, которую сейчас проигрывают, должна рисоваться. */
+.card.live { content-visibility: visible; }
 .card.openable:active { transform: scale(0.985) translateY(0); box-shadow: var(--card-glass-shadow-active); }
 .card.preview { box-shadow: var(--card-glass-shadow-hover); content-visibility: visible; } /* превью одно, отрыв заметнее */
 @keyframes cardin { from { opacity: 0; transform: translateY(12px) scale(0.98); } to { opacity: 1; transform: none; } }

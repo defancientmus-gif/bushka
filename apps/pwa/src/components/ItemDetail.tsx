@@ -44,7 +44,7 @@ export function ItemDetail({ item, favorite, own = false, onFavorite, onBuy, onQ
                   <button type="button" key={asset.id} className="detail-slide" onClick={() => setViewerIndex(i)} aria-label="Открыть на весь экран">
                     {asset.kind === 'video' && !asset.frames
                       ? <VideoMedia asset={asset} category={item.category} />
-                      : <ClipMedia asset={asset} category={item.category} />}
+                      : <ClipMedia asset={asset} category={item.category} autoplay />}
                     {asset.kind === 'video' && <span className="media-clip" aria-label="видео" />}
                   </button>
                 ))}

@@ -56,7 +56,7 @@ export function MediaViewer({ media, category, startIndex = 0, onClose }: {
         <div className="viewer-media">
           {cur.kind === 'video' && !cur.frames
             ? <VideoMedia asset={cur} category={category} />
-            : <ClipMedia asset={cur} category={category} />}
+            : <ClipMedia asset={cur} category={category} autoplay />}
         </div>
         {count > 1 && (
           <>

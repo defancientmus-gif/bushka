@@ -19,7 +19,7 @@ export type TgPost = {
 };
 
 // Различаем «пост удалён/закрыт» (телега ответила, но поста нет) и «функция/сеть молчит».
-export type TgResult = { ok: true; post: TgPost } | { ok: false; reason: 'unavailable' | 'down' };
+export type TgResult = { ok: true; post: TgPost } | { ok: false; reason: 'unavailable' | 'down' | 'asleep' };
 
 /** Первая ссылка на пост Телеграма в тексте (t.me/CHANNEL/ID), или null. */
 export function findTelegramLink(text: string): string | null {
@@ -51,6 +51,9 @@ export async function fetchTelegramPost(link: string): Promise<TgResult> {
         };
       }
     }
+    // 540 — бесплатный Supabase усыпил проект после простоя. Это НЕ «пост удалён»:
+    // пользователю надо сказать правду, иначе он думает, что объявление битое.
+    if (response.status === 540 || response.status === 503) return { ok: false, reason: 'asleep' };
     // Функция ответила, но поста нет (404 — удалён/закрыт/приватный). Всё прочее — «молчит».
     return { ok: false, reason: response.status === 404 || response.status === 400 ? 'unavailable' : 'down' };
   } catch {

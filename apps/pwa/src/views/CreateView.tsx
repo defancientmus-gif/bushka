@@ -101,7 +101,9 @@ export function CreateView({ editItem, onExport, onCreated }: { editItem?: Item 
       setDraft(current => ({ ...current, ...parsed, sourceUrl: link, city: parsed.city || current.city || profile.city }));
       showToast(result.reason === 'unavailable'
         ? 'Пост удалён или закрыт в Телеграме — добавьте фото или видео вручную'
-        : 'Перенос из Телеграма пока недоступен — добавьте фото или видео вручную');
+        : result.reason === 'asleep'
+          ? 'Сервер переноса спит после простоя — разбудите его в панели Supabase и повторите'
+          : 'Перенос из Телеграма пока недоступен — добавьте фото или видео вручную');
       return;
     }
     const post = result.post;

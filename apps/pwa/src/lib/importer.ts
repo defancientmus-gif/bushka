@@ -159,12 +159,24 @@ function findTitleLine(lines: string[], sourceUrl: string) {
 }
 
 function parsePrice(value: string) {
-  const match = value.match(/(?:^|[^\d])(\d{1,3}(?:[ \u00a0.,]\d{3})+|\d{4,9})\s*(?:₽|р\b|руб\.?|rub\b)/i)
-    || value.match(/(?:цена|стоимость|price)\D{0,16}(\d{1,3}(?:[ \u00a0.,]\d{3})+|\d{4,9})/i);
-  if (!match) return '';
-  const amount = match[1].replace(/[^\d]/g, '');
-  if (!amount || Number(amount) < 1000) return '';
-  return `${Number(amount).toLocaleString('ru-RU')} ₽`;
+  // Живые объявления пишут цену грязно: «💰 58.000₽», «🧧 - 105.000₽», «74 000 ₽», «60к».
+  // Ловим все формы. Порядок важен: сначала явная цена с рублём/словом «цена».
+  const match = value.match(/(?:^|[^\d])(\d{1,3}(?:[ \u00a0.,]\d{3,})+|\d{4,9})\s*(?:₽|р\b|руб\.?|rub\b)/i)
+    || value.match(/(?:цена|стоимость|price)\D{0,16}(\d{1,3}(?:[ \u00a0.,]\d{3,})+|\d{4,9})/i);
+  if (match) {
+    let amount = match[1].replace(/[^\d]/g, '');
+    // Опечатка продавца «85.0000₽» (лишний ноль в тысячной группе) → 85 000.
+    const grouped = match[1].match(/^(\d{1,3})[ \u00a0.,](\d{4,})$/);
+    if (grouped) amount = grouped[1] + grouped[2].slice(0, 3);
+    if (amount && Number(amount) >= 1000) return `${Number(amount).toLocaleString('ru-RU')} ₽`;
+  }
+  // «60к», «60 k» — разговорная форма тысяч.
+  const short = value.match(/(?:^|[^\d])(\d{1,4})\s*[кk](?![а-яa-z])/i);
+  if (short) {
+    const amount = Number(short[1]) * 1000;
+    if (amount >= 1000) return `${amount.toLocaleString('ru-RU')} ₽`;
+  }
+  return '';
 }
 
 function parseContact(value: string) {

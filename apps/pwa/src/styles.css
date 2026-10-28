@@ -1869,6 +1869,125 @@ html[data-theme="emerald"] .grade-badge.g-B { background: rgba(216, 181, 106, 0.
 .site-links { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px 14px; }
 .site-links button { padding: 0; border: 0; background: none; color: var(--ink); font: inherit; text-decoration: underline; text-decoration-color: var(--line); text-underline-offset: 3px; cursor: pointer; }
 
+/* ---------- Оценщик в карман ---------- */
+.chip-wrap { display: flex; flex-wrap: wrap; gap: 8px; }
+.pick-chip.active.warn { background: var(--danger-bg); border-color: transparent; color: var(--danger-fg); }
+.appraise-input { position: relative; }
+.appraise-input input, .appraise-custom input {
+  width: 100%;
+  height: 50px;
+  padding: 0 44px 0 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  background: var(--surface-2);
+  color: var(--ink);
+  font: inherit;
+  font-size: 16px;
+  outline: none;
+}
+.appraise-input input:focus, .appraise-custom input:focus { box-shadow: 0 0 0 4px var(--focus-ring); }
+.appraise-clear {
+  position: absolute;
+  top: 50%;
+  right: 8px;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--ink-3);
+  transform: translateY(-50%);
+  cursor: pointer;
+}
+.appraise-custom { display: flex; flex-direction: column; gap: 8px; font-size: 13px; line-height: 1.45; color: var(--ink-2); }
+.appraise-photo { position: relative; display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.appraise-photo input { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+.appraise-photo .ghost-btn { cursor: pointer; }
+.appraise-photo small { flex-basis: 100%; font-size: 12px; color: var(--ink-3); }
+.appraise-thumb { position: relative; width: 52px; height: 52px; flex: none; }
+.appraise-thumb img { width: 100%; height: 100%; object-fit: cover; border-radius: 12px; border: 1px solid var(--line); }
+.appraise-thumb button {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--solid);
+  color: var(--solid-fg);
+  cursor: pointer;
+}
+.appraise-row { display: flex; align-items: flex-end; gap: 10px; }
+.appraise-row .field { flex: 1; min-width: 0; }
+.box-chip { height: 46px; padding-inline: 16px; }
+.appraise-result {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  background: var(--card-glass-bg);
+  border: 1px solid var(--card-glass-border);
+  border-radius: var(--r-lg);
+  box-shadow: var(--card-glass-shadow);
+  animation: reveal 0.3s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.appraise-model { margin: 0; display: flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 700; }
+.appraise-model em { font-style: normal; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 999px; background: var(--warn-bg); color: var(--warn-fg); }
+.appraise-fork { display: flex; flex-direction: column; gap: 10px; }
+.appraise-fork > div { display: grid; grid-template-columns: 74px 1fr; align-items: baseline; gap: 0 10px; }
+.appraise-fork span { font-size: 13px; font-weight: 650; color: var(--ink-3); }
+.appraise-fork strong { font-size: 22px; font-weight: 780; letter-spacing: -0.4px; line-height: 1.2; white-space: nowrap; }
+.appraise-fork small { grid-column: 2; font-size: 12px; line-height: 1.35; color: var(--ink-3); }
+.appraise-sticky {
+  position: fixed;
+  left: 50%;
+  bottom: calc(96px + env(safe-area-inset-bottom));
+  z-index: 25;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  width: min(440px, calc(100% - 32px));
+  padding: 11px 16px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--solid);
+  color: var(--solid-fg);
+  font: inherit;
+  font-size: 13.5px;
+  box-shadow: var(--shadow-lg);
+  transform: translateX(-50%);
+  cursor: pointer;
+  animation: cookiein 0.28s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.appraise-sticky b { font-weight: 780; }
+.appraise-reasons { margin: 0; padding: 10px 0 0; list-style: none; display: flex; flex-direction: column; gap: 6px; border-top: 1px solid var(--line); }
+.appraise-reasons li { display: flex; justify-content: space-between; gap: 12px; font-size: 13px; color: var(--ink-2); }
+.appraise-reasons b { flex: none; font-weight: 700; }
+.appraise-reasons b.neg { color: var(--danger-fg); }
+.appraise-reasons b.pos { color: var(--ok-fg); }
+.appraise-pitch {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 12px 40px 12px 14px;
+  border: 1px dashed var(--line);
+  border-radius: var(--r-md);
+  background: var(--surface-2);
+  color: var(--ink);
+  font: inherit;
+  font-size: 14px;
+  line-height: 1.45;
+  text-align: left;
+  cursor: pointer;
+}
+.appraise-pitch span { font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink-3); }
+.appraise-pitch svg { position: absolute; top: 12px; right: 12px; color: var(--ink-3); }
 @media (min-width: 900px) {
   .legal-view, .appraise-view { max-width: 720px; }
   .cookie-banner, .appraise-sticky { bottom: 24px; }

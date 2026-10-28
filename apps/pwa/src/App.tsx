@@ -12,12 +12,14 @@ import { MarketView } from './views/MarketView';
 import { CreateView } from './views/CreateView';
 import { ProfileView } from './views/ProfileView';
 import { LegalView } from './views/LegalView';
+import { AppraiseView } from './views/AppraiseView';
 import { CookieBanner } from './components/CookieBanner';
 import { SiteFooter } from './components/SiteFooter';
 
-// Адреса-ссылки без роутера: #privacy… — документы (слоем поверх, черновик формы не теряется).
+// Адреса-ссылки без роутера: #privacy… — документы (слоем поверх, черновик формы не теряется),
+// #ocenka — оценщик. Ссылку можно дать человеку или повесить QR.
 const isLegalHash = (hash: string) => hash.startsWith('#privacy');
-const initialView = (): View => 'market';
+const initialView = (): View => (window.location.hash === '#ocenka' ? 'appraise' : 'market');
 
 export function App() {
   return (
@@ -44,6 +46,7 @@ function Shell() {
         setLegal(hash);
       } else {
         setLegal(null);
+        if (hash === '#ocenka') setView('appraise');
       }
     };
     window.addEventListener('hashchange', onHash);
@@ -76,6 +79,12 @@ function Shell() {
     setView(next);
   }, [clearHash]);
 
+  const sellFromAppraisal = useCallback((draft: Partial<DraftItem>) => {
+    setEditing(null);
+    setPrefill({ key: Date.now(), draft });
+    clearHash();
+    setView('create');
+  }, [clearHash]);
 
   const startEdit = useCallback((item: Item) => {
     setEditing(item);
@@ -114,7 +123,8 @@ function Shell() {
       <main className="screen" hidden={legal != null} key={view === 'create' ? `create-${editing?.id ?? prefill?.key ?? 'new'}` : view}>
         {view === 'market' && <MarketView onExport={setExportItem} />}
         {view === 'create' && <CreateView editItem={editing} prefill={prefill?.draft} onExport={setExportItem} onCreated={finishCreate} />}
-        {view === 'profile' && <ProfileView onExport={setExportItem} onEdit={startEdit} />}
+        {view === 'profile' && <ProfileView onExport={setExportItem} onEdit={startEdit} onAppraise={() => changeView('appraise')} />}
+        {view === 'appraise' && <AppraiseView onSell={sellFromAppraisal} onBack={() => changeView('profile')} />}
       </main>
 
       {legal != null && (

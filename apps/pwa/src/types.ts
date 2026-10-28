@@ -57,7 +57,7 @@ export type Profile = {
 
 export type DraftItem = Omit<Item, 'id' | 'sellerName' | 'queueCount' | 'createdAt' | 'updatedAt'>;
 
-export type View = 'market' | 'create' | 'profile';
+export type View = 'market' | 'create' | 'profile' | 'appraise';
 
 export type TxnKind = 'income' | 'expense';
 

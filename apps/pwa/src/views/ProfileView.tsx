@@ -5,6 +5,7 @@ import { Field } from '../components/Field';
 import { ItemCard, contactHref } from '../components/ItemCard';
 import { OwnItemsTable } from '../components/OwnItemsTable';
 import { CloseIcon, DownloadIcon, GearIcon, PencilIcon, PlusIcon, SendIcon, UploadIcon } from '../components/icons';
+import { LEGAL_HASH } from '../lib/legal';
 import { downloadBackup, importBackup } from '../lib/backup';
 import { useCountUp, useOnline } from '../lib/hooks';
 import { pluralize } from '../lib/format';
@@ -15,7 +16,7 @@ import { APP_CHANNEL, APP_TAG, APP_VERSION } from '../lib/version';
 type Side = 'buy' | 'sell';
 type Panel = 'edit' | 'ops' | 'settings';
 
-export function ProfileView({ onExport, onEdit }: { onExport: (item: Item) => void; onEdit: (item: Item) => void }) {
+export function ProfileView({ onExport, onEdit}: { onExport: (item: Item) => void; onEdit: (item: Item) => void }) {
   const { profile, items, seed, favorites, txns, updateProfile, saveProfile, updateStatus, deleteItem, toggleFavorite, isFavorite, addTxn, deleteTxn, showToast } = useStore();
   const online = useOnline();
   const [side, setSide] = useState<Side>(() => (items.length ? 'sell' : 'buy'));
@@ -187,6 +188,7 @@ export function ProfileView({ onExport, onEdit }: { onExport: (item: Item) => vo
             </Field>
           </div>
           <button type="button" className="solid-btn wide big" onClick={() => { saveProfile(); setOpen(null); }}>Сохранить</button>
+          <p className="consent-done">Имя, город и контакт хранятся на этом устройстве. В общей витрине их увидят только с вашего согласия · <a href={LEGAL_HASH.policy}>ваши данные</a></p>
         </div>
       )}
 

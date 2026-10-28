@@ -1783,3 +1783,93 @@ html[data-theme="emerald"] .grade-badge.g-B { background: rgba(216, 181, 106, 0.
     transition-duration: 0.001ms !important;
   }
 }
+
+/* ---------- Документы: политика, согласия, cookie, реквизиты ---------- */
+.legal-view, .appraise-view { max-width: 620px; width: 100%; margin: 0 auto; }
+.legal-back {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin: 2px 0 -6px;
+  padding: 6px 10px 6px 4px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--ink-2);
+  font-size: 14px;
+  font-weight: 650;
+  cursor: pointer;
+}
+.legal-back svg { transform: rotate(90deg); }
+.legal-tldr, .legal-doc {
+  padding: 16px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-sm);
+}
+.legal-tldr strong { display: block; font-size: 15px; margin-bottom: 6px; }
+.legal-tldr ul, .legal-doc ul { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 5px; }
+.legal-tldr li, .legal-doc li, .legal-doc p { font-size: 14px; line-height: 1.55; color: var(--ink-2); }
+.legal-doc { scroll-margin-top: 80px; }
+.legal-doc h2 { margin: 0 0 8px; font-size: 19px; font-weight: 740; letter-spacing: -0.2px; }
+.legal-doc h3 { margin: 16px 0 4px; font-size: 14.5px; font-weight: 700; }
+.legal-doc p { margin: 0 0 8px; }
+.legal-doc b { color: var(--ink); font-weight: 650; }
+.legal-meta { font-size: 12.5px !important; color: var(--ink-3) !important; }
+.legal-state { margin-top: 4px !important; }
+.legal-note { display: block; margin-top: 8px; font-size: 12.5px; color: var(--ink-3); }
+.legal-toc { display: flex; flex-wrap: wrap; gap: 8px; }
+.legal-toc a, .legal-doc a, .consent-box a, .consent-done a, .cookie-banner a, .site-foot a { color: var(--ink); text-decoration: underline; text-decoration-color: var(--line); text-underline-offset: 3px; }
+.legal-toc a {
+  padding: 8px 13px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface);
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+}
+.ghost-btn.danger-soft { color: var(--danger-fg); border-color: var(--danger-bg); background: var(--danger-bg); }
+
+/* Согласие под формой: два отдельных пункта, пустые по умолчанию, не барьер. */
+.consent-box { display: flex; flex-direction: column; gap: 8px; padding: 2px 2px 0; }
+.consent-row { display: flex; align-items: flex-start; gap: 10px; font-size: 13px; line-height: 1.45; color: var(--ink-2); cursor: pointer; }
+.consent-row input { flex: none; width: 20px; height: 20px; margin: 0; accent-color: var(--accent); }
+.consent-hint, .consent-done { margin: 0; font-size: 12px; line-height: 1.45; color: var(--ink-3); }
+.consent-done { text-align: center; padding: 0 6px; }
+
+/* Cookie: две РАВНЫЕ кнопки (одинаковый вес, размер, цвет) — отказ так же лёгок, как согласие. */
+.cookie-banner {
+  position: fixed;
+  left: 50%;
+  bottom: calc(92px + env(safe-area-inset-bottom));
+  z-index: 40;
+  width: min(440px, calc(100% - 32px));
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-lg);
+  transform: translateX(-50%);
+  animation: cookiein 0.3s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes cookiein { from { opacity: 0; transform: translate(-50%, 12px); } to { opacity: 1; transform: translate(-50%, 0); } }
+.cookie-banner p { margin: 0; font-size: 13px; line-height: 1.45; color: var(--ink-2); }
+.cookie-actions { display: flex; gap: 8px; }
+.ghost-btn.grow { flex: 1; }
+
+/* Подвал с реквизитами: тихий, мелкий, но на каждом экране. */
+.site-foot { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 26px 8px 8px; text-align: center; color: var(--ink-3); font-size: 11.5px; line-height: 1.5; }
+.site-foot p { margin: 0; }
+.site-links { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px 14px; }
+.site-links button { padding: 0; border: 0; background: none; color: var(--ink); font: inherit; text-decoration: underline; text-decoration-color: var(--line); text-underline-offset: 3px; cursor: pointer; }
+
+@media (min-width: 900px) {
+  .legal-view, .appraise-view { max-width: 720px; }
+  .cookie-banner, .appraise-sticky { bottom: 24px; }
+}

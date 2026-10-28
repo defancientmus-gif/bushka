@@ -10,7 +10,10 @@ import { batteryLabel, normalizePrice } from '../lib/money';
 import { Field } from '../components/Field';
 import { ItemCard } from '../components/ItemCard';
 import { MediaStrip } from '../components/MediaStrip';
+import { PdConsentBox, type ConsentTicks } from '../components/PdConsent';
 import { BoltIcon, CameraIcon, ChevronIcon, ClipboardIcon } from '../components/icons';
+import { loadPdConsent, savePdConsent, type PdConsent } from '../lib/legal';
+import { resyncOwnListings } from '../lib/cloud';
 
 function makeDraft(city: string, contact: string): DraftItem {
   return { ...emptyDraft(), city, contact };
@@ -22,10 +25,12 @@ function fromItem(item: Item): DraftItem {
   return draft;
 }
 
-export function CreateView({ editItem, onExport, onCreated }: { editItem?: Item | null; onExport: (item: Item) => void; onCreated: () => void }) {
-  const { profile, addItem, updateItem, showToast } = useStore();
+export function CreateView({ editItem, prefill, onExport, onCreated }: { editItem?: Item | null; prefill?: Partial<DraftItem> | null; onExport: (item: Item) => void; onCreated: () => void }) {
+  const { profile, items, addItem, updateItem, showToast } = useStore();
   const editing = editItem ?? null;
-  const [draft, setDraft] = useState<DraftItem>(() => (editing ? fromItem(editing) : makeDraft(profile.city, profile.contact)));
+  const [draft, setDraft] = useState<DraftItem>(() => (editing ? fromItem(editing) : { ...makeDraft(profile.city, profile.contact), ...prefill }));
+  const [consent, setConsent] = useState<PdConsent | null>(() => loadPdConsent());
+  const [ticks, setTicks] = useState<ConsentTicks>({ pd: false, publish: false });
   const [importValue, setImportValue] = useState('');
   const [showDetails, setShowDetails] = useState(false);
   const [busyPhoto, setBusyPhoto] = useState(false);
@@ -261,7 +266,16 @@ export function CreateView({ editItem, onExport, onCreated }: { editItem?: Item 
 
   function save() {
     if (!draft.contact.trim()) setShowDetails(true);
+    // Обе галочки — согласие фиксируем ДО сохранения, чтобы товар сразу ушёл в витрину.
+    const consentNow = !consent && ticks.pd && ticks.publish;
+    if (consentNow && draft.title.trim() && draft.contact.trim()) {
+      setConsent(savePdConsent());
+      void resyncOwnListings(items); // ранее сохранённые товары тоже выходят в витрину
+    }
     const ok = editing ? updateItem(editing.id, draft) : addItem(draft, profile.name);
+    if (ok && !consent && !consentNow) {
+      showToast('Сохранено в склад · в витрину — после согласия');
+    }
     if (ok) {
       setDraft(makeDraft(profile.city, profile.contact));
       setImportValue('');
@@ -401,6 +415,7 @@ export function CreateView({ editItem, onExport, onCreated }: { editItem?: Item 
       </div>
 
       <button type="button" className="solid-btn wide big" onClick={save}>{editing ? 'Сохранить изменения' : 'Сохранить'}</button>
+      <PdConsentBox consent={consent} ticks={ticks} onChange={setTicks} />
         </aside>
       </div>
     </section>

@@ -1,5 +1,6 @@
 import { supabase } from './supabase';
 import type { Item } from '../types';
+import { hasPdConsent } from './legal';
 
 // Local-first: облако — помощник, а не костыль. Каждый вызов отказоустойчив —
 // если двор не готов / офлайн / VPN скачет, тихо возвращаемся к локальным данным.
@@ -37,6 +38,8 @@ function toPublicItem(item: Item): Item {
 
 /** Выставить/обновить товар в общей витрине (только публичные поля как jsonb). */
 export async function pushListing(item: Item): Promise<void> {
+  // 152-ФЗ: контакт и имя продавца в общей витрине = распространение ПД. Без согласия — только склад.
+  if (!hasPdConsent()) return;
   try {
     const uid = await ensureSession();
     if (!uid) return;

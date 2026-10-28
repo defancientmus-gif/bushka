@@ -10,8 +10,10 @@ const tabs: Tab[] = [
   { id: 'profile', label: 'Профиль', Icon: UserIcon }
 ];
 
-export function TabBar({ view, onChange }: { view: View; onChange: (view: View) => void }) {
-  const index = Math.max(0, tabs.findIndex(tab => tab.id === view));
+export function TabBar({ view, onChange }: { view: View | null; onChange: (view: View) => void }) {
+  // Оценщик и документы — не вкладки: индикатор гаснет, ни одна кнопка не врёт, что она «тут».
+  const found = tabs.findIndex(tab => tab.id === view);
+  const index = Math.max(0, found);
   return (
     <nav className="tabbar" aria-label="Навигация">
       <div className="sidebar-brand">
@@ -20,7 +22,7 @@ export function TabBar({ view, onChange }: { view: View; onChange: (view: View) 
         <span className="build-badge">{APP_TAG}</span>
       </div>
       <div className="tabbar-inner">
-        <span className="tab-indicator" style={{ transform: `translateX(${index * 100}%)` }} aria-hidden="true" />
+        <span className="tab-indicator" style={{ transform: `translateX(${index * 100}%)`, opacity: found < 0 ? 0 : 1 }} aria-hidden="true" />
         {tabs.map(({ id, label, Icon }) => (
           <button
             key={id}

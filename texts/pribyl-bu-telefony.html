@@ -1,0 +1,180 @@
+<title>Прибыль на б/у телефонах</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Inter+Tight:wght@500;600;700&display=swap">
+<style>
+/* Полоса слева — порядок чтения; карточки стеклянные, воздух между блоками. Палитра БУ.шки: тёплый свет Apple. */
+:root{
+  --bg: oklch(0.962 0.007 85);
+  --surface: oklch(0.995 0.004 85 / .72);
+  --line: oklch(0.86 0.008 85);
+  --fg: oklch(0.27 0.012 75);
+  --muted: oklch(0.52 0.012 75);
+  --accent: oklch(0.56 0.14 42);
+  --good: oklch(0.52 0.11 150);
+  --warn: oklch(0.62 0.13 68);
+  --font-head: "Inter Tight", -apple-system, system-ui, sans-serif;
+  --font-body: "Inter", -apple-system, system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg: oklch(0.19 0.008 75);
+  --surface: oklch(0.245 0.009 75 / .8);
+  --line: oklch(0.34 0.01 75);
+  --fg: oklch(0.94 0.006 85);
+  --muted: oklch(0.70 0.01 85);
+  --accent: oklch(0.74 0.13 48);
+  --good: oklch(0.74 0.12 152);
+  --warn: oklch(0.78 0.12 72);
+  color-scheme: dark;
+}}
+:root[data-theme="dark"]{
+  --bg: oklch(0.19 0.008 75);
+  --surface: oklch(0.245 0.009 75 / .8);
+  --line: oklch(0.34 0.01 75);
+  --fg: oklch(0.94 0.006 85);
+  --muted: oklch(0.70 0.01 85);
+  --accent: oklch(0.74 0.13 48);
+  --good: oklch(0.74 0.12 152);
+  --warn: oklch(0.78 0.12 72);
+  color-scheme: dark;
+}
+*{box-sizing:border-box}
+body{
+  background: var(--bg); color: var(--fg);
+  font-family: var(--font-body); font-size: 16px; line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 40px 72px;
+}
+.wrap{max-width: 760px; margin: 0 auto; display: flex; flex-direction: column; gap: 34px}
+h1{font-family: var(--font-head); font-size: clamp(30px, 6vw, 42px); line-height:1.08; font-weight:700; letter-spacing:-.02em; margin:0; text-wrap: balance}
+h2{font-family: var(--font-head); font-size: 20px; font-weight:600; letter-spacing:-.01em; margin:0 0 2px}
+p{margin:0}
+.lead{font-size: 18px; color: var(--fg); max-width: 60ch}
+.sub{color: var(--muted); font-size: 14px}
+.eyebrow{font-size:11px; letter-spacing:.11em; text-transform:uppercase; color:var(--muted); font-weight:600}
+
+section{display:flex; flex-direction:column; gap:14px}
+.card{
+  background: var(--surface); border:1px solid var(--line); border-radius:18px;
+  padding:20px; backdrop-filter: blur(14px); display:flex; flex-direction:column; gap:12px;
+}
+.kick{border-left:3px solid var(--accent); padding-left:16px; display:flex; flex-direction:column; gap:6px}
+
+.nums{display:grid; grid-template-columns:repeat(auto-fit, minmax(150px,1fr)); gap:12px}
+.num{background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:14px 16px; display:flex; flex-direction:column; gap:3px}
+.num b{font-family:var(--font-head); font-size:26px; font-weight:700; letter-spacing:-.02em; font-variant-numeric: tabular-nums}
+.num span{font-size:12.5px; color:var(--muted); line-height:1.35}
+
+.scroll{overflow-x:auto; border:1px solid var(--line); border-radius:16px; background:var(--surface)}
+table{border-collapse:collapse; width:100%; min-width:420px; font-variant-numeric: tabular-nums; font-size:14.5px}
+th,td{text-align:right; padding:11px 14px; border-bottom:1px solid var(--line); white-space:nowrap}
+th:first-child, td:first-child{text-align:left; white-space:nowrap; font-weight:500}
+thead th{font-size:11px; letter-spacing:.07em; text-transform:uppercase; color:var(--muted); font-weight:600}
+tbody tr:last-child td{border-bottom:none}
+@media (max-width:520px){ .opt{display:none} th,td{padding:10px 11px} table{min-width:360px; font-size:14px} }
+td.hi{color:var(--accent); font-weight:600}
+td.ok{color:var(--good); font-weight:600}
+
+ul{margin:0; padding-left:18px; display:flex; flex-direction:column; gap:7px}
+li::marker{color:var(--muted)}
+.tag{display:inline-block; font-size:11px; font-weight:600; letter-spacing:.04em; text-transform:uppercase; padding:3px 9px; border-radius:999px; border:1px solid var(--line); color:var(--muted); width:max-content}
+.tag.warn{color:var(--warn); border-color:color-mix(in oklch, var(--warn) 40%, var(--line))}
+.tag.good{color:var(--good); border-color:color-mix(in oklch, var(--good) 40%, var(--line))}
+.src{font-size:12.5px; color:var(--muted); display:flex; flex-direction:column; gap:4px}
+footer{border-top:1px solid var(--line); padding-top:18px; font-size:12.5px; color:var(--muted); display:flex; flex-direction:column; gap:5px}
+</style>
+
+<div class="wrap">
+
+  <header style="display:flex;flex-direction:column;gap:12px">
+    <p class="eyebrow">БУ.шка · 17 ноября 2026</p>
+    <h1>Прибыль на б/у телефонах растёт от скорости, а не от процента</h1>
+    <p class="lead">Ты спросил: наше будущее, место ИИ и как быстро поднять прибыль на б/у. Я посчитал на живых цифрах — на ценах крымских перекупов и на закупке деталей с нашего склада. Вышло три вещи, одна из них неприятная.</p>
+  </header>
+
+  <section>
+    <div class="kick">
+      <p class="eyebrow">Главное</p>
+      <p><strong>Потолок у схемы «купил дешевле — продал дороже» низкий, и он не в марже.</strong> При рамке 100 000 ₽ в деле и среднем аппарате 47 000 ₽ в обороте помещается меньше трёх телефонов. Сколько бы мы ни выторговывали, за месяц это 38 000 ₽ навара при цикле в три недели. Единственное, что реально двигает цифру — <strong>сколько дней телефон лежит у нас</strong>.</p>
+    </div>
+    <div class="nums">
+      <div class="num"><b>38 000 ₽</b><span>за месяц, если цикл 21 день (так сейчас в рамке)</span></div>
+      <div class="num"><b>57 000 ₽</b><span>тот же оборот, цикл 14 дней</span></div>
+      <div class="num"><b>115 000 ₽</b><span>цикл 7 дней — втрое, без лишнего рубля вложений</span></div>
+    </div>
+    <p class="sub">2,7 аппарата разом — это 100 000 ₽ делить на порог выкупа. Маржа в расчёте 10 000 ₽ за штуку, налог 5 % уже вычтен.</p>
+  </section>
+
+  <section>
+    <h2>За сколько брать, чтобы вышла рамка</h2>
+    <p class="sub">Готовые пороги. Выше этой цены аппарат брать нельзя — маржа в 10 000 ₽ не соберётся. «Продать за» — медиана живых цен крымских перекупов с гарантией.</p>
+    <div class="scroll">
+      <table>
+        <thead>
+          <tr><th>Модель</th><th>Чистый<br>брать до</th><th>Битый экран<br>брать до</th><th>Продать за</th><th class="opt">Цен</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>15 Pro Max 256</td><td class="hi">42 245</td><td>—</td><td>54 995</td><td class="opt">8</td></tr>
+          <tr><td>15 Pro 256</td><td class="hi">39 400</td><td class="ok">32 564</td><td>52 000</td><td class="opt">7</td></tr>
+          <tr><td>15 Pro 128</td><td class="hi">32 750</td><td class="ok">25 914</td><td>45 000</td><td class="opt">5</td></tr>
+          <tr><td>14 Pro Max 256</td><td class="hi">33 178</td><td class="ok">29 108</td><td>45 450</td><td class="opt">4</td></tr>
+          <tr><td>14 Pro Max 128</td><td class="hi">26 955</td><td class="ok">22 886</td><td>38 900</td><td class="opt">7</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="sub">У 15 Pro Max прочерк: задней крышки и дисплея на складе нет, закупку я не выдумываю — цену спросим у Ричарда.</p>
+  </section>
+
+  <section>
+    <h2>Рычаг, которого нет ни у одного перекупа</h2>
+    <p>У нас есть сервис. Это значит, что битый телефон мы считаем не так, как все остальные на Авито.</p>
+    <ul>
+      <li>Человек с разбитым экраном скидывает цену примерно на стоимость ремонта — по прайсу это <strong>14 500 ₽</strong> за модуль.</li>
+      <li>Нам тот же модуль стоит закупку детали: <strong>4 069 ₽</strong> на 14 Pro Max, <strong>6 836 ₽</strong> на 15 Pro. Руки — свои.</li>
+      <li>Разница <strong>+7 700…10 400 ₽ на аппарате</strong> — сверху обычной маржи, за ту же работу.</li>
+    </ul>
+    <p class="sub">Поэтому охотиться надо не за чистыми аппаратами — за них бьются все, и там ровно 10 000 ₽ при удачном торге. Наша добыча — то, что другие пролистывают: битое стекло, мёртвая зарядка, «после воды».</p>
+  </section>
+
+  <section>
+    <h2>Что я проверил и выбросил</h2>
+    <span class="tag warn">гипотеза не подтвердилась</span>
+    <p>Была красивая идея: брать аппараты с убитой батареей дешевле и ставить новую. По 39 живым ценам не сошлось. Аккумулятор двигает цену всего на <strong>2 000–4 000 ₽</strong>, а деталь стоит 1 800–2 600 ₽. Остаётся пара сотен рублей и возня. <strong>Не рычаг.</strong> Говорю прямо, чтобы ты не вкладывал в это голову.</p>
+  </section>
+
+  <section>
+    <h2>Место ИИ — честно, без красивых слов</h2>
+    <p>ИИ не торгуется и не продаёт: торг и люди — это ты и Никитос. ИИ делает ровно то, чего человек физически не успевает, и всё это упирается в одно — <strong>в дни на полке</strong>.</p>
+    <ul>
+      <li><strong>Видит объявление через секунды после публикации.</strong> Хороший аппарат уходит за первые минуты — кто первый написал, тот и купил.</li>
+      <li><strong>Сразу считает порог</strong> — с налогом, с деталью, с остатком рамки. Человек такое в уме на рынке не считает и переплачивает.</li>
+      <li><strong>Не даёт купить то, что встанет.</strong> Аппарат, зависший на 21 день, съедает весь навар: деньги не работают.</li>
+    </ul>
+    <p class="sub">То есть ИИ здесь не украшение, а множитель: он сжимает цикл. А цикл — единственное, что в этой арифметике умножает.</p>
+  </section>
+
+  <section>
+    <h2>Куда это растёт — БУ.шка через год</h2>
+    <p>Своя скупка — это первый шаг и небольшие деньги. Настоящее в другом: ровно те же пороги, тот же счёт маржи и тот же сервис нужны каждому перекупу на рынке. Мы это уже построили для себя.</p>
+    <ul>
+      <li><strong>Сегодня:</strong> витрина плюс учёт склада и маржи. Магазин Богатого на 51 товар уже живёт в облаке — проверено на настоящем продавце.</li>
+      <li><strong>Дальше:</strong> площадка, где продавец видит свой склад, свою маржу и своих покупателей. Закупка и источник остаются только у него — чужого никто не видит, для пугливого рынка это главное.</li>
+      <li><strong>Наш козырь:</strong> сервис рядом. Мы единственные, кто может честно сказать «этот телефон проверен и починен», а не «брал у знакомого».</li>
+    </ul>
+  </section>
+
+  <section>
+    <div class="kick">
+      <p class="eyebrow">Узкое место прямо сейчас</p>
+      <p>Вся схема стоит на одном: нужно видеть, <strong>за сколько просят частники</strong>. Эта половина таблицы пока пустая — Авито не отдаёт выдачу без браузера, а расширение не подключилось после смены аккаунта. Один твой вход — и сторож начинает смотреть рынок. Пока его нет, деньги лежат, а не работают.</p>
+      <span class="tag good">от тебя нужен один вход, остальное наше</span>
+    </div>
+  </section>
+
+  <footer>
+    <p><strong>Откуда цифры.</strong> Цены продажи — 39 объявлений крымских перекупов за 30 дней, собраны 10 ноября. Закупка деталей — склад CRM, пересчитан 17 ноября. Прайс ремонта — от 17 июня, его стоит сверить.</p>
+    <p>Рамка денег — до 100 000 ₽ в телефонах разом, маржа от 10 000 ₽, налог 5 %, больше 21 дня на полке — снижаем цену. Это рамка Бухгалтера от 10 ноября; сколько свободно сегодня — цифра у него, я её не выдумываю.</p>
+  </footer>
+
+</div>

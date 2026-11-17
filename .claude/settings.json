@@ -1,0 +1,53 @@
+{
+  "permissions": {
+    "defaultMode": "acceptEdits",
+    "allow": [
+      "Bash(git status*)",
+      "Bash(git diff*)",
+      "Bash(git log*)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(git push *)",
+      "Bash(git stash*)",
+      "Bash(ls *)",
+      "Bash(find *)",
+      "Bash(grep *)",
+      "Bash(rg *)",
+      "Bash(sed -n *)",
+      "Bash(wc *)",
+      "Bash(cat *)",
+      "Bash(head *)",
+      "Bash(tail *)",
+      "Bash(mkdir *)",
+      "Bash(cp * *)",
+      "Bash(chmod +x *)",
+      "Bash(lsof *)",
+      "Bash(ps *)",
+      "Bash(kill *)",
+      "Bash(npm run *)",
+      "Bash(npm install*)",
+      "Bash(npm test*)",
+      "Bash(npx vite*)",
+      "Bash(npx tsc*)",
+      "Bash(npx vitest*)",
+      "Bash(npx eslint*)",
+      "Bash(node --check *)",
+      "Bash(node *)",
+      "Bash(curl -s http://127.0.0.1*)",
+      "Bash(curl -s http://localhost*)"
+    ]
+  },
+  "hooks": {
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '\\n📋 Перед уходом: (1) texts/NEXT.md — что сделано/что дальше (нерв Дома читает ИМЕННО его); (2) поднял APP_BUILD?; (3) был урок/грабли → впиши ПРАВИЛО (CLAUDE.md/UI_PHILOSOPHY) — так организм учится.'"
+          }
+        ]
+      }
+    ]
+  }
+}

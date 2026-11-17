@@ -14,3 +14,6 @@ supabase/.temp/
 
 # Скачанный бэкап склада (данные пользователя)
 bushka-sklad.json
+
+# Локальные разрешения сессии
+.claude/settings.local.json

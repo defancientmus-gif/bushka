@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>БУ.шка — витрина до и после</title>
+<meta name="theme-color" content="#f5f5f7" />
+<style>
+  :root {
+    --bg: #f5f5f7;
+    --surface: #ffffff;
+    --ink: #1d1d1f;
+    --ink-2: #6e6e73;
+    --ink-3: #8e8e93;
+    --line: rgba(29, 29, 31, 0.1);
+  }
+  * { box-sizing: border-box; }
+  html { background: var(--bg); -webkit-tap-highlight-color: transparent; }
+  body {
+    margin: 0;
+    padding: 40px 16px 64px;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Inter, system-ui, sans-serif;
+    letter-spacing: -0.011em;
+    -webkit-font-smoothing: antialiased;
+  }
+  ::selection { background: rgba(29, 29, 31, 0.14); }
+  .wrap { max-width: 1080px; margin: 0 auto; }
+  h1 {
+    margin: 0 0 8px;
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', Inter, system-ui, sans-serif;
+    font-size: 32px;
+    font-weight: 600;
+    letter-spacing: -0.028em;
+    line-height: 1.08;
+    text-wrap: balance;
+  }
+  .lead { margin: 0 0 32px; font-size: 17px; color: var(--ink-2); line-height: 1.5; max-width: 54ch; }
+  h2 {
+    margin: 40px 0 16px;
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', Inter, system-ui, sans-serif;
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: -0.024em;
+  }
+  .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .shot { background: var(--surface); border-radius: 20px; overflow: hidden; box-shadow: 0 1px 2px rgba(0,0,0,.05), 0 8px 24px rgba(0,0,0,.07); }
+  .shot figcaption { padding: 12px 16px 16px; font-size: 13px; color: var(--ink-3); }
+  .shot figcaption b { display: block; margin-bottom: 2px; font-size: 15px; font-weight: 600; color: var(--ink); }
+  .shot img { display: block; width: 100%; height: auto; }
+  figure { margin: 0; }
+  ul { margin: 0; padding: 0; list-style: none; }
+  li { padding: 16px 0; border-bottom: 1px solid var(--line); font-size: 16px; line-height: 1.5; }
+  li:last-child { border-bottom: 0; }
+  li b { font-weight: 600; }
+  li span { display: block; margin-top: 4px; color: var(--ink-2); font-size: 15px; }
+  .foot { margin-top: 48px; font-size: 13px; color: var(--ink-3); }
+  a { color: var(--ink); }
+  @media (max-width: 760px) {
+    body { padding: 28px 16px 48px; }
+    h1 { font-size: 28px; }
+    .pair { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Витрина без зелёного и бежевого</h1>
+  <p class="lead">Зал почти без цвета, как у Apple: светло-серый фон, белая карточка, графитовые буквы. Единственный цвет во всём приложении остался у брони — чтобы его было видно сразу.</p>
+
+  <h2>Телефон</h2>
+  <div class="pair">
+    <figure class="shot">
+      <img src="stil/bylo-420.jpg" alt="Витрина до правки: зелёные плашки и кремовый фон" />
+      <figcaption><b>Было</b>Зелёная плашка «В наличии» на каждой карточке, зелёная заливка плитки, кремовый фон</figcaption>
+    </figure>
+    <figure class="shot">
+      <img src="stil/stalo-420.jpg" alt="Витрина после правки: нейтральные тона" />
+      <figcaption><b>Стало</b>Цена, название, состояние. Плитка ровно серая, цвета нет нигде</figcaption>
+    </figure>
+  </div>
+
+  <h2>Мак</h2>
+  <div class="pair">
+    <figure class="shot">
+      <img src="stil/bylo-1440.jpg" alt="Витрина на маке до правки" />
+      <figcaption><b>Было</b>v069</figcaption>
+    </figure>
+    <figure class="shot">
+      <img src="stil/stalo-1440.jpg" alt="Витрина на маке после правки" />
+      <figcaption><b>Стало</b>v070</figcaption>
+    </figure>
+  </div>
+
+  <h2>Что поменялось внутри</h2>
+  <ul>
+    <li><b>Цвет</b><span>Фон #F5F5F7, карточка белая, буквы #1D1D1F. Янтарь остался только у брони — больше цветных пятен в приложении нет.</span></li>
+    <li><b>Плашка «В наличии» снята</b><span>Это обычное состояние вещи, объявлять его цветом не нужно. Говорит только то, что надо заметить.</span></li>
+    <li><b>Шрифт как у Apple</b><span>SF Pro: крупное — Display, текст — Text. Сняты заглавные с разрядкой и толщины, которых у SF нет.</span></li>
+    <li><b>Состояние вещи прямо на витрине</b><span>«Хорошее», «Идеальное» — третьей строкой под названием. На других досках за этим надо открывать карточку.</span></li>
+    <li><b>Тёмная тема «Графит»</b><span>Бывшая «Изумруд · золото» стала той же нейтралью, перевёрнутой в тёмное.</span></li>
+    <li><b>Отступы по сетке</b><span>63 случайных значения вроде 7, 9, 13 пикселей приведены к шагу 4 — строки встали в одну линию.</span></li>
+  </ul>
+
+  <p class="foot">Приложение: <a href="./">defancientmus-gif.github.io/bushka</a> · сборка v070 · 18 ноября 2026</p>
+</div>
+</body>
+</html>

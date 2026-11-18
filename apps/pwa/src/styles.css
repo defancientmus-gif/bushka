@@ -52,6 +52,7 @@
   --page-grad: linear-gradient(180deg, oklch(0.978 0 0) 0%, oklch(0.962 0 0) 100%);
   --topbar-fade: linear-gradient(180deg, oklch(0.972 0 0 / 0.92) 40%, oklch(0.972 0 0 / 0));
   --glass: oklch(1 0 0 / 0.82);
+  --float-bg: oklch(1 0 0 / 0.92);
   --cta-shadow: oklch(0.21 0 0 / 0.22);
   --focus-ring: oklch(0.21 0 0 / 0.14);
 
@@ -93,6 +94,7 @@ html[data-theme="graphite"] {
   --page-grad: var(--bg);
   --topbar-fade: linear-gradient(180deg, oklch(0.145 0 0 / 0.92) 40%, oklch(0.145 0 0 / 0));
   --glass: oklch(0.2 0 0 / 0.84);
+  --float-bg: oklch(0.28 0 0 / 0.88);
   --cta-shadow: oklch(0 0 0 / 0.4);
   --focus-ring: oklch(1 0 0 / 0.2);
 
@@ -186,18 +188,18 @@ button { font-family: inherit; }
   width: 34px;
   height: 34px;
   border-radius: 12px;
-  background: var(--accent);
-  color: #fff;
+  /* solid/solid-fg — парные: в тёмной теме переворачиваются вместе, знак не пропадает. */
+  background: var(--solid);
+  color: var(--solid-fg);
   font-size: 13px;
   font-weight: 600;
   letter-spacing: -0.005em;
-  box-shadow: var(--shadow-md);
 }
 .brand-name { font-size: 18px; font-weight: 600; letter-spacing: -0.021em; }
 .build-badge {
   align-self: center;
   margin-left: 1px;
-  padding: 2px 7px;
+  padding: 2px 8px;
   border-radius: 999px;
   background: var(--surface-2);
   border: 1px solid var(--line);
@@ -216,7 +218,7 @@ button { font-family: inherit; }
   font-weight: 600;
   color: var(--warn-fg);
   background: var(--warn-bg);
-  padding: 6px 11px;
+  padding: 6px 12px;
   border-radius: 999px;
 }
 
@@ -235,7 +237,7 @@ button { font-family: inherit; }
   place-items: center;
   min-width: 27px;
   height: 27px;
-  padding: 0 9px;
+  padding: 0 8px;
   border-radius: 999px;
   background: var(--solid);
   color: var(--solid-fg);
@@ -275,7 +277,7 @@ button { font-family: inherit; }
   gap: 6px;
   height: 38px;
   margin-right: -6px;
-  padding: 0 15px;
+  padding: 0 16px;
   border: 0;
   border-radius: 999px;
   background: var(--solid);
@@ -294,7 +296,7 @@ button { font-family: inherit; }
   place-items: center;
   min-width: 18px;
   height: 18px;
-  padding: 0 5px;
+  padding: 0 4px;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.26);
   color: #fff;
@@ -308,8 +310,8 @@ button { font-family: inherit; }
   flex: none;
   display: inline-flex;
   align-items: center;
-  gap: 7px;
-  padding: 9px 14px;
+  gap: 8px;
+  padding: 8px 14px;
   border: 1px solid var(--line);
   border-radius: 999px;
   background: var(--surface);
@@ -345,7 +347,7 @@ button { font-family: inherit; }
 .sort-chips::-webkit-scrollbar { display: none; }
 .pick-chip {
   flex: none;
-  padding: 8px 13px;
+  padding: 8px 12px;
   border: 1px solid var(--line);
   border-radius: 999px;
   background: var(--surface);
@@ -363,8 +365,8 @@ button { font-family: inherit; }
   flex: none;
   display: inline-flex;
   align-items: center;
-  gap: 7px;
-  padding: 9px 14px;
+  gap: 8px;
+  padding: 8px 14px;
   border: 1px solid var(--line);
   border-radius: 999px;
   background: var(--surface);
@@ -382,7 +384,7 @@ button { font-family: inherit; }
   place-items: center;
   min-width: 18px;
   height: 18px;
-  padding: 0 5px;
+  padding: 0 4px;
   border-radius: 999px;
   background: var(--accent);
   color: var(--solid-fg);
@@ -467,7 +469,7 @@ button { font-family: inherit; }
   position: absolute;
   right: 10px;
   bottom: 10px;
-  padding: 3px 8px;
+  padding: 4px 8px;
   border-radius: 999px;
   background: rgba(0, 0, 0, 0.62);
   color: #fff;
@@ -483,7 +485,7 @@ button { font-family: inherit; }
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 6px 7px 6px 9px;
+  padding: 6px 8px 6px 8px;
   border-radius: 999px;
   background: rgba(0, 0, 0, 0.55);
 }
@@ -498,7 +500,7 @@ button { font-family: inherit; }
 
 .status-pill {
   display: inline-block;
-  padding: 5px 11px;
+  padding: 4px 12px;
   border-radius: 999px;
   font-size: 12px;
   font-weight: 700;
@@ -517,8 +519,9 @@ button { font-family: inherit; }
 /* Витрина и живое превью: минимум на глаз — цена крупно, название тихо под ней.
    Подробности (грейд, состояние, продавец) — только внутри полной карточки. */
 .card-market .card-body,
-.card.preview .card-body { gap: 1px; padding: 9px 11px 11px; }
-.card-price { margin: 0; font-size: 17px; font-weight: 600; letter-spacing: -0.022em; color: var(--ink); font-variant-numeric: tabular-nums; }
+.card.preview .card-body { gap: 1px; padding: 8px 12px 12px; }
+.card-cond { display: block; margin-top: 4px; font-size: 12px; color: var(--ink-3); white-space: nowrap; }
+.card-price { flex: none; margin: 0; font-size: 17px; font-weight: 600; letter-spacing: -0.022em; color: var(--ink); font-variant-numeric: tabular-nums; }
 .card-title {
   margin: 0;
   font-size: 13px;
@@ -529,7 +532,7 @@ button { font-family: inherit; }
   white-space: nowrap;
 }
 /* Вертикальная карточка: цена крупно под названием (как на Авито), без кривых переносов. */
-.card-head { display: flex; flex-direction: column; align-items: flex-start; gap: 3px; }
+.card-head { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
 .card-head h3 {
   margin: 0;
   font-size: 15px;
@@ -550,7 +553,7 @@ button { font-family: inherit; }
   font-weight: 600;
   color: var(--ink-2);
   background: var(--surface-2);
-  padding: 4px 9px;
+  padding: 4px 8px;
   border-radius: 999px;
 }
 .tag.grade { background: oklch(0.27 0.012 75 / 0.1); color: var(--accent); font-weight: 700; }
@@ -558,7 +561,7 @@ button { font-family: inherit; }
 .tag.delivery { background: var(--ok-bg); color: var(--ok-fg); font-weight: 600; }
 
 /* Quality-first row: grade badge + condition + battery read at a glance */
-.quality { display: flex; align-items: center; flex-wrap: wrap; gap: 5px 7px; }
+.quality { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 8px; }
 .grade-badge {
   display: inline-grid;
   place-items: center;
@@ -582,7 +585,7 @@ html[data-theme="graphite"] .grade-badge.g-B { background: rgba(216, 181, 106, 0
 .delivery-line { margin: 0; font-size: 12px; color: var(--ink-3); }
 
 /* Светофор лота + навар (private seller signal) */
-.light-dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; vertical-align: middle; background: var(--ink-3); margin-right: 7px; }
+.light-dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; vertical-align: middle; background: var(--ink-3); margin-right: 8px; }
 .light-dot.green { background: var(--ok-fg); }
 .light-dot.yellow { background: var(--warn-fg); }
 .light-dot.red { background: var(--danger-fg); }
@@ -596,7 +599,7 @@ html[data-theme="graphite"] .grade-badge.g-B { background: rgba(216, 181, 106, 0
 /* Радар висяков */
 .stale-line { margin: 0; font-size: 13px; font-weight: 600; color: var(--warn-fg); }
 .money-sleep { margin: 4px 0 0; font-size: 13px; color: var(--warn-fg); }
-.stale-tag { font-size: 11px; font-weight: 700; color: var(--warn-fg); background: var(--warn-bg); padding: 2px 7px; border-radius: 999px; margin-left: 8px; white-space: nowrap; }
+.stale-tag { font-size: 11px; font-weight: 700; color: var(--warn-fg); background: var(--warn-bg); padding: 2px 8px; border-radius: 999px; margin-left: 8px; white-space: nowrap; }
 .own-table tr.stale td { background: oklch(0.64 0.17 55 / 0.06); }
 .defect-line {
   margin: 0;
@@ -641,10 +644,10 @@ html[data-theme="graphite"] .grade-badge.g-B { background: rgba(216, 181, 106, 0
 .card-meta .star { color: var(--ink-2); font-weight: 600; white-space: nowrap; }
 .card-meta .queue { color: var(--accent); font-weight: 600; white-space: nowrap; }
 
-.card-actions { display: flex; align-items: center; gap: 7px; margin-top: auto; padding-top: 2px; }
+.card-actions { display: flex; align-items: center; gap: 8px; margin-top: auto; padding-top: 2px; }
 /* В узкой карточке кнопки компактнее и не вылезают. */
 .card-actions .solid-btn,
-.card-actions .ghost-btn { padding: 9px 10px; font-size: 13px; min-width: 0; }
+.card-actions .ghost-btn { padding: 8px 10px; font-size: 13px; min-width: 0; }
 .card-actions .ghost-btn { flex: 0 0 auto; }
 
 .heart-btn {
@@ -657,7 +660,7 @@ html[data-theme="graphite"] .grade-badge.g-B { background: rgba(216, 181, 106, 0
   height: 36px;
   border: 0;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.92);
+  background: var(--float-bg);
   color: var(--ink-2);
   cursor: pointer;
   transition: transform 0.14s, color 0.2s;
@@ -672,14 +675,14 @@ html[data-theme="graphite"] .grade-badge.g-B { background: rgba(216, 181, 106, 0
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 7px;
+  gap: 8px;
   border-radius: var(--r-sm);
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
   transition: transform 0.12s, filter 0.2s, background 0.2s, box-shadow 0.2s;
 }
-.solid-btn { border: 0; background: var(--solid); color: var(--solid-fg); padding: 11px 16px; }
+.solid-btn { border: 0; background: var(--solid); color: var(--solid-fg); padding: 12px 16px; }
 .ghost-btn { border: 1px solid var(--line); background: var(--surface); color: var(--ink); padding: 10px 14px; }
 .solid-btn:active, .ghost-btn:active { transform: scale(0.96); }
 .solid-btn.wide, .ghost-btn.wide { width: 100%; }
@@ -687,7 +690,7 @@ html[data-theme="graphite"] .grade-badge.g-B { background: rgba(216, 181, 106, 0
 .solid-btn.grow { flex: 1; }
 .solid-btn.big {
   background: var(--accent);
-  padding: 15px 18px;
+  padding: 16px 18px;
   font-size: 15px;
   border-radius: var(--r-md);
   box-shadow: 0 10px 26px var(--cta-shadow);
@@ -719,7 +722,7 @@ html[data-theme="graphite"] .grade-badge.g-B { background: rgba(216, 181, 106, 0
   color: var(--ink);
   font-weight: 600;
   font-size: 13px;
-  padding: 11px 32px 11px 12px;
+  padding: 12px 32px 12px 12px;
   border-radius: var(--r-sm);
   cursor: pointer;
 }
@@ -740,7 +743,7 @@ html[data-theme="graphite"] .grade-badge.g-B { background: rgba(216, 181, 106, 0
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 10px 13px;
+  padding: 10px 12px;
   border-radius: var(--r-sm);
   background: var(--surface-2);
   color: var(--ink);
@@ -884,7 +887,7 @@ html[data-theme="graphite"] .grade-badge.g-B { background: rgba(216, 181, 106, 0
   position: absolute;
   top: 5px;
   right: 5px;
-  padding: 1px 5px;
+  padding: 1px 4px;
   border-radius: 999px;
   background: rgba(0, 0, 0, 0.62);
   color: #fff;
@@ -971,7 +974,7 @@ html[data-theme="graphite"] .grade-badge.g-B { background: rgba(216, 181, 106, 0
 }
 .viewer-nav.prev { left: -6px; }
 .viewer-nav.next { right: -6px; }
-.viewer-dots { position: absolute; bottom: -26px; left: 0; right: 0; display: flex; justify-content: center; gap: 7px; }
+.viewer-dots { position: absolute; bottom: -26px; left: 0; right: 0; display: flex; justify-content: center; gap: 8px; }
 .viewer-dots span { width: 7px; height: 7px; border-radius: 50%; background: rgba(255, 255, 255, 0.3); transition: background 0.2s, transform 0.2s; }
 .viewer-dots span.on { background: #fff; transform: scale(1.25); }
 @media (min-width: 900px) {
@@ -992,7 +995,7 @@ html[data-theme="graphite"] .grade-badge.g-B { background: rgba(216, 181, 106, 0
   justify-content: center;
   gap: 8px;
   width: 100%;
-  padding: 13px;
+  padding: 12px;
   border: 1.5px dashed var(--line);
   border-radius: var(--r-md);
   background: var(--surface);
@@ -1039,7 +1042,7 @@ html[data-theme="graphite"] .grade-badge.g-B { background: rgba(216, 181, 106, 0
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  padding: 13px 16px;
+  padding: 12px 16px;
   border: 1px solid var(--line);
   border-radius: var(--r-md);
   background: var(--surface);
@@ -1086,7 +1089,7 @@ html[data-theme="graphite"] .grade-badge.g-B { background: rgba(216, 181, 106, 0
 .profile-id { flex: 1; min-width: 0; }
 .profile-id strong { display: block; font-size: 17px; font-weight: 700; }
 .profile-id span { display: block; font-size: 13px; color: var(--ink-3); margin-top: 2px; }
-.net-dot { flex: none; font-size: 11px; font-weight: 700; padding: 5px 10px; border-radius: 999px; }
+.net-dot { flex: none; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 999px; }
 .net-dot.on { color: var(--ok-fg); background: var(--ok-bg); }
 .net-dot.off { color: var(--warn-fg); background: var(--warn-bg); }
 
@@ -1124,7 +1127,7 @@ html[data-theme="graphite"] .grade-badge.g-B { background: rgba(216, 181, 106, 0
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 3px;
+  gap: 4px;
   text-align: center;
   padding: 14px 0 4px;
 }
@@ -1159,7 +1162,7 @@ html[data-theme="graphite"] .grade-badge.g-B { background: rgba(216, 181, 106, 0
 .kpi {
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 4px;
   padding: 12px 14px;
   background: var(--card-glass-bg);
   border: 1px solid var(--card-glass-border);
@@ -1177,7 +1180,7 @@ html[data-theme="graphite"] .grade-badge.g-B { background: rgba(216, 181, 106, 0
   font-weight: 600;
   color: var(--warn-fg);
   background: var(--warn-bg);
-  padding: 9px 12px;
+  padding: 8px 12px;
   border-radius: var(--r-sm);
 }
 
@@ -1194,8 +1197,8 @@ html[data-theme="graphite"] .grade-badge.g-B { background: rgba(216, 181, 106, 0
 .door {
   display: inline-flex;
   align-items: center;
-  gap: 7px;
-  padding: 12px 15px;
+  gap: 8px;
+  padding: 12px 16px;
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: 15px;
@@ -1213,7 +1216,7 @@ html[data-theme="graphite"] .grade-badge.g-B { background: rgba(216, 181, 106, 0
 .door-n {
   margin-left: auto;
   min-width: 22px;
-  padding: 1px 7px;
+  padding: 1px 8px;
   border-radius: 999px;
   background: var(--surface-2);
   color: var(--ink-3);
@@ -1313,8 +1316,8 @@ html[data-theme="graphite"] .grade-badge.g-B { background: rgba(216, 181, 106, 0
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 3px;
-  padding: 9px 0;
+  gap: 4px;
+  padding: 8px 0;
   border: 0;
   background: transparent;
   color: var(--ink-3);
@@ -1399,8 +1402,8 @@ html[data-theme="graphite"] .grade-badge.g-B { background: rgba(216, 181, 106, 0
   margin: 0;
   display: flex;
   flex-direction: column;
-  gap: 9px;
-  padding: 13px 0;
+  gap: 8px;
+  padding: 12px 0;
   border-top: 1px solid var(--line);
   border-bottom: 1px solid var(--line);
 }
@@ -1422,7 +1425,7 @@ html[data-theme="graphite"] .grade-badge.g-B { background: rgba(216, 181, 106, 0
 }
 .detail-seller-id { display: flex; flex-direction: column; min-width: 0; }
 .detail-seller-id strong { font-size: 15px; font-weight: 700; }
-.detail-seller-id span { font-size: 13px; color: var(--ink-3); display: inline-flex; gap: 7px; align-items: center; }
+.detail-seller-id span { font-size: 13px; color: var(--ink-3); display: inline-flex; gap: 8px; align-items: center; }
 .detail-seller-id .star { color: var(--ink-2); font-weight: 600; }
 .detail-queue { margin-left: auto; font-size: 13px; font-weight: 600; color: var(--accent); white-space: nowrap; }
 
@@ -1489,7 +1492,7 @@ html[data-theme="graphite"] .grade-badge.g-B { background: rgba(216, 181, 106, 0
 .sheet-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
 .sheet-head h2 { margin: 0; font-size: 19px; font-weight: 700; }
 
-.segmented { position: relative; display: flex; padding: 5px; background: var(--surface-2); border-radius: var(--r-md); }
+.segmented { position: relative; display: flex; padding: 4px; background: var(--surface-2); border-radius: var(--r-md); }
 .seg-indicator {
   position: absolute;
   top: 5px;
@@ -1588,7 +1591,7 @@ html[data-theme="graphite"] .grade-badge.g-B { background: rgba(216, 181, 106, 0
   border: 1px solid var(--line);
   border-radius: var(--r-sm);
   background: var(--surface);
-  padding: 11px 12px;
+  padding: 12px 12px;
   font-size: 16px;
   font-family: inherit;
   color: var(--ink);
@@ -1625,7 +1628,7 @@ html[data-theme="graphite"] .grade-badge.g-B { background: rgba(216, 181, 106, 0
   bottom: calc(100px + env(safe-area-inset-bottom));
   z-index: 60;
   max-width: calc(100% - 32px);
-  padding: 11px 18px;
+  padding: 12px 18px;
   border-radius: 999px;
   background: var(--solid);
   color: var(--solid-fg);
@@ -1655,7 +1658,7 @@ html[data-theme="graphite"] .grade-badge.g-B { background: rgba(216, 181, 106, 0
 .install-text { flex: 1; min-width: 0; }
 .install-text strong { display: block; font-size: 14px; font-weight: 700; }
 .install-text small { display: block; font-size: 12px; color: var(--ink-3); margin-top: 2px; }
-.install-hint .solid-btn { flex: none; padding: 9px 14px; }
+.install-hint .solid-btn { flex: none; padding: 8px 14px; }
 
 /* ---------- CRM table (desktop ЛК) ---------- */
 .own-table { display: none; border: 1px solid var(--line); border-radius: var(--r-lg); background: var(--surface); box-shadow: var(--shadow-sm); overflow: hidden; }
@@ -1668,14 +1671,14 @@ html[data-theme="graphite"] .grade-badge.g-B { background: rgba(216, 181, 106, 0
 .own-table tfoot .t-total td { border-top: 2px solid var(--line); border-bottom: 0; padding-top: 12px; padding-bottom: 12px; font-weight: 700; color: var(--ink); background: var(--surface-2); }
 .own-table tfoot .t-total .t-name { font-weight: 700; }
 .own-table .t-name { min-width: 0; }
-.own-table td.t-name { display: flex; align-items: center; gap: 9px; }
+.own-table td.t-name { display: flex; align-items: center; gap: 8px; }
 .own-table .t-title { font-weight: 600; color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 240px; }
 .own-table th.t-num, .own-table td.t-num { text-align: right; white-space: nowrap; }
 .own-table td.t-num { font-weight: 600; color: var(--ink); }
 .own-table td.t-num.pos { color: var(--ok-fg); }
 .own-table td.t-num.neg { color: var(--danger-fg); }
 .own-table .status-select { flex: none; width: auto; }
-.own-table .status-select select { font-size: 13px; padding: 7px 28px 7px 10px; }
+.own-table .status-select select { font-size: 13px; padding: 8px 28px 8px 10px; }
 .own-table .t-actions { display: flex; gap: 6px; justify-content: flex-end; }
 .own-table .t-actions .icon-btn { width: 32px; height: 32px; }
 
@@ -1717,7 +1720,7 @@ html[data-theme="graphite"] .grade-badge.g-B { background: rgba(216, 181, 106, 0
     transform: translateY(-50%);
   }
   /* Пилюля по центру: твёрдая (без blur — под ней скроллится контент). */
-  /* padding:6 обязателен — под него считается скользящий индикатор (left:6, */
+  /* padding: 6 обязателен — под него считается скользящий индикатор (left:6, */
   /* width:(100%-12)/3); иначе тёмная капсула съезжает с подписи. */
   .tabbar-inner {
     width: 360px;
@@ -1731,8 +1734,8 @@ html[data-theme="graphite"] .grade-badge.g-B { background: rgba(216, 181, 106, 0
   .tab {
     flex-direction: row;
     justify-content: center; /* иконка+подпись по центру ячейки, без перекоса */
-    gap: 7px;
-    padding: 9px 0;
+    gap: 8px;
+    padding: 8px 0;
     font-size: 13px;
     font-weight: 600;
   }
@@ -1751,7 +1754,7 @@ html[data-theme="graphite"] .grade-badge.g-B { background: rgba(216, 181, 106, 0
   /* Профиль = классический CRM-дашборд во всю ширину: сводка-KPI, панель, таблица склада. */
   .profile-view { max-width: 1240px; margin-inline: auto; }
   .profile-view.breath { gap: 12px; }
-  .profile-view > .you-card { padding: 13px 16px; }
+  .profile-view > .you-card { padding: 12px 16px; }
   /* Сводка — 4 показателя в ряд. */
   .profile-view .kpi-row { grid-template-columns: repeat(4, 1fr); }
 

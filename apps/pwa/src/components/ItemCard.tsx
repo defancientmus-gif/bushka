@@ -133,8 +133,12 @@ export function ItemCard({
       <div className="card-body">
         {minimal ? (
           <>
+            {/* Подпись БУ.шки: состояние вещи названо прямо на витрине, рядом с ценой.
+                Человек с радиорынка смотрит цену, потом сразу «а в каком оно состоянии» —
+                и на других досках ради этого надо открывать карточку. */}
             <strong className="card-price">{item.price || 'Цена договорная'}</strong>
             <p className="card-title">{item.title || 'Без названия'}</p>
+            {item.condition && <span className="card-cond">{item.condition}</span>}
           </>
         ) : (
           <>

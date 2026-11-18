@@ -275,7 +275,9 @@ export function CreateView({ editItem, onExport, onCreated }: { editItem?: Item 
       <header className="view-head">
         <p className="eyebrow">товар</p>
         <h1>{editing ? 'Изменить' : 'Новый'}</h1>
-        <span className={`status-pill ${draft.status}`}>{statusLabels[draft.status]}</span>
+        {draft.status !== 'available' && (
+          <span className={`status-pill ${draft.status}`}>{statusLabels[draft.status]}</span>
+        )}
       </header>
 
       <div className="create-dash">

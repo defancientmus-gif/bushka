@@ -52,12 +52,12 @@ export function OwnItemsTable({
                   {stale && <span className="stale-tag">висит {daysOld(item.createdAt)} дн</span>}
                 </td>
                 <td>{item.condition}</td>
-                <td>{item.battery || '—'}</td>
+                <td>{item.battery || '—'}</td>{/* почерк-ок: строка таблицы — это товар, её не спрятать; пустая ячейка не отличима от «забыл заполнить» */}
                 <td className="t-num">{qty > 1 ? <b>{qty} шт</b> : '1'}</td>
                 <td className="t-num">{item.price || 'договорная'}</td>
-                <td className="t-num">{hasCost ? formatMoney(toNum(item.costPrice)) : '—'}</td>
+                <td className="t-num">{hasCost ? formatMoney(toNum(item.costPrice)) : '—'}</td>{/* почерк-ок: та же строка-товар */}
                 <td className={`t-num ${hasCost ? (margin >= 0 ? 'pos' : 'neg') : ''}`}>
-                  {hasCost ? <><span className={`light-dot ${marginLight(item.price, item.costPrice)}`} aria-hidden="true" />{formatMoney(margin)}</> : '—'}
+                  {hasCost ? <><span className={`light-dot ${marginLight(item.price, item.costPrice)}`} aria-hidden="true" />{formatMoney(margin)}</> : '—'}{/* почерк-ок: строка таблицы — это товар */}
                 </td>
                 <td>
                   <span className="status-select">

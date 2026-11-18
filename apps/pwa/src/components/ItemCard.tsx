@@ -99,7 +99,8 @@ export function ItemCard({
           <span className="media-glyph"><CategoryGlyph category={item.category} size={38} /></span>
         )}
         {media?.kind === 'video' && <span className="media-clip" aria-label="видео" />}
-        <span className={`status-pill ${item.status}`}>{statusLabels[item.status]}</span>
+        {/* «В наличии» — обычное состояние, плашкой его не объявляем: цвет остаётся у того, что надо заметить. */}
+        {item.status !== 'available' && <span className={`status-pill ${item.status}`}>{statusLabels[item.status]}</span>}
         {variant === 'market' && onFavorite && (
           <button
             type="button"

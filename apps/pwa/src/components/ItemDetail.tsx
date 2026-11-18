@@ -52,7 +52,9 @@ export function ItemDetail({ item, favorite, own = false, onFavorite, onBuy, onQ
             ) : (
               <span className="media-glyph"><CategoryGlyph category={item.category} size={48} /></span>
             )}
-            <span className={`status-pill ${item.status}`}>{statusLabels[item.status]}</span>
+            {item.status !== 'available' && (
+              <span className={`status-pill ${item.status}`}>{statusLabels[item.status]}</span>
+            )}
             {media.length > 1 && <span className="media-count">{media.length} фото</span>}
           </div>
 
@@ -116,7 +118,7 @@ export function ItemDetail({ item, favorite, own = false, onFavorite, onBuy, onQ
               <HeartIcon size={20} filled={favorite} />
             </button>
             <button type="button" className="ghost-btn" onClick={onExport} aria-label="Поделиться"><SendIcon size={16} /></button>
-            <button type="button" className="ghost-btn grow" onClick={onQueue}>Запрос</button>
+            <button type="button" className="ghost-btn grow" onClick={onQueue}>В очередь</button>
             <button type="button" className="solid-btn accent grow big" onClick={onBuy}>Купить</button>
           </div>
         )}

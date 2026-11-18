@@ -165,7 +165,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   const addQueue = useCallback((item: Item) => {
     if (item.id.startsWith('seed-')) {
-      showToast('Запрос отправлен');
+      showToast('Вы в очереди — продавец увидит');
       return;
     }
     persist(items.map(current => (

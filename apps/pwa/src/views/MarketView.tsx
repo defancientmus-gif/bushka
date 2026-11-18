@@ -86,7 +86,7 @@ export function MarketView({ onExport }: { onExport: (item: Item) => void }) {
     <section className="view market-view">
       <div className="search-box">
         <SearchIcon size={18} />
-        <input value={query} onChange={event => setQuery(event.target.value)} type="search" placeholder="Что ищете — телефон, ноутбук…" />
+        <input value={query} onChange={event => setQuery(event.target.value)} type="search" placeholder="Что ищете?" />
         <button type="button" className={`search-filter ${activeCount ? 'on' : ''}`} onClick={() => setFilterOpen(true)} aria-label="Фильтр">
           Фильтр{activeCount > 0 && <i>{activeCount}</i>}
         </button>

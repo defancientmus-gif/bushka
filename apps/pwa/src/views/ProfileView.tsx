@@ -140,7 +140,7 @@ export function ProfileView({ onExport, onEdit }: { onExport: (item: Item) => vo
       <div className="segmented two" role="tablist" aria-label="Тема">
         <span className="seg-indicator" style={{ transform: `translateX(${theme === 'light' ? 0 : 100}%)` }} aria-hidden="true" />
         <button type="button" role="tab" aria-selected={theme === 'light'} className={theme === 'light' ? 'active' : ''} onClick={() => pickTheme('light')}>Дневная</button>
-        <button type="button" role="tab" aria-selected={theme === 'emerald'} className={theme === 'emerald' ? 'active' : ''} onClick={() => pickTheme('emerald')}>Изумруд · золото</button>
+        <button type="button" role="tab" aria-selected={theme === 'graphite'} className={theme === 'graphite' ? 'active' : ''} onClick={() => pickTheme('graphite')}>Графит</button>
       </div>
 
       <p className="section-label">Данные</p>

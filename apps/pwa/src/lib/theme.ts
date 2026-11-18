@@ -1,11 +1,11 @@
-export type Theme = 'light' | 'emerald';
+export type Theme = 'light' | 'graphite';
 
 const KEY = 'bushka:pwa:theme:v1';
-const themeColor: Record<Theme, string> = { light: '#eef1f5', emerald: '#08120e' };
+const themeColor: Record<Theme, string> = { light: '#f5f5f7', graphite: '#171717' };
 
 export function loadTheme(): Theme {
   try {
-    return window.localStorage.getItem(KEY) === 'emerald' ? 'emerald' : 'light';
+    return window.localStorage.getItem(KEY) === 'graphite' ? 'graphite' : 'light';
   } catch {
     return 'light';
   }
@@ -13,7 +13,7 @@ export function loadTheme(): Theme {
 
 export function applyTheme(theme: Theme) {
   const root = document.documentElement;
-  if (theme === 'emerald') root.setAttribute('data-theme', 'emerald');
+  if (theme === 'graphite') root.setAttribute('data-theme', 'graphite');
   else root.removeAttribute('data-theme');
   document.querySelector('meta[name="theme-color"]')?.setAttribute('content', themeColor[theme]);
 }

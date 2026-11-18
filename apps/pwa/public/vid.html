@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>БУ.шка — три нейтральных</title>
+<style>
+*{box-sizing:border-box}
+:root{
+  --page: oklch(0.975 0 0);
+  --ink: oklch(0.25 0 0);
+  --mute: oklch(0.53 0 0);
+  --sf: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
+  color-scheme: light;
+}
+html,body{margin:0;padding:0;background:var(--page)}
+body{
+  color:var(--ink);
+  font-family:var(--sf); font-size:15px; line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+  padding:38px 20px 90px;
+}
+.wrap{max-width:1180px;margin:0 auto}
+h1{font-size:28px;font-weight:600;letter-spacing:-.022em;margin:0 0 8px;text-wrap:balance}
+.lead{color:var(--mute);margin:0 0 10px;max-width:62ch}
+.note{
+  margin:24px 0 44px;padding:17px 19px;border-radius:16px;
+  background:oklch(0.25 0 0 / .045);
+}
+.note p{margin:0;color:var(--mute);font-size:14px}
+.note p+p{margin-top:7px}
+.note b{font-weight:600;color:var(--ink)}
+
+section{margin:0 0 58px}
+.head{display:flex;align-items:baseline;gap:12px;margin:0 0 4px}
+.num{font-size:13px;font-weight:600;color:var(--mute);min-width:22px}
+h2{font-size:19px;font-weight:600;letter-spacing:-.012em;margin:0}
+.why{color:var(--mute);font-size:14px;margin:4px 0 18px 34px;max-width:64ch}
+
+.demo{border-radius:24px;overflow:hidden;margin-left:34px}
+.demo .bar{display:flex;align-items:center;gap:10px;padding:15px 18px}
+.logo{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;font-size:11px;font-weight:600}
+.name{font-weight:600;font-size:16px;letter-spacing:-.012em}
+.tag{font-size:11px;font-weight:500;padding:2px 7px;border-radius:7px}
+.search{margin:0 18px 16px;padding:11px 15px;border-radius:14px;font-size:14px}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;padding:0 18px 22px}
+.card{border-radius:18px;overflow:hidden}
+.media{aspect-ratio:1/1;position:relative;display:grid;place-items:center}
+.glyph{width:30px;height:38px;border-radius:5px}
+.pill{position:absolute;top:9px;left:9px;font-size:11px;font-weight:600;padding:3px 9px;border-radius:999px}
+.heart{position:absolute;top:9px;right:9px;width:24px;height:24px;border-radius:999px}
+.meta{padding:11px 12px 13px}
+.price{font-size:15px;font-weight:600;letter-spacing:-.012em;font-variant-numeric:tabular-nums}
+.title{font-size:13px;margin-top:2px}
+.card.gone .media{opacity:.4}
+.card.gone .price{text-decoration:line-through;text-decoration-thickness:1px}
+
+/* === 1. ГРАФИТ === */
+.v1{background:oklch(0.966 0 0);box-shadow:0 1px 2px oklch(0.2 0 0 / .05), 0 14px 40px -14px oklch(0.2 0 0 / .16)}
+.v1 .logo{background:oklch(0.22 0 0);color:#fff}
+.v1 .name{color:oklch(0.22 0 0)}
+.v1 .tag{background:oklch(0.22 0 0 / .07);color:oklch(0.48 0 0)}
+.v1 .search{background:#fff;color:oklch(0.56 0 0);box-shadow:0 1px 2px oklch(0.2 0 0 / .06)}
+.v1 .card{background:#fff;box-shadow:0 1px 2px oklch(0.2 0 0 / .055)}
+.v1 .media{background:oklch(0.944 0 0)}
+.v1 .glyph{background:oklch(0.845 0 0)}
+.v1 .heart{background:oklch(1 0 0 / .9)}
+.v1 .price{color:oklch(0.22 0 0)}
+.v1 .title{color:oklch(0.54 0 0)}
+.v1 .pill{background:oklch(0.63 0.13 62);color:#fff}
+.v1 .card.gone .price{color:oklch(0.62 0 0)}
+.v1 .card.gone .title{color:oklch(0.68 0 0)}
+
+/* === 2. КАМЕНЬ === */
+.v2{background:oklch(0.962 0.004 262);box-shadow:0 1px 2px oklch(0.3 0.02 262 / .06), 0 14px 40px -14px oklch(0.3 0.03 262 / .18)}
+.v2 .logo{background:oklch(0.255 0.014 262);color:#fff}
+.v2 .name{color:oklch(0.235 0.014 262)}
+.v2 .tag{background:oklch(0.255 0.014 262 / .07);color:oklch(0.5 0.012 262)}
+.v2 .search{background:oklch(0.996 0.001 262);color:oklch(0.56 0.01 262);box-shadow:0 1px 2px oklch(0.3 0.025 262 / .08)}
+.v2 .card{background:oklch(0.996 0.001 262);box-shadow:0 1px 2px oklch(0.3 0.025 262 / .07)}
+.v2 .media{background:oklch(0.933 0.006 262)}
+.v2 .glyph{background:oklch(0.825 0.008 262)}
+.v2 .heart{background:oklch(1 0 0 / .92)}
+.v2 .price{color:oklch(0.235 0.014 262)}
+.v2 .title{color:oklch(0.53 0.012 262)}
+.v2 .pill{background:oklch(0.63 0.13 62);color:#fff}
+.v2 .card.gone .price{color:oklch(0.62 0.008 262)}
+.v2 .card.gone .title{color:oklch(0.68 0.008 262)}
+
+/* === 3. КОНТРАСТ === */
+.v3{background:#fff;box-shadow:0 0 0 1px oklch(0.25 0 0 / .09)}
+.v3 .logo{background:oklch(0.17 0 0);color:#fff;border-radius:8px}
+.v3 .name{color:oklch(0.17 0 0)}
+.v3 .tag{background:transparent;color:oklch(0.56 0 0);box-shadow:inset 0 0 0 1px oklch(0.25 0 0 / .14)}
+.v3 .search{background:transparent;color:oklch(0.54 0 0);box-shadow:inset 0 0 0 1px oklch(0.25 0 0 / .13);border-radius:12px}
+.v3 .card{background:transparent;border-radius:14px;box-shadow:inset 0 0 0 1px oklch(0.25 0 0 / .1)}
+.v3 .media{background:oklch(0.973 0 0)}
+.v3 .glyph{background:oklch(0.86 0 0)}
+.v3 .heart{background:oklch(1 0 0 / .86);box-shadow:inset 0 0 0 1px oklch(0.25 0 0 / .1)}
+.v3 .price{color:oklch(0.17 0 0);font-size:17px}
+.v3 .title{color:oklch(0.5 0 0)}
+.v3 .pill{background:oklch(0.17 0 0);color:#fff}
+.v3 .card.gone .price{color:oklch(0.6 0 0)}
+.v3 .card.gone .title{color:oklch(0.68 0 0)}
+
+@media (max-width:860px){
+  body{padding:26px 16px 70px}
+  .grid{grid-template-columns:repeat(2,1fr)}
+  .demo,.why{margin-left:0}
+  h1{font-size:23px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Три нейтральных для витрины</h1>
+  <p class="lead">Одна и та же полка в трёх вариантах. Смотри, где взгляд первым делом падает на вещь и цену.</p>
+
+  <div class="note">
+    <p><b>Что сейчас не так.</b> Зелёная плашка «В наличии» висит на каждой карточке. Все товары в наличии — значит она ничего не сообщает, просто красит экран. Под ней зелёная заливка плитки, а фон страницы кремовый: три цвета спорят, и вещь в этом споре проигрывает.</p>
+    <p><b>Что я убрал во всех трёх.</b> Плашку «В наличии» — обычное состояние не нужно объявлять. Проданное само гаснет и цена зачёркивается, бронь остаётся цветом: её действительно надо заметить. Четвёртая карточка в каждом ряду — проданная, третья — забронированная.</p>
+  </div>
+
+  <section>
+    <div class="head"><span class="num">1</span><h2>Графит</h2></div>
+    <p class="why">Чистый серый, цвета нет вообще. Как зал Apple Store: стены белые, цвет приносит сам товар. Карточка белая и чуть приподнята мягкой тенью.</p>
+    <div class="demo v1">
+      <div class="bar"><div class="logo">бу</div><div class="name">БУ.шка</div><span class="tag">v070</span></div>
+      <div class="search">Что ищете — телефон, ноутбук…</div>
+      <div class="grid">
+        <div class="card"><div class="media"><span class="heart"></span><div class="glyph"></div></div><div class="meta"><div class="price">38 000 ₽</div><div class="title">iPhone 13 128 синий</div></div></div>
+        <div class="card"><div class="media"><span class="heart"></span><div class="glyph"></div></div><div class="meta"><div class="price">54 000 ₽</div><div class="title">MacBook Air M1 13</div></div></div>
+        <div class="card"><div class="media"><span class="pill">Бронь</span><span class="heart"></span><div class="glyph"></div></div><div class="meta"><div class="price">46 000 ₽</div><div class="title">PlayStation 5 Slim</div></div></div>
+        <div class="card gone"><div class="media"><span class="heart"></span><div class="glyph"></div></div><div class="meta"><div class="price">12 500 ₽</div><div class="title">AirPods Pro 2 USB-C</div></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="head"><span class="num">2</span><h2>Камень</h2></div>
+    <p class="why">Тот же серый, но с холодком — как светлая тема мака. Холодная нейтраль читается как металл, тёплая как бумага; разница видна на белой карточке поверх фона. Ощущение чуть дороже графита.</p>
+    <div class="demo v2">
+      <div class="bar"><div class="logo">бу</div><div class="name">БУ.шка</div><span class="tag">v070</span></div>
+      <div class="search">Что ищете — телефон, ноутбук…</div>
+      <div class="grid">
+        <div class="card"><div class="media"><span class="heart"></span><div class="glyph"></div></div><div class="meta"><div class="price">38 000 ₽</div><div class="title">iPhone 13 128 синий</div></div></div>
+        <div class="card"><div class="media"><span class="heart"></span><div class="glyph"></div></div><div class="meta"><div class="price">54 000 ₽</div><div class="title">MacBook Air M1 13</div></div></div>
+        <div class="card"><div class="media"><span class="pill">Бронь</span><span class="heart"></span><div class="glyph"></div></div><div class="meta"><div class="price">46 000 ₽</div><div class="title">PlayStation 5 Slim</div></div></div>
+        <div class="card gone"><div class="media"><span class="heart"></span><div class="glyph"></div></div><div class="meta"><div class="price">12 500 ₽</div><div class="title">AirPods Pro 2 USB-C</div></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="head"><span class="num">3</span><h2>Контраст</h2></div>
+    <p class="why">Белый лист, теней нет совсем, карточки держит тонкая линия, цена крупнее. Строгий каталог, где всё держится на типографике. Самый честный и самый сухой из трёх — подойдёт, если хочется «магазин», а не «лента».</p>
+    <div class="demo v3">
+      <div class="bar"><div class="logo">бу</div><div class="name">БУ.шка</div><span class="tag">v070</span></div>
+      <div class="search">Что ищете — телефон, ноутбук…</div>
+      <div class="grid">
+        <div class="card"><div class="media"><span class="heart"></span><div class="glyph"></div></div><div class="meta"><div class="price">38 000 ₽</div><div class="title">iPhone 13 128 синий</div></div></div>
+        <div class="card"><div class="media"><span class="heart"></span><div class="glyph"></div></div><div class="meta"><div class="price">54 000 ₽</div><div class="title">MacBook Air M1 13</div></div></div>
+        <div class="card"><div class="media"><span class="pill">Бронь</span><span class="heart"></span><div class="glyph"></div></div><div class="meta"><div class="price">46 000 ₽</div><div class="title">PlayStation 5 Slim</div></div></div>
+        <div class="card gone"><div class="media"><span class="heart"></span><div class="glyph"></div></div><div class="meta"><div class="price">12 500 ₽</div><div class="title">AirPods Pro 2 USB-C</div></div></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="note">
+    <p><b>Тёмная тема.</b> «Изумруд · золото» переделаю в тот же нейтральный, только тёмный — зелёного не останется и там.</p>
+    <p><b>Картинки.</b> Серые квадраты здесь вместо фото: у товаров без снимка сейчас стоит контурная иконка на цветной заливке, её тоже убираю.</p>
+  </div>
+
+</div>
+</body>
+</html>

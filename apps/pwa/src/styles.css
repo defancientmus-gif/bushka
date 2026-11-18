@@ -1081,7 +1081,7 @@ html[data-theme="graphite"] .grade-badge.g-B { background: rgba(216, 181, 106, 0
   flex: none;
   border-radius: 18px;
   background: var(--accent);
-  color: #fff;
+  color: var(--solid-fg);
   font-size: 22px;
   font-weight: 600;
   box-shadow: var(--shadow-md);
@@ -1225,7 +1225,7 @@ html[data-theme="graphite"] .grade-badge.g-B { background: rgba(216, 181, 106, 0
   font-style: normal;
   text-align: center;
 }
-.door.is-open .door-n { background: var(--accent); color: #fff; }
+.door.is-open .door-n { background: var(--accent); color: var(--solid-fg); }
 .door-chev { color: var(--ink-3); transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1); }
 .door.is-open .door-chev { transform: rotate(180deg); color: var(--accent); }
 
@@ -1465,7 +1465,7 @@ html[data-theme="graphite"] .grade-badge.g-B { background: rgba(216, 181, 106, 0
   display: grid;
   place-items: center;
   background: var(--accent);
-  color: #fff;
+  color: var(--solid-fg);
   font-weight: 600;
   font-size: 16px;
 }

@@ -5,6 +5,7 @@ import { ClipMedia } from './ClipMedia';
 import { VideoMedia } from './VideoMedia';
 import { MediaViewer } from './MediaViewer';
 import { CategoryGlyph, CloseIcon, HeartIcon, SendIcon } from './icons';
+import { contactHref } from './ItemCard';
 import { dealModeLabels, deliveryLabels, statusLabels } from '../lib/labels';
 
 /** Полная карточка товара: фото/видео листаются, ниже — вся информация по полочкам,
@@ -20,7 +21,10 @@ export function ItemDetail({ item, favorite, own = false, onFavorite, onBuy, onQ
   onClose: () => void;
 }) {
   const [viewerIndex, setViewerIndex] = useState<number | null>(null);
+  const [descOpen, setDescOpen] = useState(false);
   const media = item.media;
+  const link = contactHref(item.contact || '');
+  const linkWord = item.contact?.startsWith('@') ? 'Написать' : /^(?:\+7|8)/.test(item.contact || '') ? 'Позвонить' : 'Открыть';
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => { if (event.key === 'Escape') onClose(); };
@@ -33,11 +37,11 @@ export function ItemDetail({ item, favorite, own = false, onFavorite, onBuy, onQ
 
   return createPortal(
     <div className="detail-backdrop" role="presentation" onClick={onClose}>
-      <section className="detail-sheet" role="dialog" aria-modal="true" aria-label={item.title || 'Товар'} onClick={event => event.stopPropagation()}>
+      <section className={`detail-sheet ${media.length ? '' : 'no-media'}`} role="dialog" aria-modal="true" aria-label={item.title || 'Товар'} onClick={event => event.stopPropagation()}>
         <button type="button" className="detail-close" onClick={onClose} aria-label="Закрыть"><CloseIcon size={18} /></button>
 
         <div className="detail-scroll">
-          <div className={`detail-media status-${item.status}`}>
+          <div className={`detail-media status-${item.status} ${media.length ? '' : 'empty'}`}>
             {media.length ? (
               <div className="detail-slides">
                 {media.map((asset, i) => (
@@ -79,7 +83,13 @@ export function ItemDetail({ item, favorite, own = false, onFavorite, onBuy, onQ
               <p className="reserve-note">Бронь до {item.reservedUntil}</p>
             )}
 
-            {item.description && <p className="detail-desc">{item.description}</p>}
+            {item.description && (
+              <p
+                className={`detail-desc ${descOpen ? 'open' : ''}`}
+                onClick={() => setDescOpen(v => !v)}
+                title={descOpen ? 'Свернуть' : 'Показать целиком'}
+              >{item.description}</p>
+            )}
 
             <dl className="detail-specs">
               {item.kit && <div><dt>Комплект</dt><dd>{item.kit}</dd></div>}
@@ -96,11 +106,11 @@ export function ItemDetail({ item, favorite, own = false, onFavorite, onBuy, onQ
                   <strong>{item.sellerName || 'Продавец'}</strong>
                   <span>
                     {item.sellerRating != null && <b className="star">★ {item.sellerRating.toFixed(1)}</b>}
-                    {item.city || 'Город не указан'}
+                    {item.queueCount > 0 && <i className="detail-queue">{item.queueCount} в очереди</i>}
                   </span>
                 </div>
-                {item.queueCount > 0 && (
-                  <span className="detail-queue">{item.queueCount} в очереди</span>
+                {link && (
+                  <a className="seller-link" href={link} target="_blank" rel="noreferrer">{linkWord}</a>
                 )}
               </div>
             )}

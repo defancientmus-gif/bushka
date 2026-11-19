@@ -234,6 +234,42 @@ function Glyph({ name, size = 24 }: { name: string; size?: number }) {
           <path d="M10 7V4M14 7V4M10 20v-3M14 20v-3M7 10H4M7 14H4M20 10h-3M20 14h-3" />
         </Svg>
       );
+    case 'tablet':
+      return (
+        <Svg size={size}>
+          <rect x="5" y="3" width="14" height="18" rx="2.4" />
+          <path d="M10.5 18h3" />
+        </Svg>
+      );
+    case 'desktop':
+      return (
+        <Svg size={size}>
+          <rect x="3" y="4" width="18" height="12" rx="1.8" />
+          <path d="M9 20h6M12 16v4" />
+        </Svg>
+      );
+    case 'watch':
+      return (
+        <Svg size={size}>
+          <rect x="7" y="7" width="10" height="10" rx="3" />
+          <path d="M9.5 7l.6-3.5h3.8l.6 3.5M9.5 17l.6 3.5h3.8l.6-3.5" />
+        </Svg>
+      );
+    case 'part':
+      return (
+        <Svg size={size}>
+          <rect x="6" y="3" width="12" height="13" rx="1.8" />
+          <path d="M10 16v2.5a2 2 0 0 0 2 2h4" />
+          <path d="M9.5 7h5" />
+        </Svg>
+      );
+    case 'tool':
+      return (
+        <Svg size={size}>
+          <path d="M14.5 6.5a3.5 3.5 0 0 0 4.6 4.6L21 13l-8 8-2-2 .2-2.2L4.5 10 3 5.5 5.5 3 10 4.5l1.2 1.2" />
+          <path d="M5.5 5.5l4 4" />
+        </Svg>
+      );
     case 'camera':
       return <CameraIcon size={size} />;
     default:

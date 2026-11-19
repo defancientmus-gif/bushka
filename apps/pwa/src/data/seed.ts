@@ -42,8 +42,8 @@ function lot(
   } as Item;
 }
 
-// A generous mock "market" — the couch-shopping feed. Real cross-user data
-// will come from the backend later; the shape already matches.
+// Образцы объявлений: видны, только пока живых объявлений на витрине нет.
+// Контактов у них нет нарочно — выдуманный «@anton» вёл бы покупателя к настоящему чужому человеку.
 export const seedItems: Item[] = [
   lot({
     id: 'seed-iphone13',
@@ -58,7 +58,7 @@ export const seedItems: Item[] = [
     defects: 'Микроцарапины на рамке',
     city: 'Симферополь',
     sellerName: 'Антон',
-    contact: '@anton',
+    contact: '',
     sellerRating: 4.9,
     delivery: ['pickup', 'meet'],
     queueCount: 3
@@ -72,9 +72,9 @@ export const seedItems: Item[] = [
     battery: '92%',
     kit: 'Ноутбук, зарядка',
     defects: 'Лёгкие следы на крышке',
-    city: 'Краснодар',
-    sellerName: 'Reseller_KRD',
-    contact: '@krd_tech',
+    city: 'Севастополь',
+    sellerName: 'Игорь',
+    contact: '',
     sellerRating: 4.8,
     delivery: ['delivery', 'pickup'],
     queueCount: 2
@@ -88,9 +88,9 @@ export const seedItems: Item[] = [
     grade: 'A',
     description: 'Дисковая, на гарантии до осени. Один геймпад.',
     kit: 'Коробка, геймпад, провода',
-    city: 'Москва',
+    city: 'Ялта',
     sellerName: 'GameHub',
-    contact: '@gamehub_msk',
+    contact: '',
     sellerRating: 5,
     delivery: ['delivery', 'pickup', 'meet'],
     queueCount: 6
@@ -106,7 +106,7 @@ export const seedItems: Item[] = [
     kit: 'Полный комплект',
     city: 'Симферополь',
     sellerName: 'Марина',
-    contact: '@marina_audio',
+    contact: '',
     sellerRating: 4.6,
     delivery: ['meet'],
     queueCount: 1
@@ -119,9 +119,9 @@ export const seedItems: Item[] = [
     description: 'Пробег 12к кадров, матрица чистая. Подойдёт для съёмки.',
     kit: 'Тушка, объектив, 2 АКБ',
     defects: 'Потёртость на хвате',
-    city: 'Санкт-Петербург',
+    city: 'Феодосия',
     sellerName: 'Foto_Den',
-    contact: '@foto_den',
+    contact: '',
     sellerRating: 4.9,
     delivery: ['delivery', 'meet'],
     queueCount: 4
@@ -133,9 +133,9 @@ export const seedItems: Item[] = [
     category: 'Комплектующие',
     description: 'Не майнила, из домашней сборки. Тесты при встрече.',
     kit: 'Карта, коробка',
-    city: 'Казань',
+    city: 'Керчь',
     sellerName: 'PC_Master',
-    contact: '@pc_master_kzn',
+    contact: '',
     sellerRating: 4.7,
     delivery: ['pickup', 'meet'],
     queueCount: 2
@@ -150,9 +150,9 @@ export const seedItems: Item[] = [
     description: 'Зелёный, ёмкость АКБ в норме. Снят с эксплуатации.',
     battery: '94%',
     kit: 'Коробка, кабель',
-    city: 'Сочи',
+    city: 'Евпатория',
     sellerName: 'Гор',
-    contact: '@gor_sochi',
+    contact: '',
     sellerRating: 4.5,
     delivery: ['delivery', 'pickup'],
     queueCount: 2
@@ -166,9 +166,9 @@ export const seedItems: Item[] = [
     battery: '88%',
     kit: 'Ноутбук, зарядка',
     defects: 'Стёрта пара клавиш',
-    city: 'Екатеринбург',
+    city: 'Симферополь',
     sellerName: 'IT_Skupka',
-    contact: '@it_skupka',
+    contact: '',
     sellerRating: 4.8,
     delivery: ['delivery'],
     queueCount: 1
@@ -182,9 +182,9 @@ export const seedItems: Item[] = [
     grade: 'A',
     description: 'Прошитая, набор игр на карте 128 Гб в подарок.',
     kit: 'Док, джойконы, карта',
-    city: 'Москва',
+    city: 'Севастополь',
     sellerName: 'RetroPlay',
-    contact: '@retroplay',
+    contact: '',
     sellerRating: 4.7,
     delivery: ['delivery', 'meet'],
     queueCount: 3
@@ -193,7 +193,7 @@ export const seedItems: Item[] = [
     id: 'seed-ipad',
     title: 'iPad Air 4 64',
     price: '27 000 ₽',
-    category: 'Смартфон',
+    category: 'Планшет',
     condition: 'Хорошее',
     grade: 'B',
     description: 'Голубой, без вмятин. Подойдёт под учёбу и рисование.',
@@ -201,7 +201,7 @@ export const seedItems: Item[] = [
     defects: 'Скол на углу стекла',
     city: 'Симферополь',
     sellerName: 'Лена',
-    contact: '@lena_sale',
+    contact: '',
     sellerRating: 4.4,
     delivery: ['meet'],
     queueCount: 0
@@ -221,7 +221,7 @@ export const seedItems: Item[] = [
     battery: 'Разная',
     city: 'Симферополь',
     sellerName: 'IPRO opt',
-    contact: '@ipro',
+    contact: '',
     sellerRating: 4.6,
     delivery: ['delivery', 'pickup'],
     queueCount: 5
@@ -235,11 +235,43 @@ export const seedItems: Item[] = [
     grade: 'B',
     description: 'Звук без нареканий, держит заряд весь день.',
     kit: 'Колонка, кабель',
-    city: 'Краснодар',
+    city: 'Алушта',
     sellerName: 'Звук24',
-    contact: '@zvuk24',
+    contact: '',
     sellerRating: 4.8,
     delivery: ['delivery', 'pickup', 'meet'],
     queueCount: 1
+  }),
+  lot({
+    id: 'seed-display',
+    title: 'Дисплей iPhone 13 оригинал',
+    price: '9 500 ₽',
+    category: 'Запчасти',
+    condition: 'Хорошее',
+    grade: 'B',
+    description: 'Снят с донора, без пятен и полос. Проверка при встрече.',
+    kit: 'Модуль в сборе',
+    city: 'Симферополь',
+    sellerName: 'Мастерская',
+    contact: '',
+    sellerRating: 4.9,
+    delivery: ['pickup', 'meet'],
+    queueCount: 2
+  }),
+  lot({
+    id: 'seed-station',
+    title: 'Паяльная станция Quick 861DW',
+    price: '14 000 ₽',
+    category: 'Инструмент',
+    condition: 'Хорошее',
+    grade: 'B',
+    description: 'Термовоздушная, в работе два года. Отдаю с насадками.',
+    kit: 'Станция, три насадки',
+    city: 'Севастополь',
+    sellerName: 'Сергей',
+    contact: '',
+    sellerRating: 4.8,
+    delivery: ['delivery', 'pickup'],
+    queueCount: 0
   })
 ];

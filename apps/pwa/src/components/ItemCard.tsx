@@ -8,12 +8,14 @@ import { ClipMedia } from './ClipMedia';
 import { VideoMedia } from './VideoMedia';
 import { MediaViewer } from './MediaViewer';
 import { ItemDetail } from './ItemDetail';
+import type { PriceHint } from '../lib/search';
 
 export function ItemCard({
   item,
   index = 0,
   variant = 'market',
   isOwn = false,
+  hint,
   favorite = false,
   onQueue,
   onBuy,
@@ -27,6 +29,7 @@ export function ItemCard({
   index?: number;
   variant?: 'market' | 'preview' | 'own';
   isOwn?: boolean;
+  hint?: PriceHint;
   favorite?: boolean;
   onQueue?: () => void;
   onBuy?: () => void;
@@ -122,6 +125,7 @@ export function ItemCard({
           item={item}
           favorite={favorite}
           own={isOwn}
+          hint={hint}
           onFavorite={() => onFavorite?.()}
           onBuy={() => onBuy?.()}
           onQueue={() => onQueue?.()}

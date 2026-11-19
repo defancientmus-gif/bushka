@@ -7,13 +7,16 @@ import { MediaViewer } from './MediaViewer';
 import { CategoryGlyph, CloseIcon, HeartIcon, SendIcon } from './icons';
 import { contactHref } from './ItemCard';
 import { dealModeLabels, deliveryLabels, statusLabels } from '../lib/labels';
+import type { PriceHint } from '../lib/search';
 
 /** Полная карточка товара: фото/видео листаются, ниже — вся информация по полочкам,
  *  внизу — действия. Открывается на весь экран (портал в body). */
-export function ItemDetail({ item, favorite, own = false, onFavorite, onBuy, onQueue, onExport, onClose }: {
+export function ItemDetail({ item, favorite, own = false, hint, onFavorite, onBuy, onQueue, onExport, onClose }: {
   item: Item;
   favorite: boolean;
   own?: boolean;
+  /** Насколько цена ниже таких же вещей на витрине (считает поиск). */
+  hint?: PriceHint;
   onFavorite: () => void;
   onBuy: () => void;
   onQueue: () => void;
@@ -23,6 +26,8 @@ export function ItemDetail({ item, favorite, own = false, onFavorite, onBuy, onQ
   const [viewerIndex, setViewerIndex] = useState<number | null>(null);
   const [descOpen, setDescOpen] = useState(false);
   const media = item.media;
+  // Образец объявления: продавца не существует, поэтому ни связи, ни «Купить».
+  const sample = item.id.startsWith('seed-');
   const link = contactHref(item.contact || '');
   const linkWord = item.contact?.startsWith('@') ? 'Написать' : /^(?:\+7|8)/.test(item.contact || '') ? 'Позвонить' : 'Открыть';
 
@@ -73,6 +78,7 @@ export function ItemDetail({ item, favorite, own = false, onFavorite, onBuy, onQ
               <span className="quality-word">{item.condition}</span>
               {item.battery && <span className="quality-sub">· АКБ {item.battery}</span>}
               {item.dealMode !== 'free' && <span className="quality-sub">· {dealModeLabels[item.dealMode]}</span>}
+              {hint && <span className="quality-sub" title={`Сравнил с ${hint.count} такими же на витрине`}>· дешевле похожих на {`${hint.percent}\u00a0%`}</span>}
             </div>
 
             <p className={`defect-line ${item.defects?.trim() ? '' : 'clean'}`}>
@@ -117,7 +123,11 @@ export function ItemDetail({ item, favorite, own = false, onFavorite, onBuy, onQ
           </div>
         </div>
 
-        {own ? (
+        {sample ? (
+          <div className="detail-actions own">
+            <span className="own-note">Образец — так выглядит объявление</span>
+          </div>
+        ) : own ? (
           <div className="detail-actions own">
             <span className="own-note">Ваш товар — так его видит покупатель</span>
             <button type="button" className="ghost-btn grow" onClick={onExport}><SendIcon size={16} />Поделиться</button>

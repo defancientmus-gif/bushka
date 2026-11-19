@@ -1,6 +1,7 @@
 import type { Category, Condition, DraftItem, Grade, Item } from '../types';
+import { cityFromText } from './crimea';
 
-const categories: Category[] = ['Смартфон', 'Ноутбук', 'Консоль', 'Фото', 'Аудио', 'Комплектующие', 'Другое'];
+const categories: Category[] = ['Смартфон', 'Планшет', 'Ноутбук', 'Компьютер', 'Часы', 'Консоль', 'Аудио', 'Фото', 'Комплектующие', 'Запчасти', 'Инструмент', 'Другое'];
 const conditions: Condition[] = ['Идеальное', 'Хорошее', 'Есть следы', 'На запчасти'];
 const grades: Grade[] = ['A', 'B', 'C', 'D', 'Repair'];
 
@@ -161,19 +162,28 @@ function findTitleLine(lines: string[], sourceUrl: string) {
 function parsePrice(value: string) {
   // Живые объявления пишут цену грязно: «💰 58.000₽», «🧧 - 105.000₽», «74 000 ₽», «60к».
   // Ловим все формы. Порядок важен: сначала явная цена с рублём/словом «цена».
-  const match = value.match(/(?:^|[^\d])(\d{1,3}(?:[ \u00a0.,]\d{3,})+|\d{4,9})\s*(?:₽|р\b|руб\.?|rub\b)/i)
-    || value.match(/(?:цена|стоимость|price)\D{0,16}(\d{1,3}(?:[ \u00a0.,]\d{3,})+|\d{4,9})/i);
+  // «р» проверяем просмотром вперёд: \b в JS кириллицу не видит, и «25000р» раньше терялось.
+  // Нижняя граница — сотни: шлейф или стекло у мастера стоят 300–900 ₽.
+  const match = value.match(/(?:^|[^\d])(\d{1,3}(?:[ \u00a0.,]\d{3,})+|\d{3,9})\s*(?:₽|р(?![а-яёa-z])|руб\.?|rub\b)/i)
+    || value.match(/(?:цена|стоимость|price)\D{0,16}(\d{1,3}(?:[ \u00a0.,]\d{3,})+|\d{3,9})/i);
   if (match) {
     let amount = match[1].replace(/[^\d]/g, '');
     // Опечатка продавца «85.0000₽» (лишний ноль в тысячной группе) → 85 000.
     const grouped = match[1].match(/^(\d{1,3})[ \u00a0.,](\d{4,})$/);
     if (grouped) amount = grouped[1] + grouped[2].slice(0, 3);
-    if (amount && Number(amount) >= 1000) return `${Number(amount).toLocaleString('ru-RU')} ₽`;
+    if (amount && Number(amount) >= 100) return `${Number(amount).toLocaleString('ru-RU')} ₽`;
   }
   // «60к», «60 k» — разговорная форма тысяч.
   const short = value.match(/(?:^|[^\d])(\d{1,4})\s*[кk](?![а-яa-z])/i);
   if (short) {
     const amount = Number(short[1]) * 1000;
+    if (amount >= 1000) return `${amount.toLocaleString('ru-RU')} ₽`;
+  }
+  // Цена отдельной строкой без подписи: «9000», «52 000» — в каналах так пишут чаще всего.
+  // Телефон длиннее семи цифр, память и модель короче четырёх — сюда не попадут.
+  const bare = value.split('\n').map(line => line.trim()).find(line => /^(?:\d{1,3}(?:[ \u00a0.]\d{3})+|\d{4,7})$/.test(line));
+  if (bare) {
+    const amount = Number(bare.replace(/[^\d]/g, ''));
     if (amount >= 1000) return `${amount.toLocaleString('ru-RU')} ₽`;
   }
   return '';
@@ -191,12 +201,21 @@ function parseContact(value: string) {
 
 function detectCategory(value: string): Category {
   const lower = value.toLowerCase();
-  if (/(iphone|айфон|samsung|pixel|xiaomi|смартфон|телефон)/i.test(lower)) return 'Смартфон';
-  if (/(macbook|thinkpad|ноут|laptop|air|probook|xps|компьютер)/i.test(lower)) return 'Ноутбук';
-  if (/(playstation|ps5|ps4|xbox|switch|консол)/i.test(lower)) return 'Консоль';
-  if (/(sony|canon|nikon|fujifilm|камера|объектив|фото)/i.test(lower)) return 'Фото';
-  if (/(airpods|наушник|колонка|audio|акустик)/i.test(lower)) return 'Аудио';
-  if (/(ssd|hdd|видеокарт|rtx|gtx|процессор|память|комплектующ)/i.test(lower)) return 'Комплектующие';
+  // Запчасть и инструмент узнаём по ПЕРВОЙ строке: в объявлении о телефоне тоже есть
+  // «экран без царапин» и «аккумулятор 90%», и телефон от этого запчастью не становится.
+  const head = (lower.split('\n').find(line => /[a-zа-яё]/.test(line)) || '').replace(/^[^a-zа-яё]+/, '');
+  if (/^(паяльн|микроскоп|термофен|фен\s|отв[её]ртк|набор\s+отв[её]рт|мультиметр|программатор|сепаратор|лабораторный|инструмент|пинцет|флюс|припой|ультразвуков)/.test(head)) return 'Инструмент';
+  if (/^(дисплей|модуль|экран|тачскрин|шлейф|аккумулятор|акб[\s.,:]|плата|корпус|крышка|стекло|динамик|разъ[её]м|запчаст)/.test(head)) return 'Запчасти';
+  // «Часы» — только в названии: в постах магазинов есть «часы работы», и это не товар.
+  if (/(apple watch|galaxy watch|смарт-?часы|mi band)/.test(lower) || /^(часы|watch)/.test(head) || /\bwatch\b/.test(head)) return 'Часы';
+  if (/(ipad|айпад|планшет|galaxy tab|\bpad\s?\d|\btab\s?[as]?\d)/.test(lower)) return 'Планшет';
+  if (/(airpods|наушник|колонка|audio|акустик)/.test(lower)) return 'Аудио';
+  if (/(iphone|айфон|samsung|pixel|xiaomi|redmi|poco|honor|huawei|realme|tecno|infinix|смартфон|телефон)/.test(lower)) return 'Смартфон';
+  if (/(системный блок|системник|моноблок|imac|mac mini|неттоп|компьютер)/.test(lower)) return 'Компьютер';
+  if (/(macbook|thinkpad|ноут|laptop|probook|xps)/.test(lower)) return 'Ноутбук';
+  if (/(playstation|ps5|ps4|xbox|switch|консол)/.test(lower)) return 'Консоль';
+  if (/(sony|canon|nikon|fujifilm|камера|объектив|фото)/.test(lower)) return 'Фото';
+  if (/(ssd|hdd|видеокарт|rtx|gtx|процессор|память|комплектующ)/.test(lower)) return 'Комплектующие';
   return 'Другое';
 }
 
@@ -222,9 +241,11 @@ function detectGrade(value: string, condition: Condition): Grade {
 }
 
 function detectCity(value: string) {
-  // \b does not work with Cyrillic (it is ASCII-only in JS), so use explicit
-  // non-letter boundaries instead.
-  const match = value.match(/(?:^|[^а-яёa-z-])(Москва|Симферополь|Севастополь|Краснодар|Ростов(?:-на-Дону)?|СПб|Санкт-Петербург|Казань|Екатеринбург|Новосибирск|Нижний Новгород|Воронеж|Самара|Уфа|Пермь|Челябинск|Омск|Волгоград|Сочи|Тюмень|Ижевск|Барнаул|Иркутск|Хабаровск|Владивосток|Ялта|Керчь|Евпатория)(?=[^а-яёa-z-]|$)/i);
+  // Сначала Крым — мы внутрикрымская площадка; словарь ловит и «Симф», и «в Ялте».
+  const crimea = cityFromText(value);
+  if (crimea) return crimea;
+  // \b не работает с кириллицей (в JS он только для ASCII) — границы слова задаём явно.
+  const match = value.match(/(?:^|[^а-яёa-z-])(Москва|Краснодар|Ростов(?:-на-Дону)?|СПб|Санкт-Петербург|Сочи|Новороссийск|Анапа)(?=[^а-яёa-z-]|$)/i);
   return match ? match[1] : '';
 }
 

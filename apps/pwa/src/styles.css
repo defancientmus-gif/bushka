@@ -269,6 +269,18 @@ button { font-family: inherit; }
   color: var(--ink);
   text-overflow: ellipsis;
 }
+/* Крестик очистки у браузера синий — единственное цветное пятно на витрине. Красим в чернила. */
+.search-box input::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  margin: 0 0 0 8px;
+  background: var(--ink-3);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M6 6l8 8M14 6l-8 8' stroke='%23000' stroke-width='1.6' stroke-linecap='round' fill='none'/%3E%3C/svg%3E") center / 20px no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M6 6l8 8M14 6l-8 8' stroke='%23000' stroke-width='1.6' stroke-linecap='round' fill='none'/%3E%3C/svg%3E") center / 20px no-repeat;
+  cursor: pointer;
+}
 /* «Фильтр» встроен прямо в строку поиска (справа). */
 .search-filter {
   flex: none;
@@ -1674,6 +1686,38 @@ html[data-theme="graphite"] .grade-badge.g-B { background: rgba(216, 181, 106, 0
 .txn-del { flex: none; display: grid; place-items: center; width: 28px; height: 28px; border: 0; background: transparent; color: var(--ink-3); cursor: pointer; border-radius: 12px; }
 .txn-del:active { background: var(--surface-2); }
 .solid-btn[disabled] { opacity: 0.7; pointer-events: none; }
+
+/* ---------- Что поиск понял из фразы ---------- */
+/* Условия — плашками (нажал — убрал), пояснение — тихой строкой. Ряд прижат к строке поиска:
+   это её продолжение, а не отдельный блок. Цвета нет: плашка — ступень серого. */
+.search-sense {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: -4px;
+}
+.sense-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 36px;
+  padding: 0 12px 0 16px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--surface-2);
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.12s;
+}
+.sense-chip svg { color: var(--ink-3); }
+.sense-chip:active { transform: scale(0.97); }
+.sense-note { font-size: 13px; color: var(--ink-2); }
+.feed-note { margin: -4px 0 0; padding: 0 4px; font-size: 13px; color: var(--ink-3); }
 
 /* ---------- Empty + toast ---------- */
 .empty-state {

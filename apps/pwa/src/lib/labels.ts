@@ -26,10 +26,15 @@ export const deliveryLabels: Record<DeliveryKind, string> = {
 
 export const categoryGlyph: Record<Category, string> = {
   'Смартфон': 'phone',
+  'Планшет': 'tablet',
   'Ноутбук': 'laptop',
+  'Компьютер': 'desktop',
+  'Часы': 'watch',
   'Консоль': 'console',
-  'Фото': 'camera',
   'Аудио': 'audio',
+  'Фото': 'camera',
   'Комплектующие': 'chip',
+  'Запчасти': 'part',
+  'Инструмент': 'tool',
   'Другое': 'box'
 };

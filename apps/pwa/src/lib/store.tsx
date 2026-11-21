@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import type { DraftItem, Item, ItemStatus, Profile, Txn, TxnKind } from '../types';
 import { defaultProfile, seedItems } from '../data/seed';
 import {
@@ -44,17 +44,37 @@ const StoreContext = createContext<StoreValue | null>(null);
 
 let toastTimer = 0;
 
+/** Сколько держать сообщение: короткое — 2,4 с, длинное — 4,5 с (не прочитать за раз). */
+function toastLifetime(message: string): number {
+  return message.length > 60 ? 4500 : 2400;
+}
+
 export function StoreProvider({ children }: { children: ReactNode }) {
   const [profile, setProfile] = useState<Profile>(() => loadProfile());
   const [items, setItems] = useState<Item[]>(() => loadItems());
   const [favorites, setFavorites] = useState<string[]>(() => loadFavorites());
   const [txns, setTxns] = useState<Txn[]>(() => loadTxns());
   const [toast, setToast] = useState('');
+  const toastQueue = useRef<string[]>([]);
 
+  // Сообщение живёт ровно столько, чтобы его прочитали: длинное — дольше.
+  // Тост — один канал на всё приложение, поэтому сообщения встают в очередь:
+  // без неё «Загружаю из Телеграма…» затирало собой итог, и человек не узнавал,
+  // чем кончилось дело (живой случай 22.11: экран молчал, поля оставались пустыми).
   const showToast = useCallback((message: string) => {
-    setToast(message);
-    window.clearTimeout(toastTimer);
-    toastTimer = window.setTimeout(() => setToast(''), 1900);
+    toastQueue.current.push(message);
+    if (toastTimer) return; // предыдущее ещё на экране — это сообщение подождёт
+    const next = () => {
+      const message2 = toastQueue.current.shift();
+      if (!message2) {
+        toastTimer = 0;
+        setToast('');
+        return;
+      }
+      setToast(message2);
+      toastTimer = window.setTimeout(next, toastLifetime(message2));
+    };
+    next();
   }, []);
 
   // Одноразовая зачистка приватности: перезалить свои товары уже без закупки/источника,

@@ -103,7 +103,7 @@ export function CreateView({ editItem, onExport, onCreated }: { editItem?: Item 
         ? 'Пост удалён или закрыт в Телеграме — добавьте фото или видео вручную'
         : result.reason === 'asleep'
           ? 'Сервер переноса спит после простоя — разбудите его в панели Supabase и повторите'
-          : 'Перенос из Телеграма пока недоступен — добавьте фото или видео вручную');
+          : 'Перенос из Телеграма пока недоступен (нужна сеть) — добавьте фото или видео вручную');
       return;
     }
     const post = result.post;
@@ -288,7 +288,7 @@ export function CreateView({ editItem, onExport, onCreated }: { editItem?: Item 
           <span className="hero-icon"><BoltIcon size={18} /></span>
           <div>
             <strong>Перенос с площадки</strong>
-            <small>Ссылка из Телеграма — перенесу фото, видео, описание и цену одним нажатием. Или вставьте текст, скриншот, фото или видео.</small>
+            <small>Ссылка из Телеграма — перенесу фото, видео, описание и цену одним нажатием. Или вставьте текст объявления или фото.</small>
           </div>
         </div>
         <textarea
@@ -296,7 +296,7 @@ export function CreateView({ editItem, onExport, onCreated }: { editItem?: Item 
           onChange={event => setImportValue(event.target.value)}
           onPaste={handleTextareaPaste}
           rows={3}
-          placeholder="Вставьте ссылку, текст или скриншот объявления…"
+          placeholder="Вставьте ссылку или текст объявления…"
         />
         <div className="import-hero-actions">
           <button type="button" className="ghost-btn" onClick={handlePaste}><ClipboardIcon size={16} />Вставить</button>
@@ -313,7 +313,9 @@ export function CreateView({ editItem, onExport, onCreated }: { editItem?: Item 
           <CameraIcon size={18} />
           {busyPhoto ? 'Обработка…' : `Фото / видео · ${draft.media.length}/8`}
         </label>
-        {draft.media.length > 1 && <p className="strip-hint">Листайте, чтобы посмотреть; зажмите и перетащите, чтобы изменить порядок или удалить. Первое фото — обложка.</p>}
+        {/* Как снять и как добавить — сказано один раз, где человек ищет руками. */}
+        <p className="strip-hint">Снимайте прямо здесь или выберите из галереи. Первое фото — обложка.</p>
+        {draft.media.length > 1 && <p className="strip-hint">Зажмите кадр и перетащите — так меняется порядок или убирается лишнее.</p>}
       </div>
 
       <div className="form-grid">

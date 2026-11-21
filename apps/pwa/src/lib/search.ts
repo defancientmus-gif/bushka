@@ -231,7 +231,10 @@ for (const [shelf, signs] of Object.entries(SIGNS) as Array<[Category, string[]]
 const STOP = new Set([
   'в', 'на', 'с', 'и', 'для', 'по', 'из', 'от', 'до', 'за', 'или', 'б', 'у', 'бу', 'куплю', 'купить', 'ищу', 'нужен',
   'нужна', 'нужно', 'нужны', 'продам', 'хочу', 'цена', 'ценой', 'рублей', 'руб', 'рубл', 'тысяч', 'тыс', 'крым', 'крыму',
-  'город', 'г', 'есть', 'ли', 'где', 'какой', 'мне', 'а', 'не', 'шт', 'the'
+  'город', 'г', 'есть', 'ли', 'где', 'какой', 'мне', 'а', 'не', 'шт', 'the',
+  // «Покажи всё до 20 000» — это просьба о порядке, а не название вещи: искать «все»
+  // среди товаров бессмысленно, из-за этого витрина молчала при живых товарах в цену.
+  'все', 'всё', 'вся', 'покажи', 'показать', 'выведи', 'найди'
 ]);
 
 // ---------- Опечатки ----------
@@ -397,6 +400,20 @@ export function understand(rawQuery: string, items: Item[]): Understood {
   const fixedQuery = fixLayout(rawQuery, known);
   const query = fixedQuery;
   let rest = norm(query);
+
+  // Короткое слово в чужой раскладке само по себе не чинится: «hp» и «lg» — марки.
+  // Но рядом с числом-ценой это почти всегда «до» или «на» («lj 20000»), а не марка —
+  // иначе вкладка чужой раскладки у цены молча даёт пустую витрину.
+  // Чиним только служебные слова, чтобы «lg 30000» остался маркой с ценой.
+  if (/(?:^|\s)[a-z]{2,4}\s+\d/i.test(rest)) {
+    const duty = new Set(['на', 'до', 'от', 'за', 'по', 'из', 'с', 'в', 'и', 'или', 'для']);
+    rest = split(rest).map(word => {
+      if (!/^[a-z]{2,4}$/i.test(word)) return word;
+      const russian = swap(word, TO_RU);
+      return duty.has(russian) ? russian : word;
+    }).join(' ');
+  }
+
   const chips: Chip[] = [];
   const out: Understood = {
     query, fixed: norm(fixedQuery) !== norm(rawQuery), words: [], priceMin: 0, priceMax: 0, city: '', condition: '', delivery: '', cheapFirst: false, chips

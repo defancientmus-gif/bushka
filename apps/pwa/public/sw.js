@@ -36,6 +36,17 @@ self.addEventListener('activate', event => {
 // serve the cached shell at once, refresh it in the background for next launch.
 // The freshness guard (version.json in main.tsx) force-reloads when a newer
 // build is live, so cache-first never traps anyone on an old version.
+//
+// Только сам запуск приложения отдаём из кэша. Отдельные страницы витрины
+// (poryadok.html, stil.html, pribyl.html) идут в сеть: иначе установленное
+// приложение подменяло бы их оболочкой — открываешь «как устроен поиск»,
+// а получаешь витрину.
+function isAppShell(url) {
+  const scopePath = new URL(SCOPE).pathname;
+  const path = url.pathname;
+  return path === scopePath || path === `${scopePath}index.html`;
+}
+
 async function handleNavigation(request) {
   const cached = await caches.match(SCOPE);
   const network = fetch(request)
@@ -62,6 +73,11 @@ self.addEventListener('fetch', event => {
   if (url.pathname.endsWith('/version.json')) return;
 
   if (request.mode === 'navigate') {
+    if (!isAppShell(url)) {
+      // Отдельная страница: сеть, при обрыве — то, что успело закэшироваться.
+      event.respondWith(fetch(request).catch(() => caches.match(request)));
+      return;
+    }
     event.respondWith(handleNavigation(request));
     return;
   }

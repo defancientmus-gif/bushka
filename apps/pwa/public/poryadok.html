@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Как устроены поиск и порядок на витрине — БУ.шка</title>
+<meta name="description" content="Честно и простыми словами: как БУ.шка понимает запрос, почему показывает не то, что искали, и по каким правилам вещи стоят на витрине.">
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Inter+Tight:wght@500;600;700&display=swap">
+<style>
+/* Тот же почерк, что у разбора про прибыль: стекло, воздух, тёплый свет Apple. */
+:root{
+  --bg: oklch(0.962 0.007 85);
+  --surface: oklch(0.995 0.004 85 / .72);
+  --line: oklch(0.86 0.008 85);
+  --fg: oklch(0.27 0.012 75);
+  --muted: oklch(0.52 0.012 75);
+  --accent: oklch(0.56 0.14 42);
+  --good: oklch(0.52 0.11 150);
+  --warn: oklch(0.62 0.13 68);
+  --font-head: "Inter Tight", -apple-system, system-ui, sans-serif;
+  --font-body: "Inter", -apple-system, system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg: oklch(0.19 0.008 75);
+  --surface: oklch(0.245 0.009 75 / .8);
+  --line: oklch(0.34 0.01 75);
+  --fg: oklch(0.94 0.006 85);
+  --muted: oklch(0.70 0.01 85);
+  --accent: oklch(0.74 0.13 48);
+  --good: oklch(0.74 0.12 152);
+  --warn: oklch(0.78 0.12 72);
+  color-scheme: dark;
+}}
+:root[data-theme="dark"]{
+  --bg: oklch(0.19 0.008 75);
+  --surface: oklch(0.245 0.009 75 / .8);
+  --line: oklch(0.34 0.01 75);
+  --fg: oklch(0.94 0.006 85);
+  --muted: oklch(0.70 0.01 85);
+  --accent: oklch(0.74 0.13 48);
+  --good: oklch(0.74 0.12 152);
+  --warn: oklch(0.78 0.12 72);
+  color-scheme: dark;
+}
+*{box-sizing:border-box}
+body{
+  background: var(--bg); color: var(--fg);
+  font-family: var(--font-body); font-size: 16px; line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 40px 72px;
+}
+.wrap{max-width: 760px; margin: 0 auto; display: flex; flex-direction: column; gap: 34px}
+h1{font-family: var(--font-head); font-size: clamp(30px, 6vw, 42px); line-height:1.08; font-weight:700; letter-spacing:-.02em; margin:0; text-wrap: balance}
+h2{font-family: var(--font-head); font-size: 20px; font-weight:600; letter-spacing:-.01em; margin:0 0 2px}
+p{margin:0}
+.lead{font-size: 18px; color: var(--fg); max-width: 60ch}
+.sub{color: var(--muted); font-size: 14px}
+.eyebrow{font-size:12px; letter-spacing:.01em; color:var(--muted); font-weight:600}
+section{display:flex; flex-direction:column; gap:14px}
+.card{
+  /* почерк-ок: карточка — не рамка в рамке, а мягкая тонировка внутри стекла страницы. */
+  background: color-mix(in oklch, var(--fg) 4%, transparent); border-radius:18px;
+  padding:20px; display:flex; flex-direction:column; gap:12px;
+}
+.kick{border-left:3px solid var(--accent); padding-left:16px; display:flex; flex-direction:column; gap:6px}
+ul{margin:0; padding-left:18px; display:flex; flex-direction:column; gap:7px}
+li::marker{color:var(--muted)}
+.tag{display:inline-block; font-size:12px; font-weight:600; letter-spacing:.01em; padding:3px 10px; border-radius:999px; background:color-mix(in oklch, var(--fg) 7%, transparent); color:var(--muted); width:max-content}
+.tag.good{color:var(--good); background:color-mix(in oklch, var(--good) 12%, transparent)}
+.tag.warn{color:var(--warn); background:color-mix(in oklch, var(--warn) 14%, transparent)}
+.ask{font-weight:600}
+.answer{color:var(--fg)}
+.pair{display:flex; flex-direction:column; gap:4px; padding-top:12px; border-top:1px solid var(--line)}
+.pair:first-of-type{border-top:none; padding-top:0}
+footer{border-top:1px solid var(--line); padding-top:18px; font-size:12.5px; color:var(--muted); display:flex; flex-direction:column; gap:5px}
+a{color:var(--accent)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header style="display:flex;flex-direction:column;gap:12px">
+    <p class="eyebrow">БУ.шка · как это работает</p>
+    <h1>Поиск и порядок на витрине — без тайн</h1>
+    <p class="lead">Тут простыми словами: как БУ.шка понимает, что ты ищешь, почему иногда показывает не то, и по каким правилам вещи стоят на витрине. Ничего волшебного — всё, что написано ниже, так и работает.</p>
+  </header>
+
+  <section>
+    <div class="kick">
+      <p class="eyebrow">Коротко</p>
+      <p><strong>Ты пишешь обычной фразой — «айфон 13 до 30к симф». Поиск разбирает её на части: вещь, цена, город, состояние. И ищет прямо на твоём телефоне, без отправки запроса куда-либо.</strong> Если точного нет — покажет ближайшее и честно скажет, что именно не нашлось.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>Как поиск понимает фразу</h2>
+    <div class="card">
+      <p>Одна строка вместо десяти фильтров. Внутри она разбирается на то, что ты имел в виду:</p>
+      <ul>
+        <li><strong>Вещь и марку.</strong> «айфон 13», «леново» — понимает и разговорные слова: «плойка», «видюха», «ноут».</li>
+        <li><strong>Цену.</strong> «до 30к», «от 40 до 50 тысяч», «около 20», «подешевле».</li>
+        <li><strong>Город.</strong> 24 города Крыма — «симф», «Симферополь», «Керчь».</li>
+        <li><strong>Состояние.</strong> «как новый», «на запчасти».</li>
+      </ul>
+      <p>Опечатки и чужая раскладка не мешают: набрал «yf» вместо «на» или промазал по букве — поиск догадается. Под строкой появляются плашки с тем, что он понял: нажал — условие снято.</p>
+      <p class="sub">Всё это считается на устройстве. Запрос никуда не уходит, работает и без сети — поэтому отвечает мгновенно.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>Почему показывает не то, что искал</h2>
+    <div class="card">
+      <p>Мы не говорим «ничего нет». Вместо пустого экрана поиск показывает ближайшее — и объясняет, что произошло:</p>
+      <div class="pair">
+        <p class="ask">«Точно такого нет. Показываю похожее»</p>
+        <p class="answer sub">Спросили вещь — деталь не подмешивает, и наоборот. Искали айфон — не подсунем кабель.</p>
+      </div>
+      <div class="pair">
+        <p class="ask">Цена и город — это границы, а не пожелание</p>
+        <p class="answer sub">Если в «до 30к» ничего нет, поиск скажет об этом прямо, а не покажет за 45к.</p>
+      </div>
+      <p>Так честнее: ты сразу видишь, что рынок пуст, и решаешь — поднять цену в поиске или подождать.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>По каким правилам вещи стоят на витрине</h2>
+    <div class="card">
+      <ul>
+        <li><strong>Сначала то, что тебе ближе.</strong> Свежие объявления — выше. Никто не покупает место в списке.</li>
+        <li><strong>Цена ниже похожих — видна.</strong> Если вещь дешевле таких же на витрине, в карточке честно написано, на сколько. Сравниваем только одинаковые модели и состояние, и только когда есть с чем сравнивать (три и больше).</li>
+        <li><strong>Продавцу видно обратное.</strong> В своём складе продавец видит: «дороже похожих на N %». Это не наказание, а подсказка — по такой цене покупатель уйдёт к соседу.</li>
+        <li><strong>Рейтинг нельзя купить.</strong> Он растёт только от дел: подтверждённые сделки, скорость ответа, точность описания. Отзывов-суда у нас нет нарочно.</li>
+        <li><strong>Дефект нельзя спрятать.</strong> Если продавец отметил трещину, вещь не встанет как «идеал».</li>
+      </ul>
+    </div>
+  </section>
+
+  <section>
+    <h2>Что мы НЕ делаем</h2>
+    <div class="card">
+      <ul>
+        <li><strong>Не проводим сделку и не берём процент.</strong> БУ.шка только сводит продавца и покупателя. Деньги вы передаёте друг другу сами.</li>
+        <li><strong>Не продаём место в списке и не продаём рейтинг.</strong> Всё, что видно на витрине, заработано делами, а не оплачено.</li>
+        <li><strong>Не отправляем твой запрос на сторону.</strong> Поиск работает на устройстве.</li>
+        <li><strong>Не собираем лишнего.</strong> Телефон и телеграм продавца видит только тот, кто хочет связаться.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section>
+    <h2>Частые вопросы</h2>
+    <div class="card">
+      <div class="pair">
+        <p class="ask">Нужна регистрация, чтобы смотреть?</p>
+        <p class="answer sub">Нет. Витрина открыта. Аккаунт нужен только продавцу — чтобы вести свой склад.</p>
+      </div>
+      <div class="pair">
+        <p class="ask">Поиск работает без интернета?</p>
+        <p class="answer sub">Да, разбор фразы — на устройстве. Сами объявления подгрузятся, когда сеть вернётся.</p>
+      </div>
+      <div class="pair">
+        <p class="ask">Как связаться с продавцом?</p>
+        <p class="answer sub">Одной кнопкой в карточке — откроется телеграм или звонок, что продавец оставил.</p>
+      </div>
+      <div class="pair">
+        <p class="ask">Вещь продана, а объявление висит?</p>
+        <p class="answer sub">Продавец отмечает статус в своём складе. Если видишь устаревшее — напиши нам, поправим.</p>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <p>БУ.шка — внутрикрымская площадка б/у техники, запчастей и инструмента. Сделана для мастеров и перекупов Крыма.</p>
+    <p>Страница описывает, как устроены поиск и порядок на витрине. Это не публичная оферта.</p>
+    <p>Есть вопрос или нашёл неточность — скажи нам, поправим.</p>
+  </footer>
+
+</div>
+</body>
+</html>

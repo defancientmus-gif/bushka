@@ -613,6 +613,9 @@ html[data-theme="graphite"] .grade-badge.g-B { background: rgba(216, 181, 106, 0
 .money-sleep { margin: 4px 0 0; font-size: 13px; color: var(--warn-fg); }
 .stale-tag { font-size: 11px; font-weight: 700; color: var(--warn-fg); background: var(--warn-bg); padding: 2px 8px; border-radius: 999px; margin-left: 8px; white-space: nowrap; }
 .own-table tr.stale td { background: oklch(0.64 0.17 55 / 0.06); }
+/* Дороже похожих: тот же голос, что у «висит N дней», — цена, которая отпугивает. */
+.dear-line { margin: 0; font-size: 13px; font-weight: 600; color: var(--warn-fg); }
+.dear-tag { display: block; font-size: 11px; font-weight: 700; color: var(--warn-fg); white-space: nowrap; }
 .defect-line {
   margin: 0;
   font-size: 13px;

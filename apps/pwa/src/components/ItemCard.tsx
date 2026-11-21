@@ -16,6 +16,7 @@ export function ItemCard({
   variant = 'market',
   isOwn = false,
   hint,
+  sellerHint,
   favorite = false,
   onQueue,
   onBuy,
@@ -30,6 +31,7 @@ export function ItemCard({
   variant?: 'market' | 'preview' | 'own';
   isOwn?: boolean;
   hint?: PriceHint;
+  sellerHint?: PriceHint;
   favorite?: boolean;
   onQueue?: () => void;
   onBuy?: () => void;
@@ -167,6 +169,13 @@ export function ItemCard({
             )}
 
             {stale && <p className="stale-line">На площадке {age} {pluralize(age, 'день', 'дня', 'дней')} · пересмотрите цену</p>}
+
+            {/* Своя подсказка продавцу: он дороже таких же — покупатель уйдёт к ним. */}
+            {sellerHint && (
+              <p className="dear-line" title={`Сравнил с ${sellerHint.count} такими же на витрине`}>
+                Дороже похожих на {`${sellerHint.percent}\u00a0%`} · покупатель уйдёт к ним
+              </p>
+            )}
 
             {item.defects && <p className="defect-line">Нюансы: {item.defects}</p>}
 

@@ -7,6 +7,7 @@ import { OwnItemsTable } from '../components/OwnItemsTable';
 import { CloseIcon, DownloadIcon, GearIcon, PencilIcon, PlusIcon, SendIcon, UploadIcon } from '../components/icons';
 import { downloadBackup, importBackup } from '../lib/backup';
 import { useCountUp, useOnline } from '../lib/hooks';
+import { sellerPriceHints } from '../lib/search';
 import { pluralize } from '../lib/format';
 import { formatMoney, isStale, isToday, marginLight, qtyOf, saleStreak, toNum } from '../lib/money';
 import { applyTheme, loadTheme, saveTheme, type Theme } from '../lib/theme';
@@ -79,6 +80,9 @@ export function ProfileView({ onExport, onEdit }: { onExport: (item: Item) => vo
     () => [...items, ...seed].filter(item => favorites.includes(item.id)),
     [items, seed, favorites]
   );
+
+  // Подсказка продавцу: где он дороже таких же на витрине. По своему складу, до витрины.
+  const dear = useMemo(() => sellerPriceHints(items), [items]);
 
   const money = useMemo(() => {
     const soldItems = items.filter(item => item.status === 'sold');
@@ -271,6 +275,7 @@ export function ProfileView({ onExport, onEdit }: { onExport: (item: Item) => vo
                       item={item}
                       index={index}
                       variant="own"
+                      sellerHint={dear.get(item.id)}
                       onStatusChange={status => updateStatus(item.id, status)}
                       onEdit={() => onEdit(item)}
                       onDelete={() => deleteItem(item.id)}

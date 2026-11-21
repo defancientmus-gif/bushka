@@ -1,6 +1,8 @@
+import { useMemo } from 'react';
 import type { Item, ItemStatus } from '../types';
 import { statusLabels, statusOrder } from '../lib/labels';
 import { daysOld, formatMoney, isStale, marginLight, qtyOf, toNum } from '../lib/money';
+import { sellerPriceHints } from '../lib/search';
 import { PencilIcon, SendIcon, TrashIcon } from './icons';
 
 // Desktop CRM view of the seller's stock — dense, scannable, editable inline, с итогами.
@@ -21,6 +23,10 @@ export function OwnItemsTable({
   const units = live.reduce((sum, item) => sum + qtyOf(item), 0);
   const invested = live.reduce((sum, item) => sum + toNum(item.costPrice) * qtyOf(item), 0);
   const potential = live.reduce((sum, item) => sum + toNum(item.price) * qtyOf(item), 0);
+
+  // «Дороже похожих на N %» — считаем по всему складу, не только по живым:
+  // сравнение с проданным тоже верное, а лишний расчёт ничего не стоит.
+  const dear = useMemo(() => sellerPriceHints(items), [items]);
 
   return (
     <div className="own-table">
@@ -54,7 +60,17 @@ export function OwnItemsTable({
                 <td>{item.condition}</td>
                 <td>{item.battery || '—'}</td>{/* почерк-ок: строка таблицы — это товар, её не спрятать; пустая ячейка не отличима от «забыл заполнить» */}
                 <td className="t-num">{qty > 1 ? <b>{qty} шт</b> : '1'}</td>
-                <td className="t-num">{item.price || 'договорная'}</td>
+                <td className="t-num">
+                  {item.price || 'договорная'}
+                  {dear.has(item.id) && (
+                    <span
+                      className="dear-tag"
+                      title={`Дороже ${dear.get(item.id)!.count} таких же на витрине — покупатель уйдёт к ним`}
+                    >
+                      дороже похожих на {`${dear.get(item.id)!.percent}\u00a0%`}
+                    </span>
+                  )}
+                </td>
                 <td className="t-num">{hasCost ? formatMoney(toNum(item.costPrice)) : '—'}</td>{/* почерк-ок: та же строка-товар */}
                 <td className={`t-num ${hasCost ? (margin >= 0 ? 'pos' : 'neg') : ''}`}>
                   {hasCost ? <><span className={`light-dot ${marginLight(item.price, item.costPrice)}`} aria-hidden="true" />{formatMoney(margin)}</> : '—'}{/* почерк-ок: строка таблицы — это товар */}

@@ -711,10 +711,10 @@ const COLORS = new Set([
 export type PriceHint = { percent: number; count: number };
 
 /**
- * Насколько цена ниже таких же вещей на витрине. Сравниваем только одинаковые модели
- * (без цвета) в одном классе состояния, минимум три объявления — иначе молчим.
+ * Группы «таких же вещей»: одинаковая модель без цвета, в одном классе состояния
+ * (рабочее / на запчасти). Собираем только позиции с ценой и осмысленным названием.
  */
-export function priceHints(items: Item[]): Map<string, PriceHint> {
+function alikeGroups(items: Item[]): Map<string, Item[]> {
   const groups = new Map<string, Item[]>();
   for (const item of items) {
     const ix = indexOf(item);
@@ -727,14 +727,48 @@ export function priceHints(items: Item[]): Map<string, PriceHint> {
     if (list) list.push(item);
     else groups.set(key, [item]);
   }
+  return groups;
+}
+
+/** Срединная цена группы. Чётное число — среднее двух серединных. */
+function midPrice(list: Item[]): number {
+  const prices = list.map(item => indexOf(item).price).sort((a, b) => a - b);
+  return prices.length % 2
+    ? prices[(prices.length - 1) / 2]
+    : (prices[prices.length / 2 - 1] + prices[prices.length / 2]) / 2;
+}
+
+/**
+ * Насколько цена ниже таких же вещей на витрине. Сравниваем только одинаковые модели
+ * (без цвета) в одном классе состояния, минимум три объявления — иначе молчим.
+ */
+export function priceHints(items: Item[]): Map<string, PriceHint> {
   const out = new Map<string, PriceHint>();
-  for (const list of groups.values()) {
+  for (const list of alikeGroups(items).values()) {
     if (list.length < 3) continue;
-    const prices = list.map(item => indexOf(item).price).sort((a, b) => a - b);
-    const mid = prices.length % 2 ? prices[(prices.length - 1) / 2] : (prices[prices.length / 2 - 1] + prices[prices.length / 2]) / 2;
+    const mid = midPrice(list);
     for (const item of list) {
       const percent = Math.round((indexOf(item).price - mid) / mid * 100);
       if (percent <= -5) out.set(item.id, { percent: -percent, count: list.length - 1 });
+    }
+  }
+  return out;
+}
+
+/**
+ * Подсказка продавцу: насколько его цена ВЫШЕ таких же на витрине. Молчим, если
+ * дороже меньше чем на 10 % (это ещё «в рынке»), или если сравнить не с чем.
+ * Порог выше покупательского нарочно: продавцу важно не «на 5 % дороже»,
+ * а «тебя обойдут», и лишний шум здесь стоит дороже пропуска.
+ */
+export function sellerPriceHints(items: Item[]): Map<string, PriceHint> {
+  const out = new Map<string, PriceHint>();
+  for (const list of alikeGroups(items).values()) {
+    if (list.length < 3) continue;
+    const mid = midPrice(list);
+    for (const item of list) {
+      const percent = Math.round((indexOf(item).price - mid) / mid * 100);
+      if (percent >= 10) out.set(item.id, { percent, count: list.length - 1 });
     }
   }
   return out;
